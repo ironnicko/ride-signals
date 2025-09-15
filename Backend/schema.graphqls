@@ -1,0 +1,36 @@
+type User {
+  id: ID!
+  name: String!
+  email: String!
+}
+
+type Participant {
+  userId: ID!
+  role: String!
+  joinedAt: String!
+}
+
+type Ride {
+  id: ID!
+  rideCode: String!
+  status: String!
+  participants: [Participant!]!
+  settings: RideSettings!
+}
+
+type RideSettings {
+  maxRiders: Int!
+  visibility: String!
+}
+
+type Query {
+  me: User
+  ride(rideCode: String!): Ride
+  myRides: [Ride!]!
+}
+
+type Mutation {
+  createRide(maxRiders: Int!, visibility: String!): Ride!
+  joinRide(rideCode: String!, role: String!): Ride!
+  sendSignal(rideCode: String!, type: String!, lat: Float, lng: Float): Boolean!
+}
