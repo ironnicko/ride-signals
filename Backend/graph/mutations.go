@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/ironnicko/ride-signals/db"
-	"github.com/ironnicko/ride-signals/graph/model"
-	"github.com/ironnicko/ride-signals/kafka"
+	"github.com/ironnicko/ride-signals/Backend/db"
+	"github.com/ironnicko/ride-signals/Backend/graph/model"
+	"github.com/ironnicko/ride-signals/Backend/kafka"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

@@ -1,4 +1,4 @@
-module github.com/ironnicko/ride-signals
+module github.com/ironnicko/ride-signals/Backend
 
 go 1.25.1
 

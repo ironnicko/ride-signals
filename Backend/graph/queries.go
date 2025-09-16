@@ -3,8 +3,8 @@ package graph
 import (
 	"context"
 
-	"github.com/ironnicko/ride-signals/db"
-	"github.com/ironnicko/ride-signals/graph/model"
+	"github.com/ironnicko/ride-signals/Backend/db"
+	"github.com/ironnicko/ride-signals/Backend/graph/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

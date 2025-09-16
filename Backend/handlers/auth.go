@@ -5,15 +5,14 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ironnicko/ride-signals/db"
-	"github.com/ironnicko/ride-signals/models"
-	"github.com/ironnicko/ride-signals/utils"
+	"github.com/ironnicko/ride-signals/Backend/db"
+	"github.com/ironnicko/ride-signals/Backend/models"
+	"github.com/ironnicko/ride-signals/Backend/utils"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
-
 
 func Signup(c *gin.Context) {
 	var usersColl = db.GetCollection("bikeapp", "users")

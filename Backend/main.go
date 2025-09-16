@@ -6,12 +6,12 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
-	"github.com/ironnicko/ride-signals/config"
-	"github.com/ironnicko/ride-signals/db"
-	"github.com/ironnicko/ride-signals/graph"
-	"github.com/ironnicko/ride-signals/handlers"
-	"github.com/ironnicko/ride-signals/kafka"
-	"github.com/ironnicko/ride-signals/utils"
+	"github.com/ironnicko/ride-signals/Backend/config"
+	"github.com/ironnicko/ride-signals/Backend/db"
+	"github.com/ironnicko/ride-signals/Backend/graph"
+	"github.com/ironnicko/ride-signals/Backend/handlers"
+	"github.com/ironnicko/ride-signals/Backend/kafka"
+	"github.com/ironnicko/ride-signals/Backend/utils"
 
 	"github.com/joho/godotenv"
 )
