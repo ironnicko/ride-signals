@@ -13,15 +13,15 @@ import (
 )
 
 func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
-	userId := ctx.Value("userId").(string)
-
-	oid, err := primitive.ObjectIDFromHex(userId)
-	if err != nil {
-		return nil, errors.New("invalid userId")
-	}
 
 	var dbUser models.User
 	coll := db.GetCollection("bikeapp", "users")
+
+	userId := ctx.Value("userId").(string)
+	oid, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		return nil, errors.New("userId invalid")
+	}
 
 	err = coll.FindOne(ctx, bson.M{"_id": oid}).Decode(&dbUser)
 	if err != nil {
@@ -50,7 +50,7 @@ func (r *queryResolver) Ride(ctx context.Context, rideCode string) (*model.Ride,
 
 func (r *queryResolver) MyRides(ctx context.Context) ([]*model.Ride, error) {
 
-	userID := primitive.NewObjectID().Hex()
+	userID := ctx.Value("userId").(string)
 	coll := db.GetCollection("bikeapp", "rides")
 	cursor, err := coll.Find(ctx, bson.M{"participants.userId": userID})
 	if err != nil {
