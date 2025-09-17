@@ -3,6 +3,8 @@ package graph
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/ironnicko/ride-signals/Backend/db"
@@ -10,9 +12,20 @@ import (
 	"github.com/ironnicko/ride-signals/Backend/kafka"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibility string) (*model.Ride, error) {
+	userId := ctx.Value("userId").(string)
+	participants := []*model.Participant{
+		{
+			UserID:   userId,
+			Role:     "member",
+			JoinedAt: time.Now().Format(time.RFC3339),
+		},
+	}
+
 	ride := &model.Ride{
 		ID:       primitive.NewObjectID().Hex(),
 		RideCode: primitive.NewObjectID().Hex()[:6],
@@ -21,7 +34,7 @@ func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibi
 			MaxRiders:  maxRiders,
 			Visibility: visibility,
 		},
-		Participants: []*model.Participant{},
+		Participants: participants,
 		CreatedAt:    time.Now().Format(time.RFC3339),
 	}
 
@@ -34,36 +47,63 @@ func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibi
 }
 
 func (r *mutationResolver) JoinRide(ctx context.Context, rideCode string, role string) (*model.Ride, error) {
-	// TODO: replace with JWT user
-	user := &model.User{
-		ID:    primitive.NewObjectID().Hex(),
-		Name:  "Test User",
-		Email: "test@example.com",
+
+	userIdVal := ctx.Value("userId")
+	if userIdVal == nil {
+		return nil, errors.New("unauthorized: no userId in context")
 	}
 
-	participant := &model.Participant{
-		UserID:   user.ID,
-		Role:     role,
-		JoinedAt: time.Now().Format(time.RFC3339),
+	userIdHex, ok := userIdVal.(string)
+	if !ok {
+		return nil, errors.New("invalid userId type in context")
+	}
+
+	userID, err := primitive.ObjectIDFromHex(userIdHex)
+	if err != nil {
+		return nil, fmt.Errorf("invalid userId format: %w", err)
 	}
 
 	coll := db.GetCollection("bikeapp", "rides")
-	_, err := coll.UpdateOne(
-		ctx,
-		bson.M{"rideCode": rideCode},
-		bson.M{"$push": bson.M{"participants": participant}},
-	)
-	if err != nil {
-		return nil, err
-	}
 
 	var ride model.Ride
 	err = coll.FindOne(ctx, bson.M{"rideCode": rideCode}).Decode(&ride)
 	if err != nil {
-		return nil, err
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("ride not found")
+		}
+		return nil, fmt.Errorf("failed to fetch ride: %w", err)
 	}
 
-	return &ride, nil
+	for _, p := range ride.Participants {
+		if p.UserID == userID.Hex() {
+			return &ride, nil
+		}
+	}
+
+	if len(ride.Participants) >= ride.Settings.MaxRiders {
+		return nil, fmt.Errorf("ride is full: max riders = %d", ride.Settings.MaxRiders)
+	}
+
+	participant := model.Participant{
+		UserID:   userID.Hex(),
+		Role:     role,
+		JoinedAt: time.Now().Format(time.RFC3339),
+	}
+
+	update := bson.M{"$push": bson.M{"participants": participant}}
+	res := coll.FindOneAndUpdate(
+		ctx,
+		bson.M{"rideCode": rideCode},
+		update,
+		options.FindOneAndUpdate().SetReturnDocument(options.After),
+	)
+
+	var updatedRide model.Ride
+	if err := res.Decode(&updatedRide); err != nil {
+		return nil, fmt.Errorf("failed to decode updated ride: %w", err)
+	}
+
+	return &updatedRide, nil
 }
 
 func (r *mutationResolver) SendSignal(ctx context.Context, rideCode string, signalType string, lat *float64, lng *float64) (bool, error) {
