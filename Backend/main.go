@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -48,9 +49,21 @@ func main() {
 	// GraphQL
 	v1.GET("/playground", gin.WrapH(playground.Handler("GraphQL Playground", "/api/v1/graphql")))
 
-		// Authenticated
+	// Authenticated
 	v1.Use(utils.AuthMiddleware())
-	v1.POST("/graphql", gin.WrapH(srv))
+	// v1.POST("/graphql", gin.WrapH(srv))
+	v1.POST("/graphql", func(c *gin.Context) {
+		// grab userId from Gin context (set by AuthMiddleware)
+		userID, _ := c.Get("userId")
+
+		// inject into gqlgen’s context
+		ctx := context.WithValue(c.Request.Context(), "userId", userID)
+
+		// replace request with new context
+		req := c.Request.WithContext(ctx)
+
+		srv.ServeHTTP(c.Writer, req)
+	})
 
 	r.Run(":" + cfg.ServerPort)
 }
