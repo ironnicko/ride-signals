@@ -46,10 +46,15 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	GeoLocation struct {
+		Lat func(childComplexity int) int
+		Lng func(childComplexity int) int
+	}
+
 	Mutation struct {
 		CreateRide func(childComplexity int, maxRiders int, visibility string) int
 		JoinRide   func(childComplexity int, rideCode string, role string) int
-		SendSignal func(childComplexity int, rideCode string, typeArg string, lat *float64, lng *float64) int
+		SendSignal func(childComplexity int, rideCode string, signalType string, lat *float64, lng *float64) int
 	}
 
 	Participant struct {
@@ -65,6 +70,8 @@ type ComplexityRoot struct {
 	}
 
 	Ride struct {
+		CreatedAt    func(childComplexity int) int
+		EndedAt      func(childComplexity int) int
 		ID           func(childComplexity int) int
 		Participants func(childComplexity int) int
 		RideCode     func(childComplexity int) int
@@ -77,17 +84,29 @@ type ComplexityRoot struct {
 		Visibility func(childComplexity int) int
 	}
 
+	Signal struct {
+		FromUser  func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Location  func(childComplexity int) int
+		RideCode  func(childComplexity int) int
+		Timestamp func(childComplexity int) int
+		Type      func(childComplexity int) int
+	}
+
 	User struct {
-		Email func(childComplexity int) int
-		ID    func(childComplexity int) int
-		Name  func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		Email       func(childComplexity int) int
+		ID          func(childComplexity int) int
+		IsActive    func(childComplexity int) int
+		LastLoginAt func(childComplexity int) int
+		Name        func(childComplexity int) int
 	}
 }
 
 type MutationResolver interface {
 	CreateRide(ctx context.Context, maxRiders int, visibility string) (*model.Ride, error)
 	JoinRide(ctx context.Context, rideCode string, role string) (*model.Ride, error)
-	SendSignal(ctx context.Context, rideCode string, typeArg string, lat *float64, lng *float64) (bool, error)
+	SendSignal(ctx context.Context, rideCode string, signalType string, lat *float64, lng *float64) (bool, error)
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*model.User, error)
@@ -113,6 +132,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "GeoLocation.lat":
+		if e.complexity.GeoLocation.Lat == nil {
+			break
+		}
+
+		return e.complexity.GeoLocation.Lat(childComplexity), true
+	case "GeoLocation.lng":
+		if e.complexity.GeoLocation.Lng == nil {
+			break
+		}
+
+		return e.complexity.GeoLocation.Lng(childComplexity), true
 
 	case "Mutation.createRide":
 		if e.complexity.Mutation.CreateRide == nil {
@@ -146,7 +178,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.SendSignal(childComplexity, args["rideCode"].(string), args["type"].(string), args["lat"].(*float64), args["lng"].(*float64)), true
+		return e.complexity.Mutation.SendSignal(childComplexity, args["rideCode"].(string), args["signalType"].(string), args["lat"].(*float64), args["lng"].(*float64)), true
 
 	case "Participant.joinedAt":
 		if e.complexity.Participant.JoinedAt == nil {
@@ -191,6 +223,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Ride(childComplexity, args["rideCode"].(string)), true
 
+	case "Ride.createdAt":
+		if e.complexity.Ride.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Ride.CreatedAt(childComplexity), true
+	case "Ride.endedAt":
+		if e.complexity.Ride.EndedAt == nil {
+			break
+		}
+
+		return e.complexity.Ride.EndedAt(childComplexity), true
 	case "Ride.id":
 		if e.complexity.Ride.ID == nil {
 			break
@@ -235,6 +279,49 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.RideSettings.Visibility(childComplexity), true
 
+	case "Signal.fromUser":
+		if e.complexity.Signal.FromUser == nil {
+			break
+		}
+
+		return e.complexity.Signal.FromUser(childComplexity), true
+	case "Signal.id":
+		if e.complexity.Signal.ID == nil {
+			break
+		}
+
+		return e.complexity.Signal.ID(childComplexity), true
+	case "Signal.location":
+		if e.complexity.Signal.Location == nil {
+			break
+		}
+
+		return e.complexity.Signal.Location(childComplexity), true
+	case "Signal.rideCode":
+		if e.complexity.Signal.RideCode == nil {
+			break
+		}
+
+		return e.complexity.Signal.RideCode(childComplexity), true
+	case "Signal.timestamp":
+		if e.complexity.Signal.Timestamp == nil {
+			break
+		}
+
+		return e.complexity.Signal.Timestamp(childComplexity), true
+	case "Signal.type":
+		if e.complexity.Signal.Type == nil {
+			break
+		}
+
+		return e.complexity.Signal.Type(childComplexity), true
+
+	case "User.createdAt":
+		if e.complexity.User.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.User.CreatedAt(childComplexity), true
 	case "User.email":
 		if e.complexity.User.Email == nil {
 			break
@@ -247,6 +334,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.User.ID(childComplexity), true
+	case "User.isActive":
+		if e.complexity.User.IsActive == nil {
+			break
+		}
+
+		return e.complexity.User.IsActive(childComplexity), true
+	case "User.lastLoginAt":
+		if e.complexity.User.LastLoginAt == nil {
+			break
+		}
+
+		return e.complexity.User.LastLoginAt(childComplexity), true
 	case "User.name":
 		if e.complexity.User.Name == nil {
 			break
@@ -362,6 +461,19 @@ var sources = []*ast.Source{
   id: ID!
   name: String!
   email: String!
+  createdAt: String!
+  lastLoginAt: String!
+  isActive: Boolean!
+}
+
+type Ride {
+  id: ID!
+  rideCode: String!
+  status: String!
+  createdAt: String!
+  endedAt: String
+  participants: [Participant!]!
+  settings: RideSettings!
 }
 
 type Participant {
@@ -370,17 +482,23 @@ type Participant {
   joinedAt: String!
 }
 
-type Ride {
-  id: ID!
-  rideCode: String!
-  status: String!
-  participants: [Participant!]!
-  settings: RideSettings!
-}
-
 type RideSettings {
   maxRiders: Int!
   visibility: String!
+}
+
+type Signal {
+  id: ID!
+  rideCode: String!
+  fromUser: ID!
+  type: String!
+  timestamp: String!
+  location: GeoLocation
+}
+
+type GeoLocation {
+  lat: Float!
+  lng: Float!
 }
 
 type Query {
@@ -392,7 +510,13 @@ type Query {
 type Mutation {
   createRide(maxRiders: Int!, visibility: String!): Ride!
   joinRide(rideCode: String!, role: String!): Ride!
-  sendSignal(rideCode: String!, type: String!, lat: Float, lng: Float): Boolean!
+  sendSignal(
+    rideCode: String!
+    signalType: String!
+    lat: Float
+    lng: Float
+  ): Boolean!
+  
 }
 `, BuiltIn: false},
 }
@@ -442,11 +566,11 @@ func (ec *executionContext) field_Mutation_sendSignal_args(ctx context.Context, 
 		return nil, err
 	}
 	args["rideCode"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "type", ec.unmarshalNString2string)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "signalType", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
-	args["type"] = arg1
+	args["signalType"] = arg1
 	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "lat", ec.unmarshalOFloat2ᚖfloat64)
 	if err != nil {
 		return nil, err
@@ -534,6 +658,60 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _GeoLocation_lat(ctx context.Context, field graphql.CollectedField, obj *model.GeoLocation) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GeoLocation_lat,
+		func(ctx context.Context) (any, error) { return obj.Lat, nil },
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GeoLocation_lat(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GeoLocation",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GeoLocation_lng(ctx context.Context, field graphql.CollectedField, obj *model.GeoLocation) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GeoLocation_lng,
+		func(ctx context.Context) (any, error) { return obj.Lng, nil },
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GeoLocation_lng(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GeoLocation",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_createRide(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -545,7 +723,7 @@ func (ec *executionContext) _Mutation_createRide(ctx context.Context, field grap
 			return ec.resolvers.Mutation().CreateRide(ctx, fc.Args["maxRiders"].(int), fc.Args["visibility"].(string))
 		},
 		nil,
-		ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋgraphᚋmodelᚐRide,
+		ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐRide,
 		true,
 		true,
 	)
@@ -565,6 +743,10 @@ func (ec *executionContext) fieldContext_Mutation_createRide(ctx context.Context
 				return ec.fieldContext_Ride_rideCode(ctx, field)
 			case "status":
 				return ec.fieldContext_Ride_status(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Ride_createdAt(ctx, field)
+			case "endedAt":
+				return ec.fieldContext_Ride_endedAt(ctx, field)
 			case "participants":
 				return ec.fieldContext_Ride_participants(ctx, field)
 			case "settings":
@@ -598,7 +780,7 @@ func (ec *executionContext) _Mutation_joinRide(ctx context.Context, field graphq
 			return ec.resolvers.Mutation().JoinRide(ctx, fc.Args["rideCode"].(string), fc.Args["role"].(string))
 		},
 		nil,
-		ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋgraphᚋmodelᚐRide,
+		ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐRide,
 		true,
 		true,
 	)
@@ -618,6 +800,10 @@ func (ec *executionContext) fieldContext_Mutation_joinRide(ctx context.Context, 
 				return ec.fieldContext_Ride_rideCode(ctx, field)
 			case "status":
 				return ec.fieldContext_Ride_status(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Ride_createdAt(ctx, field)
+			case "endedAt":
+				return ec.fieldContext_Ride_endedAt(ctx, field)
 			case "participants":
 				return ec.fieldContext_Ride_participants(ctx, field)
 			case "settings":
@@ -648,7 +834,7 @@ func (ec *executionContext) _Mutation_sendSignal(ctx context.Context, field grap
 		ec.fieldContext_Mutation_sendSignal,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().SendSignal(ctx, fc.Args["rideCode"].(string), fc.Args["type"].(string), fc.Args["lat"].(*float64), fc.Args["lng"].(*float64))
+			return ec.resolvers.Mutation().SendSignal(ctx, fc.Args["rideCode"].(string), fc.Args["signalType"].(string), fc.Args["lat"].(*float64), fc.Args["lng"].(*float64))
 		},
 		nil,
 		ec.marshalNBoolean2bool,
@@ -772,7 +958,7 @@ func (ec *executionContext) _Query_me(ctx context.Context, field graphql.Collect
 			return ec.resolvers.Query().Me(ctx)
 		},
 		nil,
-		ec.marshalOUser2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋgraphᚋmodelᚐUser,
+		ec.marshalOUser2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐUser,
 		true,
 		false,
 	)
@@ -792,6 +978,12 @@ func (ec *executionContext) fieldContext_Query_me(_ context.Context, field graph
 				return ec.fieldContext_User_name(ctx, field)
 			case "email":
 				return ec.fieldContext_User_email(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "lastLoginAt":
+				return ec.fieldContext_User_lastLoginAt(ctx, field)
+			case "isActive":
+				return ec.fieldContext_User_isActive(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -810,7 +1002,7 @@ func (ec *executionContext) _Query_ride(ctx context.Context, field graphql.Colle
 			return ec.resolvers.Query().Ride(ctx, fc.Args["rideCode"].(string))
 		},
 		nil,
-		ec.marshalORide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋgraphᚋmodelᚐRide,
+		ec.marshalORide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐRide,
 		true,
 		false,
 	)
@@ -830,6 +1022,10 @@ func (ec *executionContext) fieldContext_Query_ride(ctx context.Context, field g
 				return ec.fieldContext_Ride_rideCode(ctx, field)
 			case "status":
 				return ec.fieldContext_Ride_status(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Ride_createdAt(ctx, field)
+			case "endedAt":
+				return ec.fieldContext_Ride_endedAt(ctx, field)
 			case "participants":
 				return ec.fieldContext_Ride_participants(ctx, field)
 			case "settings":
@@ -862,7 +1058,7 @@ func (ec *executionContext) _Query_myRides(ctx context.Context, field graphql.Co
 			return ec.resolvers.Query().MyRides(ctx)
 		},
 		nil,
-		ec.marshalNRide2ᚕᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋgraphᚋmodelᚐRideᚄ,
+		ec.marshalNRide2ᚕᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐRideᚄ,
 		true,
 		true,
 	)
@@ -882,6 +1078,10 @@ func (ec *executionContext) fieldContext_Query_myRides(_ context.Context, field 
 				return ec.fieldContext_Ride_rideCode(ctx, field)
 			case "status":
 				return ec.fieldContext_Ride_status(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Ride_createdAt(ctx, field)
+			case "endedAt":
+				return ec.fieldContext_Ride_endedAt(ctx, field)
 			case "participants":
 				return ec.fieldContext_Ride_participants(ctx, field)
 			case "settings":
@@ -1082,6 +1282,60 @@ func (ec *executionContext) fieldContext_Ride_status(_ context.Context, field gr
 	return fc, nil
 }
 
+func (ec *executionContext) _Ride_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Ride) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Ride_createdAt,
+		func(ctx context.Context) (any, error) { return obj.CreatedAt, nil },
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Ride_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Ride",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Ride_endedAt(ctx context.Context, field graphql.CollectedField, obj *model.Ride) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Ride_endedAt,
+		func(ctx context.Context) (any, error) { return obj.EndedAt, nil },
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Ride_endedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Ride",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Ride_participants(ctx context.Context, field graphql.CollectedField, obj *model.Ride) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1090,7 +1344,7 @@ func (ec *executionContext) _Ride_participants(ctx context.Context, field graphq
 		ec.fieldContext_Ride_participants,
 		func(ctx context.Context) (any, error) { return obj.Participants, nil },
 		nil,
-		ec.marshalNParticipant2ᚕᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋgraphᚋmodelᚐParticipantᚄ,
+		ec.marshalNParticipant2ᚕᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐParticipantᚄ,
 		true,
 		true,
 	)
@@ -1125,7 +1379,7 @@ func (ec *executionContext) _Ride_settings(ctx context.Context, field graphql.Co
 		ec.fieldContext_Ride_settings,
 		func(ctx context.Context) (any, error) { return obj.Settings, nil },
 		nil,
-		ec.marshalNRideSettings2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋgraphᚋmodelᚐRideSettings,
+		ec.marshalNRideSettings2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐRideSettings,
 		true,
 		true,
 	)
@@ -1199,6 +1453,174 @@ func (ec *executionContext) fieldContext_RideSettings_visibility(_ context.Conte
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Signal_id(ctx context.Context, field graphql.CollectedField, obj *model.Signal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Signal_id,
+		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Signal_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Signal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Signal_rideCode(ctx context.Context, field graphql.CollectedField, obj *model.Signal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Signal_rideCode,
+		func(ctx context.Context) (any, error) { return obj.RideCode, nil },
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Signal_rideCode(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Signal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Signal_fromUser(ctx context.Context, field graphql.CollectedField, obj *model.Signal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Signal_fromUser,
+		func(ctx context.Context) (any, error) { return obj.FromUser, nil },
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Signal_fromUser(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Signal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Signal_type(ctx context.Context, field graphql.CollectedField, obj *model.Signal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Signal_type,
+		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Signal_type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Signal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Signal_timestamp(ctx context.Context, field graphql.CollectedField, obj *model.Signal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Signal_timestamp,
+		func(ctx context.Context) (any, error) { return obj.Timestamp, nil },
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Signal_timestamp(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Signal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Signal_location(ctx context.Context, field graphql.CollectedField, obj *model.Signal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Signal_location,
+		func(ctx context.Context) (any, error) { return obj.Location, nil },
+		nil,
+		ec.marshalOGeoLocation2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐGeoLocation,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Signal_location(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Signal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "lat":
+				return ec.fieldContext_GeoLocation_lat(ctx, field)
+			case "lng":
+				return ec.fieldContext_GeoLocation_lng(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GeoLocation", field.Name)
 		},
 	}
 	return fc, nil
@@ -1280,6 +1702,87 @@ func (ec *executionContext) fieldContext_User_email(_ context.Context, field gra
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_createdAt,
+		func(ctx context.Context) (any, error) { return obj.CreatedAt, nil },
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_lastLoginAt(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_lastLoginAt,
+		func(ctx context.Context) (any, error) { return obj.LastLoginAt, nil },
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_lastLoginAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_isActive(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_isActive,
+		func(ctx context.Context) (any, error) { return obj.IsActive, nil },
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_isActive(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2717,6 +3220,50 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** object.gotpl ****************************
 
+var geoLocationImplementors = []string{"GeoLocation"}
+
+func (ec *executionContext) _GeoLocation(ctx context.Context, sel ast.SelectionSet, obj *model.GeoLocation) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, geoLocationImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GeoLocation")
+		case "lat":
+			out.Values[i] = ec._GeoLocation_lat(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "lng":
+			out.Values[i] = ec._GeoLocation_lng(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -2965,6 +3512,13 @@ func (ec *executionContext) _Ride(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "createdAt":
+			out.Values[i] = ec._Ride_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "endedAt":
+			out.Values[i] = ec._Ride_endedAt(ctx, field, obj)
 		case "participants":
 			out.Values[i] = ec._Ride_participants(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -3042,6 +3596,67 @@ func (ec *executionContext) _RideSettings(ctx context.Context, sel ast.Selection
 	return out
 }
 
+var signalImplementors = []string{"Signal"}
+
+func (ec *executionContext) _Signal(ctx context.Context, sel ast.SelectionSet, obj *model.Signal) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, signalImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Signal")
+		case "id":
+			out.Values[i] = ec._Signal_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "rideCode":
+			out.Values[i] = ec._Signal_rideCode(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "fromUser":
+			out.Values[i] = ec._Signal_fromUser(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "type":
+			out.Values[i] = ec._Signal_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "timestamp":
+			out.Values[i] = ec._Signal_timestamp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "location":
+			out.Values[i] = ec._Signal_location(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var userImplementors = []string{"User"}
 
 func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *model.User) graphql.Marshaler {
@@ -3065,6 +3680,21 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "email":
 			out.Values[i] = ec._User_email(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._User_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "lastLoginAt":
+			out.Values[i] = ec._User_lastLoginAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "isActive":
+			out.Values[i] = ec._User_isActive(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3442,6 +4072,22 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v any) (float64, error) {
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalFloatContext(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return graphql.WrapContextMarshaler(ctx, res)
+}
+
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3474,7 +4120,7 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNParticipant2ᚕᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋgraphᚋmodelᚐParticipantᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Participant) graphql.Marshaler {
+func (ec *executionContext) marshalNParticipant2ᚕᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐParticipantᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Participant) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3498,7 +4144,7 @@ func (ec *executionContext) marshalNParticipant2ᚕᚖgithubᚗcomᚋironnicko�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNParticipant2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋgraphᚋmodelᚐParticipant(ctx, sel, v[i])
+			ret[i] = ec.marshalNParticipant2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐParticipant(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3518,7 +4164,7 @@ func (ec *executionContext) marshalNParticipant2ᚕᚖgithubᚗcomᚋironnicko�
 	return ret
 }
 
-func (ec *executionContext) marshalNParticipant2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋgraphᚋmodelᚐParticipant(ctx context.Context, sel ast.SelectionSet, v *model.Participant) graphql.Marshaler {
+func (ec *executionContext) marshalNParticipant2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐParticipant(ctx context.Context, sel ast.SelectionSet, v *model.Participant) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -3528,11 +4174,11 @@ func (ec *executionContext) marshalNParticipant2ᚖgithubᚗcomᚋironnickoᚋri
 	return ec._Participant(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNRide2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋgraphᚋmodelᚐRide(ctx context.Context, sel ast.SelectionSet, v model.Ride) graphql.Marshaler {
+func (ec *executionContext) marshalNRide2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐRide(ctx context.Context, sel ast.SelectionSet, v model.Ride) graphql.Marshaler {
 	return ec._Ride(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNRide2ᚕᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋgraphᚋmodelᚐRideᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Ride) graphql.Marshaler {
+func (ec *executionContext) marshalNRide2ᚕᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐRideᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Ride) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3556,7 +4202,7 @@ func (ec *executionContext) marshalNRide2ᚕᚖgithubᚗcomᚋironnickoᚋride�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋgraphᚋmodelᚐRide(ctx, sel, v[i])
+			ret[i] = ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐRide(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3576,7 +4222,7 @@ func (ec *executionContext) marshalNRide2ᚕᚖgithubᚗcomᚋironnickoᚋride�
 	return ret
 }
 
-func (ec *executionContext) marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋgraphᚋmodelᚐRide(ctx context.Context, sel ast.SelectionSet, v *model.Ride) graphql.Marshaler {
+func (ec *executionContext) marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐRide(ctx context.Context, sel ast.SelectionSet, v *model.Ride) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -3586,7 +4232,7 @@ func (ec *executionContext) marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsi
 	return ec._Ride(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNRideSettings2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋgraphᚋmodelᚐRideSettings(ctx context.Context, sel ast.SelectionSet, v *model.RideSettings) graphql.Marshaler {
+func (ec *executionContext) marshalNRideSettings2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐRideSettings(ctx context.Context, sel ast.SelectionSet, v *model.RideSettings) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -3912,7 +4558,14 @@ func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel as
 	return graphql.WrapContextMarshaler(ctx, res)
 }
 
-func (ec *executionContext) marshalORide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋgraphᚋmodelᚐRide(ctx context.Context, sel ast.SelectionSet, v *model.Ride) graphql.Marshaler {
+func (ec *executionContext) marshalOGeoLocation2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐGeoLocation(ctx context.Context, sel ast.SelectionSet, v *model.GeoLocation) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._GeoLocation(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalORide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐRide(ctx context.Context, sel ast.SelectionSet, v *model.Ride) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -3937,7 +4590,7 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
