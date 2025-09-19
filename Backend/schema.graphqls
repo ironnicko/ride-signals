@@ -12,6 +12,7 @@ type Ride {
   rideCode: String!
   status: String!
   createdAt: String!
+  createdBy: String!
   endedAt: String
   participants: [Participant!]!
   settings: RideSettings!

@@ -33,8 +33,8 @@ func Signup(c *gin.Context) {
 		Name:         req.Name,
 		Email:        req.Email,
 		PasswordHash: string(hash),
-		CreatedAt:    primitive.NewDateTimeFromTime(time.Now()),
-		LastLoginAt:  primitive.NewDateTimeFromTime(time.Now()),
+		CreatedAt:    primitive.NewDateTimeFromTime(time.Now().UTC()),
+		LastLoginAt:  primitive.NewDateTimeFromTime(time.Now().UTC()),
 		IsActive:     true,
 	}
 
@@ -79,7 +79,7 @@ func Login(c *gin.Context) {
 	_, _ = usersColl.UpdateByID(
 		context.Background(),
 		user.ID,
-		bson.M{"$set": bson.M{"lastloginat": primitive.NewDateTimeFromTime(time.Now())}},
+		bson.M{"$set": bson.M{"lastloginat": primitive.NewDateTimeFromTime(time.Now().UTC())}},
 	)
 
 	// Generate token

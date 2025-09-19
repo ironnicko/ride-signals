@@ -71,6 +71,7 @@ type ComplexityRoot struct {
 
 	Ride struct {
 		CreatedAt    func(childComplexity int) int
+		CreatedBy    func(childComplexity int) int
 		EndedAt      func(childComplexity int) int
 		ID           func(childComplexity int) int
 		Participants func(childComplexity int) int
@@ -229,6 +230,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Ride.CreatedAt(childComplexity), true
+	case "Ride.createdBy":
+		if e.complexity.Ride.CreatedBy == nil {
+			break
+		}
+
+		return e.complexity.Ride.CreatedBy(childComplexity), true
 	case "Ride.endedAt":
 		if e.complexity.Ride.EndedAt == nil {
 			break
@@ -471,6 +478,7 @@ type Ride {
   rideCode: String!
   status: String!
   createdAt: String!
+  createdBy: String!
   endedAt: String
   participants: [Participant!]!
   settings: RideSettings!
@@ -745,6 +753,8 @@ func (ec *executionContext) fieldContext_Mutation_createRide(ctx context.Context
 				return ec.fieldContext_Ride_status(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Ride_createdAt(ctx, field)
+			case "createdBy":
+				return ec.fieldContext_Ride_createdBy(ctx, field)
 			case "endedAt":
 				return ec.fieldContext_Ride_endedAt(ctx, field)
 			case "participants":
@@ -802,6 +812,8 @@ func (ec *executionContext) fieldContext_Mutation_joinRide(ctx context.Context, 
 				return ec.fieldContext_Ride_status(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Ride_createdAt(ctx, field)
+			case "createdBy":
+				return ec.fieldContext_Ride_createdBy(ctx, field)
 			case "endedAt":
 				return ec.fieldContext_Ride_endedAt(ctx, field)
 			case "participants":
@@ -1024,6 +1036,8 @@ func (ec *executionContext) fieldContext_Query_ride(ctx context.Context, field g
 				return ec.fieldContext_Ride_status(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Ride_createdAt(ctx, field)
+			case "createdBy":
+				return ec.fieldContext_Ride_createdBy(ctx, field)
 			case "endedAt":
 				return ec.fieldContext_Ride_endedAt(ctx, field)
 			case "participants":
@@ -1080,6 +1094,8 @@ func (ec *executionContext) fieldContext_Query_myRides(_ context.Context, field 
 				return ec.fieldContext_Ride_status(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Ride_createdAt(ctx, field)
+			case "createdBy":
+				return ec.fieldContext_Ride_createdBy(ctx, field)
 			case "endedAt":
 				return ec.fieldContext_Ride_endedAt(ctx, field)
 			case "participants":
@@ -1297,6 +1313,33 @@ func (ec *executionContext) _Ride_createdAt(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) fieldContext_Ride_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Ride",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Ride_createdBy(ctx context.Context, field graphql.CollectedField, obj *model.Ride) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Ride_createdBy,
+		func(ctx context.Context) (any, error) { return obj.CreatedBy, nil },
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Ride_createdBy(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Ride",
 		Field:      field,
@@ -3514,6 +3557,11 @@ func (ec *executionContext) _Ride(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "createdAt":
 			out.Values[i] = ec._Ride_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdBy":
+			out.Values[i] = ec._Ride_createdBy(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

@@ -7,6 +7,7 @@
 *.dll
 *.so
 *.dylib
+/mongo_data
 
 # Test binary, built with `go test -c`
 *.test

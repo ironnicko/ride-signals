@@ -19,7 +19,7 @@ func InitJWT(secret string) {
 func GenerateToken(userId string) (string, error) {
 	claims := &jwt.MapClaims{
 		"userId": userId,
-		"exp":    time.Now().Add(24 * time.Hour).Unix(),
+		"exp":    time.Now().UTC().Add(24 * time.Hour).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(jwtKey)
