@@ -2,64 +2,85 @@ package kafka
 
 import (
 	"context"
-	"log"
+	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/segmentio/kafka-go"
 )
 
 var Writer *kafka.Writer
+var topic = "ride-signals"
 
 func InitProducer(brokers string) error {
-
 	Writer = kafka.NewWriter(kafka.WriterConfig{
 		Brokers:  []string{brokers},
-		Topic:    "ride-signals",
+		Topic:    topic,
 		Balancer: &kafka.LeastBytes{},
 	})
 
-	conn, err := kafka.Dial("tcp", brokers)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
+	var lastErr error
 
-	controller, err := conn.Controller()
-	if err != nil {
-		return err
-	}
-	log.Printf("Connected to Kafka broker %s (controller ID %d)\n", brokers, controller.ID)
+	for {
 
-	if err := ensureTopic(brokers, "ride-signals", 3, 1); err != nil {
-		return err
+		conn, err := kafka.Dial("tcp", brokers)
+		if err != nil {
+			lastErr = err
+			time.Sleep(2 * time.Second)
+			continue
+		}
+
+		controller, err := conn.Controller()
+		if err != nil {
+			conn.Close()
+			lastErr = err
+			time.Sleep(2 * time.Second)
+			continue
+		}
+
+		controllerConn, err := kafka.Dial("tcp", controller.Host+":"+strconv.Itoa(controller.Port))
+		if err != nil {
+			conn.Close()
+			lastErr = err
+			time.Sleep(2 * time.Second)
+			continue
+		}
+
+		topicConfig := kafka.TopicConfig{
+			Topic:             topic,
+			NumPartitions:     1,
+			ReplicationFactor: 1,
+		}
+
+		err = controllerConn.CreateTopics(topicConfig)
+		controllerConn.Close()
+		conn.Close()
+
+		if err == nil {
+			break
+		}
+
+		lastErr = err
+		time.Sleep(2 * time.Second)
 	}
 
-	log.Println("Kafka producer initialized and connection verified")
+	if lastErr != nil {
+		return fmt.Errorf("failed to create Kafka topic: %w", lastErr)
+	}
+
 	return nil
 }
 
 func PublishSignal(key string, value []byte) error {
+	if Writer == nil {
+		return fmt.Errorf("Kafka writer is not initialized")
+	}
+
 	return Writer.WriteMessages(context.Background(),
 		kafka.Message{
 			Key:   []byte(key),
 			Value: value,
+			Time:  time.Now(),
 		},
 	)
-}
-
-func ensureTopic(brokerAddr, topic string, partitions, replicationFactor int) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	conn, err := kafka.DialContext(ctx, "tcp", brokerAddr)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	return conn.CreateTopics(kafka.TopicConfig{
-		Topic:             topic,
-		NumPartitions:     partitions,
-		ReplicationFactor: replicationFactor,
-	})
 }

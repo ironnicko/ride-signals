@@ -8,6 +8,7 @@
 *.so
 *.dylib
 /mongo_data
+/kafka_data
 
 # Test binary, built with `go test -c`
 *.test

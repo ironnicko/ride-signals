@@ -13,7 +13,6 @@ services:
         condition: service_healthy
         restart: true
       mongo:
-        condition: service_healthy
         restart: true
   mongo:
     image: mongo
@@ -61,7 +60,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_NUM_PARTITIONS: 3
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      # KAFKA_CREATE_TOPICS: "ride-signals:3:1"
     volumes:
       - ./kafka_data:/var/lib/kafka/data
     healthcheck:
