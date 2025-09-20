@@ -19,54 +19,56 @@ func InitProducer(brokers string) error {
 		Balancer: &kafka.LeastBytes{},
 	})
 
-	var lastErr error
+	go func()(error){	
+		var lastErr error
+		for {
 
-	for {
+			conn, err := kafka.Dial("tcp", brokers)
+			if err != nil {
+				lastErr = err
+				time.Sleep(2 * time.Second)
+				continue
+			}
 
-		conn, err := kafka.Dial("tcp", brokers)
-		if err != nil {
-			lastErr = err
-			time.Sleep(2 * time.Second)
-			continue
-		}
+			controller, err := conn.Controller()
+			if err != nil {
+				conn.Close()
+				lastErr = err
+				time.Sleep(2 * time.Second)
+				continue
+			}
 
-		controller, err := conn.Controller()
-		if err != nil {
+			controllerConn, err := kafka.Dial("tcp", controller.Host+":"+strconv.Itoa(controller.Port))
+			if err != nil {
+				conn.Close()
+				lastErr = err
+				time.Sleep(2 * time.Second)
+				continue
+			}
+
+			topicConfig := kafka.TopicConfig{
+				Topic:             topic,
+				NumPartitions:     1,
+				ReplicationFactor: 1,
+			}
+
+			err = controllerConn.CreateTopics(topicConfig)
+			controllerConn.Close()
 			conn.Close()
+
+			if err == nil {
+				break
+			}
+
 			lastErr = err
 			time.Sleep(2 * time.Second)
-			continue
 		}
 
-		controllerConn, err := kafka.Dial("tcp", controller.Host+":"+strconv.Itoa(controller.Port))
-		if err != nil {
-			conn.Close()
-			lastErr = err
-			time.Sleep(2 * time.Second)
-			continue
+		if lastErr != nil {
+			return fmt.Errorf("failed to create Kafka topic: %w", lastErr)
 		}
-
-		topicConfig := kafka.TopicConfig{
-			Topic:             topic,
-			NumPartitions:     1,
-			ReplicationFactor: 1,
-		}
-
-		err = controllerConn.CreateTopics(topicConfig)
-		controllerConn.Close()
-		conn.Close()
-
-		if err == nil {
-			break
-		}
-
-		lastErr = err
-		time.Sleep(2 * time.Second)
-	}
-
-	if lastErr != nil {
-		return fmt.Errorf("failed to create Kafka topic: %w", lastErr)
-	}
+		return nil
+	}()
 
 	return nil
 }
