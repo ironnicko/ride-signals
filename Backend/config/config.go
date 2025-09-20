@@ -8,7 +8,7 @@ type Config struct {
 	MongoURI     string
 	KafkaBrokers string
 	JWTSecret    string
-	PRODUCTION   string
+	Mode   string
 	ServerPort   string
 }
 
@@ -18,7 +18,7 @@ func LoadConfig() *Config {
 		KafkaBrokers: getEnv("KAFKA_BROKERS", "localhost:9092"),
 		JWTSecret:    getEnv("JWT_SECRET", "supersecret"),
 		ServerPort:   getEnv("PORT", "8080"),
-		PRODUCTION:   getEnv("PRODUCTION", "local"),
+		Mode:   getEnv("MODE", "local"),
 	}
 }
 

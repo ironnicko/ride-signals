@@ -1,22 +1,19 @@
 package main
 
 import (
-	"context"
 	"fmt"
 
 	// "github.com/99designs/gqlgen"
 	// "github.com/99designs/gqlgen/api"
 	// "github.com/99designs/gqlgen/internal/imports"
 	// "github.com/99designs/gqlgen/codegen/config"
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/ironnicko/ride-signals/Backend/config"
 	"github.com/ironnicko/ride-signals/Backend/db"
-	"github.com/ironnicko/ride-signals/Backend/graph"
-	"github.com/ironnicko/ride-signals/Backend/handlers"
 	"github.com/ironnicko/ride-signals/Backend/kafka"
+	"github.com/ironnicko/ride-signals/Backend/routes"
 	"github.com/ironnicko/ride-signals/Backend/utils"
 	"github.com/joho/godotenv"
 )
@@ -24,7 +21,7 @@ import (
 func main() {
 	cfg := config.LoadConfig()
 
-	if cfg.PRODUCTION != "PROD" {
+	if cfg.Mode != "Prod" {
 		godotenv.Load(".env.local")
 		cfg = config.LoadConfig()
 	}
@@ -34,8 +31,6 @@ func main() {
 	kafka.InitProducer(cfg.KafkaBrokers)
 	utils.InitJWT(cfg.JWTSecret)
 
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
-
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
 		AllowOriginFunc: func(origin string) bool {
@@ -44,24 +39,8 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	v1 := r.Group("/api/v1")
-
-	// REST
-	v1.POST("/signup", handlers.Signup)
-	v1.POST("/login", handlers.Login)
-
-	// GraphQL
-	v1.GET("/playground", gin.WrapH(playground.Handler("GraphQL Playground", "/api/v1/graphql")))
-
-	// Authenticated
-	v1.Use(utils.AuthMiddleware())
-	// v1.POST("/graphql", gin.WrapH(srv))
-	v1.POST("/graphql", func(c *gin.Context) {
-		userID, _ := c.Get("userId")
-		ctx := context.WithValue(c.Request.Context(), "userId", userID)
-		req := c.Request.WithContext(ctx)
-		srv.ServeHTTP(c.Writer, req)
-	})
+	routes.InitializeRoutes(r)
 
 	r.Run(":" + cfg.ServerPort)
+
 }
