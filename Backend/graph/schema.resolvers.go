@@ -116,9 +116,11 @@ func (r *mutationResolver) JoinRide(ctx context.Context, rideCode string, role s
 
 // SendSignal is the resolver for the sendSignal field.
 func (r *mutationResolver) SendSignal(ctx context.Context, rideCode string, signalType string, lat *float64, lng *float64) (bool, error) {
+	userId := ctx.Value("userId").(string)
 	sig := model.Signal{
 		ID:        primitive.NewObjectID().Hex(),
 		RideCode:  rideCode,
+		FromUser:  userId,
 		Type:      signalType,
 		Timestamp: time.Now().UTC().Format(time.RFC3339),
 	}
