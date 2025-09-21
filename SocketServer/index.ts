@@ -1,17 +1,8 @@
 import { Server, Socket } from "socket.io";
 import http from "http";
-import { Kafka } from "kafkajs";
+import type { JoinRidePayload } from "./types";
+import { runKafka } from "./consumer";
 
-
-interface JoinRidePayload {
-  rideCode: string;
-  fromUser: string
-}
-
-interface KafkaRideEvent {
-  rideCode: string;
-  type: string;
-}
 
 const rideParticipants: Record<string, string[]> = {
   ride123: ["user1", "user2"],
@@ -45,43 +36,7 @@ io.on("connection", (socket: Socket) => {
 });
 
 
-const kafka = new Kafka({
-  clientId: "socket-server",
-  brokers: ["localhost:9094"],
-});
-
-const consumer = kafka.consumer({ groupId: "ride-signals-consumer" });
-
-async function runKafka() {
-  await consumer.connect();
-  await consumer.subscribe({ topic: "ride-signals", fromBeginning: false });
-
-  await consumer.run({
-    eachMessage: async ({ message }) => {
-      try {
-        const event: KafkaRideEvent = JSON.parse(message.value?.toString() || "{}");
-
-        console.log(event)
-
-        if (!event.rideCode || !event.type) {
-          console.warn("Invalid Kafka message:", message.value?.toString());
-          return;
-        }
-
-        console.log(`Kafka -> Ride ${event.rideCode}:`, event.type);
-
-        io.to(event.rideCode).emit("ride-signals", {
-          type: event.type,
-          source: "kafka",
-        });
-      } catch (err) {
-        console.error("Error parsing Kafka message", err);
-      }
-    },
-  });
-}
-
-runKafka().catch(console.error);
+runKafka(io).catch(console.error);
 
 server.listen(3001, () => {
   console.log("🚀 Socket.io + Kafka bridge running on port 3001");

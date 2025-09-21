@@ -10,35 +10,76 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtKey []byte
+var (
+	jwtKey        []byte
+	refreshJwtKey []byte
+)
 
-func InitJWT(secret string) {
+func InitJWT(secret, refreshSecret string) {
 	jwtKey = []byte(secret)
+	refreshJwtKey = []byte(refreshSecret)
 }
 
-func GenerateToken(userId string) (string, error) {
-	claims := &jwt.MapClaims{
+type TokenPair struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+}
+
+func GenerateAccessToken(userId string) (string, error) {
+	accessClaims := &jwt.MapClaims{
 		"userId": userId,
-		"exp":    time.Now().UTC().Add(24 * time.Hour).Unix(),
+		"exp":    time.Now().UTC().Add(15 * time.Minute).Unix(),
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(jwtKey)
+
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
+	signedAccessToken, err := accessToken.SignedString(jwtKey)
+	if err != nil {
+		return "", err
+	}
+	return signedAccessToken, nil
 }
 
-func ValidateToken(tokenString string) (string, error) {
+func GenerateTokens(userId string) (*TokenPair, error) {
+
+	signedAccessToken, err := GenerateAccessToken(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	refreshClaims := &jwt.MapClaims{
+		"userId": userId,
+		"exp":    time.Now().UTC().Add(7 * 24 * time.Hour).Unix(),
+	}
+
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+	signedRefreshToken, err := refreshToken.SignedString(refreshJwtKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return &TokenPair{
+		AccessToken:  signedAccessToken,
+		RefreshToken: signedRefreshToken,
+	}, nil
+}
+
+func ValidateToken(tokenString string, isRefresh bool) (string, error) {
+	secret := jwtKey
+	if isRefresh {
+		secret = refreshJwtKey
+	}
+
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// Check signing method
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
 		}
-		return jwtKey, nil
+		return secret, nil
 	})
 
 	if err != nil {
 		return "", err
 	}
 
-	// Extract claims
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		if userID, ok := claims["userId"].(string); ok {
 			return userID, nil
@@ -50,7 +91,6 @@ func ValidateToken(tokenString string) (string, error) {
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Get token from Authorization header: "Bearer <token>"
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header missing"})
@@ -58,26 +98,23 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Extract token part
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid auth header format"})
 			c.Abort()
 			return
 		}
+
 		tokenString := parts[1]
 
-		// Validate token
-		userId, err := ValidateToken(tokenString)
+		userId, err := ValidateToken(tokenString, false)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired access token"})
 			c.Abort()
 			return
 		}
 
-		// Store userId in context for resolvers/handlers to access
 		c.Set("userId", userId)
-
 		c.Next()
 	}
 }

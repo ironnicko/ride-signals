@@ -38,14 +38,26 @@ func Signup(c *gin.Context) {
 		IsActive:     true,
 	}
 
-	_, err := usersColl.InsertOne(context.Background(), user)
+	insertedRecord, err := usersColl.InsertOne(context.Background(), user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
 
-	token, _ := utils.GenerateToken(user.ID.Hex())
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	tokenPair, err := utils.GenerateTokens(user.ID.Hex())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate access and refresh tokens"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"accessToken":  tokenPair.AccessToken,
+		"refreshToken": tokenPair.RefreshToken,
+		"user": gin.H{
+			"id":    insertedRecord.InsertedID.(primitive.ObjectID).Hex(),
+			"name":  user.Name,
+			"email": user.Email,
+		},
+	})
 }
 
 func Login(c *gin.Context) {
@@ -82,15 +94,47 @@ func Login(c *gin.Context) {
 		bson.M{"$set": bson.M{"lastloginat": primitive.NewDateTimeFromTime(time.Now().UTC())}},
 	)
 
-	// Generate token
-	token, _ := utils.GenerateToken(user.ID.Hex())
+	tokenPair, err := utils.GenerateTokens(user.ID.Hex())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate access and refresh tokens"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"token": token,
+		"accessToken":  tokenPair.AccessToken,
+		"refreshToken": tokenPair.RefreshToken,
 		"user": gin.H{
 			"id":    user.ID.Hex(),
 			"name":  user.Name,
 			"email": user.Email,
 		},
+	})
+}
+
+func RefreshAccessToken(c *gin.Context) {
+	var request struct {
+		RefreshToken string `json:"refreshToken"`
+	}
+
+	if err := c.BindJSON(&request); err != nil || request.RefreshToken == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	userId, err := utils.ValidateToken(request.RefreshToken, true)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired refresh token"})
+		return
+	}
+
+	signedAccessToken, err := utils.GenerateAccessToken(userId)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unable to generate Access Token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"accessToken": signedAccessToken,
 	})
 }

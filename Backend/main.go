@@ -29,7 +29,12 @@ func main() {
 
 	db.Connect(cfg.MongoURI)
 	kafka.InitProducer(cfg.KafkaBrokers)
-	utils.InitJWT(cfg.JWTSecret)
+	utils.InitJWT(cfg.JWTSecret, cfg.RefreshJWTSecret)
+	utils.InitGoogleOAuth(
+		cfg.Google_Client_ID,
+		cfg.Google_Client_Secret,
+		cfg.Google_Redirect_URL,
+	)
 
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
