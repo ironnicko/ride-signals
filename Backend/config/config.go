@@ -22,7 +22,7 @@ func LoadConfig() *Config {
 		KafkaBrokers:         getEnv("KAFKA_BROKERS", "localhost:9092"),
 		JWTSecret:            getEnv("JWT_SECRET", "supersecret"),
 		RefreshJWTSecret:     getEnv("REFRESH_SECRET", "refreshsupersecret"),
-		Google_Client_ID:     getEnv("GOOGLE_CLIENT_ID", ""),
+		Google_Client_ID:     getEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", ""),
 		Google_Client_Secret: getEnv("GOOGLE_CLIENT_SECRET", ""),
 		Google_Redirect_URL:  getEnv("GOOGLE_REDIRECT_URL", ""),
 		ServerPort:           getEnv("PORT", "8080"),

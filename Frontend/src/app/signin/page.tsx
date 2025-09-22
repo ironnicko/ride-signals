@@ -1,0 +1,66 @@
+'use client';
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import GoogleSignInButton from "./signInWithGoogle";
+
+export default function SignIn() {
+  return (
+
+      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-lg">
+        <h2 className="text-center text-2xl font-bold text-gray-900">
+          Sign in to your account
+        </h2>
+
+        <form className="space-y-6">
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                required
+                className="mt-1 w-full"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="********"
+                required
+                className="mt-1 w-full"
+              />
+            </div>
+          </div>
+
+          <Button type="submit" className="w-full mt-4">
+            Sign In
+          </Button>
+        </form>
+
+        <div className="flex items-center my-4">
+          <hr className="flex-grow border-gray-300" />
+          <span className="px-2 text-gray-400">or</span>
+          <hr className="flex-grow border-gray-300" />
+        </div>
+
+        <div className="mt-4">
+          {/* Google Sign-In */}
+          <GoogleSignInButton></GoogleSignInButton>
+        </div>
+
+        <p className="text-center text-sm text-gray-500 mt-4">
+          Don’t have an account?{" "}
+          <a href="/signup" className="text-blue-600 hover:underline">
+            Sign up
+          </a>
+        </p>
+      </div>
+  );
+}
