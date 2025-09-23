@@ -44,7 +44,9 @@ func Signup(c *gin.Context) {
 		return
 	}
 
-	tokenPair, err := utils.GenerateTokens(user.ID.Hex())
+	userId := insertedRecord.InsertedID.(primitive.ObjectID).Hex()
+
+	tokenPair, err := utils.GenerateTokens(userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate access and refresh tokens"})
 		return
@@ -53,7 +55,7 @@ func Signup(c *gin.Context) {
 		"accessToken":  tokenPair.AccessToken,
 		"refreshToken": tokenPair.RefreshToken,
 		"user": gin.H{
-			"id":    insertedRecord.InsertedID.(primitive.ObjectID).Hex(),
+			"id":    userId,
 			"name":  user.Name,
 			"email": user.Email,
 		},

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/stores/useAuth";
+import api from "@/lib/axios";
 
 interface ProtectedProps {
   children: React.ReactNode;
@@ -10,18 +11,22 @@ interface ProtectedProps {
 
 export default function ProtectedRoute({ children }: ProtectedProps) {
   const router = useRouter();
-  const { isAuthenticated, accessToken } = useAuth();
+  const { accessToken } = useAuth();
 
   useEffect(() => {
     const checkAuth = async () => {
-      if (!useAuth.getState().isAuthenticated) {
+      try {
+        const {status} = await api.post("/authenticated")
+        if (status != 200){
+          router.replace("/signin");
+        }
+      } catch(err){
         router.replace("/signin");
       }
     };
     checkAuth();
   }, [accessToken, router]);
 
-  if (!isAuthenticated) return null; 
 
   return <>{children}</>;
 }
