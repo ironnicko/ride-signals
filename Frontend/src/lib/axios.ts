@@ -26,7 +26,7 @@ api.interceptors.response.use(
     if (response?.status === 401 && auth.refreshToken) {
       try {
         // Try refreshing token
-        const res = await fetch("/refresh", {
+        const res = await fetch(process.env.NEXT_PUBLIC_API_URL +"/refresh", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ refreshToken: auth.refreshToken }),

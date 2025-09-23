@@ -22,11 +22,11 @@ export const useAuth = create<AuthState>()(
                         throw res.statusText
                     }
                     const data = await res.json();
+                    userState.setState(data.user)
                     set({
                         accessToken: data.accessToken,
                         refreshToken: data.refreshToken,
                     });
-                    userState.setState(data.user)
                     return true;
                 } catch (err) {
                     set({ accessToken: null, refreshToken: null });
@@ -46,12 +46,12 @@ export const useAuth = create<AuthState>()(
                         throw Error
                     }
                     const data = await res.json();
+                    userState.setState(data.user)
                     set({
 
                         accessToken: data.accessToken,
                         refreshToken: data.refreshToken,
                     });
-                    userState.setState(data.user)
 
                 } catch (err) {
                     set({ accessToken: null, refreshToken: null });
