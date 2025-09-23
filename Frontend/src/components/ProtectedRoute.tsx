@@ -11,7 +11,7 @@ interface ProtectedProps {
 
 export default function ProtectedRoute({ children }: ProtectedProps) {
   const router = useRouter();
-  const { accessToken } = useAuth();
+  const { accessToken } = useAuth.getState();
 
   useEffect(() => {
     const checkAuth = async () => {

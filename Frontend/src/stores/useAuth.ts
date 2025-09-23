@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { AuthState, storage } from "./types"
 import Error from "next/error";
+import { useUser } from "./useUser";
 
 export const useAuth = create<AuthState>()(
     persist(
@@ -11,12 +12,13 @@ export const useAuth = create<AuthState>()(
 
             login: async (email, password) => {
                 try {
+                    const userState = useUser;
                     const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/login", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ email, password }),
                     });
-                    if (res.status != 200){
+                    if (res.status != 200) {
                         throw res.statusText
                     }
                     const data = await res.json();
@@ -24,6 +26,7 @@ export const useAuth = create<AuthState>()(
                         accessToken: data.accessToken,
                         refreshToken: data.refreshToken,
                     });
+                    userState.setState(data.user)
                     return true;
                 } catch (err) {
                     set({ accessToken: null, refreshToken: null });
@@ -33,7 +36,7 @@ export const useAuth = create<AuthState>()(
 
             loginWithGoogle: async (idToken) => {
                 try {
-
+                    const userState = useUser;
                     const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/auth/google", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -48,6 +51,8 @@ export const useAuth = create<AuthState>()(
                         accessToken: data.accessToken,
                         refreshToken: data.refreshToken,
                     });
+                    userState.setState(data.user)
+
                 } catch (err) {
                     set({ accessToken: null, refreshToken: null });
                     throw err;

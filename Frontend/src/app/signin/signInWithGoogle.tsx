@@ -6,7 +6,7 @@ import { FcGoogle } from "react-icons/fc";
 import { useRouter } from "next/navigation";
 
 export default function GoogleSignInButton() {
-  const {loginWithGoogle} = useAuth();
+  const {loginWithGoogle} = useAuth.getState();
   const router = useRouter();
   useEffect(() => {
     const script = document.createElement("script");

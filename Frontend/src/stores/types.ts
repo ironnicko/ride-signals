@@ -44,7 +44,11 @@ export interface AuthState {
 }
 
 export interface UserState {
-    id: number;
-    name: string | null;
-    
+    id: string | null
+    name: string | null
+    email: string | null
+    picture?: string | null
+    createdAt: string | null
+    lastLoginAt: string | null
+    isActive: boolean | null
 }
