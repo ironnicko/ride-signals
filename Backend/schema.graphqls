@@ -16,6 +16,8 @@ type Ride {
   endedAt: String
   participants: [Participant!]!
   settings: RideSettings!
+  Start: GeoLocation!
+  Destination: GeoLocation!
 }
 
 type Participant {
@@ -35,7 +37,7 @@ type Signal {
   fromUser: ID!
   type: String!
   timestamp: String!
-  location: GeoLocation
+  location: GeoLocation!
 }
 
 type GeoLocation {
@@ -44,8 +46,8 @@ type GeoLocation {
 }
 
 type Query {
-  me: User
-  ride(rideCode: String!): Ride
+  me: User!
+  ride(rideCode: String!): Ride!
   myRides: [Ride!]!
 }
 
@@ -58,5 +60,4 @@ type Mutation {
     lat: Float
     lng: Float
   ): Boolean!
-  
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/stores/useAuth";
 import api from "@/lib/axios";
@@ -11,22 +11,22 @@ interface ProtectedProps {
 
 export default function ProtectedRoute({ children }: ProtectedProps) {
   const router = useRouter();
-  const { accessToken } = useAuth.getState();
-
+  const { isAuthenticated } = useAuth.getState();
+  
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const {status} = await api.post("/authenticated")
-        if (status != 200){
+        if (status != 200)
           router.replace("/signin");
-        }
+        
       } catch(err){
         router.replace("/signin");
       }
     };
     checkAuth();
-  }, [accessToken, router]);
+  }, [isAuthenticated, router]);
 
 
-  return <>{children}</>;
+  return isAuthenticated ? <>{children}</> : null;
 }

@@ -72,11 +72,13 @@ type ComplexityRoot struct {
 	Ride struct {
 		CreatedAt    func(childComplexity int) int
 		CreatedBy    func(childComplexity int) int
+		Destination  func(childComplexity int) int
 		EndedAt      func(childComplexity int) int
 		ID           func(childComplexity int) int
 		Participants func(childComplexity int) int
 		RideCode     func(childComplexity int) int
 		Settings     func(childComplexity int) int
+		Start        func(childComplexity int) int
 		Status       func(childComplexity int) int
 	}
 
@@ -236,6 +238,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Ride.CreatedBy(childComplexity), true
+	case "Ride.Destination":
+		if e.complexity.Ride.Destination == nil {
+			break
+		}
+
+		return e.complexity.Ride.Destination(childComplexity), true
 	case "Ride.endedAt":
 		if e.complexity.Ride.EndedAt == nil {
 			break
@@ -266,6 +274,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Ride.Settings(childComplexity), true
+	case "Ride.Start":
+		if e.complexity.Ride.Start == nil {
+			break
+		}
+
+		return e.complexity.Ride.Start(childComplexity), true
 	case "Ride.status":
 		if e.complexity.Ride.Status == nil {
 			break
@@ -482,6 +496,8 @@ type Ride {
   endedAt: String
   participants: [Participant!]!
   settings: RideSettings!
+  Start: GeoLocation!
+  Destination: GeoLocation!
 }
 
 type Participant {
@@ -501,7 +517,7 @@ type Signal {
   fromUser: ID!
   type: String!
   timestamp: String!
-  location: GeoLocation
+  location: GeoLocation!
 }
 
 type GeoLocation {
@@ -510,8 +526,8 @@ type GeoLocation {
 }
 
 type Query {
-  me: User
-  ride(rideCode: String!): Ride
+  me: User!
+  ride(rideCode: String!): Ride!
   myRides: [Ride!]!
 }
 
@@ -524,7 +540,6 @@ type Mutation {
     lat: Float
     lng: Float
   ): Boolean!
-  
 }
 `, BuiltIn: false},
 }
@@ -761,6 +776,10 @@ func (ec *executionContext) fieldContext_Mutation_createRide(ctx context.Context
 				return ec.fieldContext_Ride_participants(ctx, field)
 			case "settings":
 				return ec.fieldContext_Ride_settings(ctx, field)
+			case "Start":
+				return ec.fieldContext_Ride_Start(ctx, field)
+			case "Destination":
+				return ec.fieldContext_Ride_Destination(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Ride", field.Name)
 		},
@@ -820,6 +839,10 @@ func (ec *executionContext) fieldContext_Mutation_joinRide(ctx context.Context, 
 				return ec.fieldContext_Ride_participants(ctx, field)
 			case "settings":
 				return ec.fieldContext_Ride_settings(ctx, field)
+			case "Start":
+				return ec.fieldContext_Ride_Start(ctx, field)
+			case "Destination":
+				return ec.fieldContext_Ride_Destination(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Ride", field.Name)
 		},
@@ -970,9 +993,9 @@ func (ec *executionContext) _Query_me(ctx context.Context, field graphql.Collect
 			return ec.resolvers.Query().Me(ctx)
 		},
 		nil,
-		ec.marshalOUser2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐUser,
 		true,
-		false,
+		true,
 	)
 }
 
@@ -1014,9 +1037,9 @@ func (ec *executionContext) _Query_ride(ctx context.Context, field graphql.Colle
 			return ec.resolvers.Query().Ride(ctx, fc.Args["rideCode"].(string))
 		},
 		nil,
-		ec.marshalORide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐRide,
+		ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐRide,
 		true,
-		false,
+		true,
 	)
 }
 
@@ -1044,6 +1067,10 @@ func (ec *executionContext) fieldContext_Query_ride(ctx context.Context, field g
 				return ec.fieldContext_Ride_participants(ctx, field)
 			case "settings":
 				return ec.fieldContext_Ride_settings(ctx, field)
+			case "Start":
+				return ec.fieldContext_Ride_Start(ctx, field)
+			case "Destination":
+				return ec.fieldContext_Ride_Destination(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Ride", field.Name)
 		},
@@ -1102,6 +1129,10 @@ func (ec *executionContext) fieldContext_Query_myRides(_ context.Context, field 
 				return ec.fieldContext_Ride_participants(ctx, field)
 			case "settings":
 				return ec.fieldContext_Ride_settings(ctx, field)
+			case "Start":
+				return ec.fieldContext_Ride_Start(ctx, field)
+			case "Destination":
+				return ec.fieldContext_Ride_Destination(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Ride", field.Name)
 		},
@@ -1447,6 +1478,72 @@ func (ec *executionContext) fieldContext_Ride_settings(_ context.Context, field 
 	return fc, nil
 }
 
+func (ec *executionContext) _Ride_Start(ctx context.Context, field graphql.CollectedField, obj *model.Ride) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Ride_Start,
+		func(ctx context.Context) (any, error) { return obj.Start, nil },
+		nil,
+		ec.marshalNGeoLocation2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐGeoLocation,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Ride_Start(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Ride",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "lat":
+				return ec.fieldContext_GeoLocation_lat(ctx, field)
+			case "lng":
+				return ec.fieldContext_GeoLocation_lng(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GeoLocation", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Ride_Destination(ctx context.Context, field graphql.CollectedField, obj *model.Ride) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Ride_Destination,
+		func(ctx context.Context) (any, error) { return obj.Destination, nil },
+		nil,
+		ec.marshalNGeoLocation2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐGeoLocation,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Ride_Destination(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Ride",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "lat":
+				return ec.fieldContext_GeoLocation_lat(ctx, field)
+			case "lng":
+				return ec.fieldContext_GeoLocation_lng(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GeoLocation", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _RideSettings_maxRiders(ctx context.Context, field graphql.CollectedField, obj *model.RideSettings) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1644,9 +1741,9 @@ func (ec *executionContext) _Signal_location(ctx context.Context, field graphql.
 		ec.fieldContext_Signal_location,
 		func(ctx context.Context) (any, error) { return obj.Location, nil },
 		nil,
-		ec.marshalOGeoLocation2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐGeoLocation,
+		ec.marshalNGeoLocation2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐGeoLocation,
 		true,
-		false,
+		true,
 	)
 }
 
@@ -3441,13 +3538,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "me":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_me(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -3460,13 +3560,16 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "ride":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Query_ride(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -3577,6 +3680,16 @@ func (ec *executionContext) _Ride(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "Start":
+			out.Values[i] = ec._Ride_Start(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Destination":
+			out.Values[i] = ec._Ride_Destination(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3682,6 +3795,9 @@ func (ec *executionContext) _Signal(ctx context.Context, sel ast.SelectionSet, o
 			}
 		case "location":
 			out.Values[i] = ec._Signal_location(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4136,6 +4252,16 @@ func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.S
 	return graphql.WrapContextMarshaler(ctx, res)
 }
 
+func (ec *executionContext) marshalNGeoLocation2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐGeoLocation(ctx context.Context, sel ast.SelectionSet, v *model.GeoLocation) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._GeoLocation(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4304,6 +4430,20 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNUser2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
+	return ec._User(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._User(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -4606,20 +4746,6 @@ func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel as
 	return graphql.WrapContextMarshaler(ctx, res)
 }
 
-func (ec *executionContext) marshalOGeoLocation2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐGeoLocation(ctx context.Context, sel ast.SelectionSet, v *model.GeoLocation) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._GeoLocation(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalORide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐRide(ctx context.Context, sel ast.SelectionSet, v *model.Ride) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Ride(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {
 	if v == nil {
 		return nil, nil
@@ -4636,13 +4762,6 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	_ = ctx
 	res := graphql.MarshalString(*v)
 	return res
-}
-
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._User(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

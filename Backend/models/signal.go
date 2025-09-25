@@ -12,8 +12,3 @@ type Signal struct {
     Timestamp primitive.DateTime `bson:"timestamp" json:"timestamp"`
     Location  *GeoLocation       `bson:"location,omitempty" json:"location,omitempty"`
 }
-
-type GeoLocation struct {
-    Lat float64 `bson:"lat" json:"lat"`
-    Lng float64 `bson:"lng" json:"lng"`
-}

@@ -1,5 +1,4 @@
 "use client";
-
 import { GoogleMap, useLoadScript, Marker, Autocomplete } from "@react-google-maps/api";
 import { useEffect, useState, useRef, RefObject, useCallback } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -17,6 +16,8 @@ export default function DashboardPage() {
 
   const [fromLocation, setFromLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [toLocation, setToLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  const [formIndex, setFormIndex] = useState<Number>(0);
 
   const autocompleteFromRef = useRef<google.maps.places.Autocomplete | null>(null);
   const autocompleteToRef = useRef<google.maps.places.Autocomplete | null>(null);
@@ -106,12 +107,12 @@ export default function DashboardPage() {
           {toLocation && <Marker position={toLocation} />}
         </GoogleMap>
 
-        {/* Trip Planning Inputs */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
+          {/* Trip Planning Inputs */}
           <div className="p-6 bg-white shadow-lg rounded-2xl border border-gray-200 w-80">
             <div className="mb-4 text-center">
               <h2 className="text-lg font-semibold">Plan Your Trip</h2>
-              <p className="text-sm text-gray-500">Enter your trip details below</p>
+              <p className="text-sm text-gray-500">Select your Start and Destination</p>
             </div>
 
             <div className="flex flex-col gap-3">
@@ -122,7 +123,7 @@ export default function DashboardPage() {
               >
                 <input
                   type="text"
-                  placeholder="From..."
+                  placeholder="Start..."
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </Autocomplete>
@@ -134,7 +135,7 @@ export default function DashboardPage() {
               >
                 <input
                   type="text"
-                  placeholder="To..."
+                  placeholder="Destination..."
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </Autocomplete>

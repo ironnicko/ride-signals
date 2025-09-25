@@ -38,7 +38,10 @@ export interface AuthState {
     // isAuthenticated: boolean;
     accessToken: string | null;
     refreshToken: string | null;
+    isAuthenticated: Boolean;
+    user: UserState | null;
     login: (email: string, password: string) => Promise<Boolean>;
+    setUser(user: UserState): void
     loginWithGoogle: (idToken: string) => Promise<void>;
     logout: () => void;
 }
@@ -51,5 +54,4 @@ export interface UserState {
     createdAt: string | null
     lastLoginAt: string | null
     isActive: boolean | null
-    setUser(user: this): void
 }

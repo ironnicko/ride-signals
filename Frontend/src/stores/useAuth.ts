@@ -2,17 +2,18 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { AuthState, storage } from "./types"
 import Error from "next/error";
-import { useUser } from "./useUser";
 
 export const useAuth = create<AuthState>()(
     persist(
         (set) => ({
             accessToken: null,
             refreshToken: null,
+            isAuthenticated: false,
+            user: null,
 
             login: async (email, password) => {
                 try {
-                    const { setUser } = useUser.getState();
+
                     const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/login", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -22,10 +23,11 @@ export const useAuth = create<AuthState>()(
                         throw res.statusText
                     }
                     const data = await res.json();
-                    setUser(data.user)
                     set({
                         accessToken: data.accessToken,
                         refreshToken: data.refreshToken,
+                        isAuthenticated: true,
+                        user: data.user
                     });
                     return true;
                 } catch (err) {
@@ -36,7 +38,6 @@ export const useAuth = create<AuthState>()(
 
             loginWithGoogle: async (idToken) => {
                 try {
-                    const { setUser } = useUser.getState();
                     const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/auth/google", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -46,11 +47,11 @@ export const useAuth = create<AuthState>()(
                         throw Error
                     }
                     const data = await res.json();
-                    setUser(data.user)
                     set({
-
                         accessToken: data.accessToken,
                         refreshToken: data.refreshToken,
+                        isAuthenticated: true,
+                        user: data.user
                     });
 
                 } catch (err) {
@@ -59,10 +60,12 @@ export const useAuth = create<AuthState>()(
                 }
             },
 
+            setUser: (user) => {
+                set({ user: user })
+            },
+
             logout: () => {
-                const { setUser } = useUser.getState();
                 set(useAuth.getInitialState());
-                setUser(useUser.getInitialState())
             },
         }),
         {
