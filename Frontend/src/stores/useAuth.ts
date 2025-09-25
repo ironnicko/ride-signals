@@ -12,7 +12,7 @@ export const useAuth = create<AuthState>()(
 
             login: async (email, password) => {
                 try {
-                    const userState = useUser;
+                    const { setUser } = useUser.getState();
                     const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/login", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -22,21 +22,21 @@ export const useAuth = create<AuthState>()(
                         throw res.statusText
                     }
                     const data = await res.json();
-                    userState.setState(data.user)
+                    setUser(data.user)
                     set({
                         accessToken: data.accessToken,
                         refreshToken: data.refreshToken,
                     });
                     return true;
                 } catch (err) {
-                    set({ accessToken: null, refreshToken: null });
+                    set(useAuth.getInitialState());
                     return false;
                 }
             },
 
             loginWithGoogle: async (idToken) => {
                 try {
-                    const userState = useUser;
+                    const { setUser } = useUser.getState();
                     const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/auth/google", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -46,7 +46,7 @@ export const useAuth = create<AuthState>()(
                         throw Error
                     }
                     const data = await res.json();
-                    userState.setState(data.user)
+                    setUser(data.user)
                     set({
 
                         accessToken: data.accessToken,
@@ -54,13 +54,15 @@ export const useAuth = create<AuthState>()(
                     });
 
                 } catch (err) {
-                    set({ accessToken: null, refreshToken: null });
+                    set(useAuth.getInitialState());
                     throw err;
                 }
             },
 
             logout: () => {
-                set({ accessToken: null, refreshToken: null });
+                const { setUser } = useUser.getState();
+                set(useAuth.getInitialState());
+                setUser(useUser.getInitialState())
             },
         }),
         {

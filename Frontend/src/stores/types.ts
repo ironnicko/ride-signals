@@ -51,4 +51,5 @@ export interface UserState {
     createdAt: string | null
     lastLoginAt: string | null
     isActive: boolean | null
+    setUser(user: this): void
 }

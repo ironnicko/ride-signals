@@ -21,24 +21,25 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const { response, config } = error;
-    const auth = useAuth.getState();
+    const { refreshToken, logout } = useAuth.getState();
 
-    if (response?.status === 401 && auth.refreshToken) {
+    if (response?.status === 401 && refreshToken) {
       try {
         // Try refreshing token
-        const res = await fetch(process.env.NEXT_PUBLIC_API_URL +"/refresh", {
+        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/refresh", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ refreshToken: auth.refreshToken }),
+          body: JSON.stringify({ refreshToken: refreshToken }),
         });
         if (!res.ok) throw new Error("Refresh failed");
         const data = await res.json();
         // Update Refreshed Tokens
+        useAuth.setState({ accessToken: data.accessToken })
         config.headers["Authorization"] = `Bearer ${data.accessToken}`;
 
         return api(config); // retry original request
       } catch {
-        auth.logout(); // failed refresh → logout
+        logout(); // failed refresh → logout
         return Promise.reject(error);
       }
     }

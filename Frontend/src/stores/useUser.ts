@@ -11,7 +11,9 @@ export const useUser = create<UserState>()(
             picture: null,
             createdAt: null,
             lastLoginAt: null,
-            isActive: null
+            isActive: null,
+            setUser: (user : UserState) => set((state) => ({ ...state, ...user })),
+            reset: () => set({ id: null, email: null, name: null }),
             }),
         {
             name: "auth-storage",
