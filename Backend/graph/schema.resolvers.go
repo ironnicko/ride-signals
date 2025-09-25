@@ -22,8 +22,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+func getGeoLocation(lat *float64, lng *float64) (*model.GeoLocation, error) {
+	if lat != nil && lng != nil {
+		return &model.GeoLocation{Lat: *lat, Lng: *lng}, nil
+	}
+	return nil, fmt.Errorf("Latitute or Longitude wasn't provided!")
+}
+
 // CreateRide is the resolver for the createRide field.
-func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibility string) (*model.Ride, error) {
+func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64) (*model.Ride, error) {
 	userId := ctx.Value("userId").(string)
 	participants := []*model.Participant{
 		{
@@ -31,6 +38,16 @@ func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibi
 			Role:     "leader",
 			JoinedAt: time.Now().UTC().Format(time.RFC3339),
 		},
+	}
+
+	startLocation, err := getGeoLocation(&startLat, &startLng)
+	if err != nil {
+		return nil, fmt.Errorf("invalid start location: %w", err)
+	}
+
+	destinationLocation, err := getGeoLocation(&destinationLat, &destinationLng)
+	if err != nil {
+		return nil, fmt.Errorf("invalid destination location: %w", err)
 	}
 
 	ride := &model.Ride{
@@ -44,10 +61,12 @@ func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibi
 		Participants: participants,
 		CreatedAt:    time.Now().UTC().Format(time.RFC3339),
 		CreatedBy:    userId,
+		Start:        startLocation,
+		Destination:  destinationLocation,
 	}
 
 	coll := db.GetCollection("bikeapp", "rides")
-	_, err := coll.InsertOne(ctx, ride)
+	_, err = coll.InsertOne(ctx, ride)
 	if err != nil {
 		return nil, err
 	}
@@ -125,12 +144,15 @@ func (r *mutationResolver) SendSignal(ctx context.Context, rideCode string, sign
 		Timestamp: time.Now().UTC().Format(time.RFC3339),
 	}
 
-	if lat != nil && lng != nil {
-		sig.Location = &model.GeoLocation{Lat: *lat, Lng: *lng}
+	var err error
+	sig.Location, err = getGeoLocation(lat, lng)
+
+	if err != nil {
+		return false, err
 	}
 
 	coll := db.GetCollection("bikeapp", "signals")
-	_, err := coll.InsertOne(ctx, sig)
+	_, err = coll.InsertOne(ctx, sig)
 	if err != nil {
 		return false, err
 	}

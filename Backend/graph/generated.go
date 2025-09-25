@@ -52,7 +52,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateRide func(childComplexity int, maxRiders int, visibility string) int
+		CreateRide func(childComplexity int, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64) int
 		JoinRide   func(childComplexity int, rideCode string, role string) int
 		SendSignal func(childComplexity int, rideCode string, signalType string, lat *float64, lng *float64) int
 	}
@@ -107,7 +107,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreateRide(ctx context.Context, maxRiders int, visibility string) (*model.Ride, error)
+	CreateRide(ctx context.Context, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64) (*model.Ride, error)
 	JoinRide(ctx context.Context, rideCode string, role string) (*model.Ride, error)
 	SendSignal(ctx context.Context, rideCode string, signalType string, lat *float64, lng *float64) (bool, error)
 }
@@ -159,7 +159,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateRide(childComplexity, args["maxRiders"].(int), args["visibility"].(string)), true
+		return e.complexity.Mutation.CreateRide(childComplexity, args["maxRiders"].(int), args["visibility"].(string), args["startLat"].(float64), args["startLng"].(float64), args["destinationLat"].(float64), args["destinationLng"].(float64)), true
 	case "Mutation.joinRide":
 		if e.complexity.Mutation.JoinRide == nil {
 			break
@@ -532,7 +532,14 @@ type Query {
 }
 
 type Mutation {
-  createRide(maxRiders: Int!, visibility: String!): Ride!
+  createRide(
+    maxRiders: Int!
+    visibility: String!
+    startLat: Float!
+    startLng: Float!
+    destinationLat: Float!
+    destinationLng: Float!
+  ): Ride!
   joinRide(rideCode: String!, role: String!): Ride!
   sendSignal(
     rideCode: String!
@@ -562,6 +569,26 @@ func (ec *executionContext) field_Mutation_createRide_args(ctx context.Context, 
 		return nil, err
 	}
 	args["visibility"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "startLat", ec.unmarshalNFloat2float64)
+	if err != nil {
+		return nil, err
+	}
+	args["startLat"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "startLng", ec.unmarshalNFloat2float64)
+	if err != nil {
+		return nil, err
+	}
+	args["startLng"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "destinationLat", ec.unmarshalNFloat2float64)
+	if err != nil {
+		return nil, err
+	}
+	args["destinationLat"] = arg4
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "destinationLng", ec.unmarshalNFloat2float64)
+	if err != nil {
+		return nil, err
+	}
+	args["destinationLng"] = arg5
 	return args, nil
 }
 
@@ -743,7 +770,7 @@ func (ec *executionContext) _Mutation_createRide(ctx context.Context, field grap
 		ec.fieldContext_Mutation_createRide,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().CreateRide(ctx, fc.Args["maxRiders"].(int), fc.Args["visibility"].(string))
+			return ec.resolvers.Mutation().CreateRide(ctx, fc.Args["maxRiders"].(int), fc.Args["visibility"].(string), fc.Args["startLat"].(float64), fc.Args["startLng"].(float64), fc.Args["destinationLat"].(float64), fc.Args["destinationLng"].(float64))
 		},
 		nil,
 		ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐRide,

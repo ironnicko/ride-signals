@@ -52,7 +52,14 @@ type Query {
 }
 
 type Mutation {
-  createRide(maxRiders: Int!, visibility: String!): Ride!
+  createRide(
+    maxRiders: Int!
+    visibility: String!
+    startLat: Float!
+    startLng: Float!
+    destinationLat: Float!
+    destinationLng: Float!
+  ): Ride!
   joinRide(rideCode: String!, role: String!): Ride!
   sendSignal(
     rideCode: String!
