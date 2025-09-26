@@ -1,7 +1,11 @@
 "use client";
-import { GoogleMap, useLoadScript, Marker, Autocomplete } from "@react-google-maps/api";
-import { useEffect, useState, useRef, RefObject, useCallback } from "react";
+import { GoogleMap, useLoadScript, Marker } from "@react-google-maps/api";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { useMutation } from "@apollo/client/react"
+import { CREATE_RIDE, GeoLocation } from "@/lib/graphql/schema";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { TripLocationInputs } from "./TripLocationInputs";
+import { TripSettingsInputs } from "./TripSettingsInputs";
 
 const containerStyle = {
   width: "100%",
@@ -14,16 +18,15 @@ export default function DashboardPage() {
     libraries: ["maps", "places"],
   });
 
-  const [fromLocation, setFromLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [toLocation, setToLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [createRide] = useMutation(CREATE_RIDE);
+  const [formIndex, setFormIndex] = useState<number>(0);
+  const [toLocation, setToLocation] = useState<GeoLocation | null>(null);
+  const [fromLocation, setFromLocation] = useState<GeoLocation | null>(null);
+  const [maxRiders, setMaxRiders] = useState<number>(1);
+  const [visibility, setVisibility] = useState<"public" | "private">("private");
 
-  const [formIndex, setFormIndex] = useState<Number>(0);
-
-  const autocompleteFromRef = useRef<google.maps.places.Autocomplete | null>(null);
-  const autocompleteToRef = useRef<google.maps.places.Autocomplete | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
 
-  // Get current user location for initial "From"
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -41,44 +44,51 @@ export default function DashboardPage() {
     mapRef.current = map;
   }, []);
 
-  const onLoadAutocomplete = (
-    autocompleteRef: RefObject<google.maps.places.Autocomplete | null>,
-    autocomplete: google.maps.places.Autocomplete
-  ) => {
-    autocompleteRef.current = autocomplete;
-  };
 
-  /** 
-   * Separate handler for "From" field 
-   */
-  const handleFromPlaceChanged = () => {
-    if (autocompleteFromRef.current) {
-      const place = autocompleteFromRef.current.getPlace();
-      if (place.geometry?.location) {
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
-        setFromLocation({ lat, lng });
+
+  const CreateRide = async ()=> {
+    try{
+        const res = await createRide({
+          variables: {
+              maxRiders,
+              visibility,
+              startLat: fromLocation!.lat,
+              startLng: fromLocation!.lng,
+              destinationLat: toLocation!.lat,
+              destinationLng: toLocation!.lng,
+          },
+      })
+      if (res.error){
+        console.log(res.error)
       }
+    } catch(err){
+      // Handle Error!
     }
   };
 
-  /** 
-   * Separate handler for "To" field 
-   */
-  const handleToPlaceChanged = () => {
-    if (autocompleteToRef.current) {
-      const place = autocompleteToRef.current.getPlace();
-      if (place.geometry?.location) {
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
-        setToLocation({ lat, lng });
-      }
+  const renderFormInput = () => {
+    switch(formIndex){
+      case 0:
+        return <TripLocationInputs 
+                setFormIndex={setFormIndex}
+                setFromLocation={setFromLocation}
+                setToLocation={setToLocation}
+                fromLocation={fromLocation}
+                toLocation={toLocation}
+        >
+        </TripLocationInputs>;
+      case 1:
+        return <TripSettingsInputs
+                setMaxRiders={setMaxRiders}
+                setVisibility={setVisibility}
+                maxRiders={maxRiders}
+                visibility={visibility}
+                CreateRide={CreateRide}
+        ></TripSettingsInputs>
     }
-  };
+  }
 
-  /**
-   * Fit the map to both markers when both locations are available
-   */
+
   useEffect(() => {
     if (mapRef.current && fromLocation && toLocation) {
       const bounds = new window.google.maps.LatLngBounds();
@@ -93,7 +103,7 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="relative w-full h-screen">
+      <div className="relative w-screen h-screen">
         {/* Google Map */}
         <GoogleMap
           mapContainerStyle={containerStyle}
@@ -108,42 +118,8 @@ export default function DashboardPage() {
         </GoogleMap>
 
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
-          {/* Trip Planning Inputs */}
           <div className="p-6 bg-white shadow-lg rounded-2xl border border-gray-200 w-80">
-            <div className="mb-4 text-center">
-              <h2 className="text-lg font-semibold">Plan Your Trip</h2>
-              <p className="text-sm text-gray-500">Select your Start and Destination</p>
-            </div>
-
-            <div className="flex flex-col gap-3">
-              {/* From Location Input */}
-              <Autocomplete
-                onLoad={(autocomplete) => onLoadAutocomplete(autocompleteFromRef, autocomplete)}
-                onPlaceChanged={handleFromPlaceChanged}
-              >
-                <input
-                  type="text"
-                  placeholder="Start..."
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </Autocomplete>
-
-              {/* To Location Input */}
-              <Autocomplete
-                onLoad={(autocomplete) => onLoadAutocomplete(autocompleteToRef, autocomplete)}
-                onPlaceChanged={handleToPlaceChanged}
-              >
-                <input
-                  type="text"
-                  placeholder="Destination..."
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </Autocomplete>
-            </div>
-
-            <button className="cursor-pointer mt-6 w-full bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800">
-              Next
-            </button>
+            {renderFormInput()}
           </div>
         </div>
       </div>

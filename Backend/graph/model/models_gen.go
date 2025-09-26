@@ -28,8 +28,8 @@ type Ride struct {
 	EndedAt      *string        `json:"endedAt,omitempty"`
 	Participants []*Participant `json:"participants"`
 	Settings     *RideSettings  `json:"settings"`
-	Start        *GeoLocation   `json:"Start"`
-	Destination  *GeoLocation   `json:"Destination"`
+	Start        *GeoLocation   `json:"start"`
+	Destination  *GeoLocation   `json:"destination"`
 }
 
 type RideSettings struct {

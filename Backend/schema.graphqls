@@ -16,8 +16,8 @@ type Ride {
   endedAt: String
   participants: [Participant!]!
   settings: RideSettings!
-  Start: GeoLocation!
-  Destination: GeoLocation!
+  start: GeoLocation!
+  destination: GeoLocation!
 }
 
 type Participant {

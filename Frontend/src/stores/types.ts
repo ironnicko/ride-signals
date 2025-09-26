@@ -41,7 +41,7 @@ export interface AuthState {
     isAuthenticated: Boolean;
     user: UserState | null;
     login: (email: string, password: string) => Promise<Boolean>;
-    setUser(user: UserState): void
+    setUser: (user: UserState) => void
     loginWithGoogle: (idToken: string) => Promise<void>;
     logout: () => void;
 }

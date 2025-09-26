@@ -238,7 +238,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Ride.CreatedBy(childComplexity), true
-	case "Ride.Destination":
+	case "Ride.destination":
 		if e.complexity.Ride.Destination == nil {
 			break
 		}
@@ -274,7 +274,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Ride.Settings(childComplexity), true
-	case "Ride.Start":
+	case "Ride.start":
 		if e.complexity.Ride.Start == nil {
 			break
 		}
@@ -496,8 +496,8 @@ type Ride {
   endedAt: String
   participants: [Participant!]!
   settings: RideSettings!
-  Start: GeoLocation!
-  Destination: GeoLocation!
+  start: GeoLocation!
+  destination: GeoLocation!
 }
 
 type Participant {
@@ -803,10 +803,10 @@ func (ec *executionContext) fieldContext_Mutation_createRide(ctx context.Context
 				return ec.fieldContext_Ride_participants(ctx, field)
 			case "settings":
 				return ec.fieldContext_Ride_settings(ctx, field)
-			case "Start":
-				return ec.fieldContext_Ride_Start(ctx, field)
-			case "Destination":
-				return ec.fieldContext_Ride_Destination(ctx, field)
+			case "start":
+				return ec.fieldContext_Ride_start(ctx, field)
+			case "destination":
+				return ec.fieldContext_Ride_destination(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Ride", field.Name)
 		},
@@ -866,10 +866,10 @@ func (ec *executionContext) fieldContext_Mutation_joinRide(ctx context.Context, 
 				return ec.fieldContext_Ride_participants(ctx, field)
 			case "settings":
 				return ec.fieldContext_Ride_settings(ctx, field)
-			case "Start":
-				return ec.fieldContext_Ride_Start(ctx, field)
-			case "Destination":
-				return ec.fieldContext_Ride_Destination(ctx, field)
+			case "start":
+				return ec.fieldContext_Ride_start(ctx, field)
+			case "destination":
+				return ec.fieldContext_Ride_destination(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Ride", field.Name)
 		},
@@ -1094,10 +1094,10 @@ func (ec *executionContext) fieldContext_Query_ride(ctx context.Context, field g
 				return ec.fieldContext_Ride_participants(ctx, field)
 			case "settings":
 				return ec.fieldContext_Ride_settings(ctx, field)
-			case "Start":
-				return ec.fieldContext_Ride_Start(ctx, field)
-			case "Destination":
-				return ec.fieldContext_Ride_Destination(ctx, field)
+			case "start":
+				return ec.fieldContext_Ride_start(ctx, field)
+			case "destination":
+				return ec.fieldContext_Ride_destination(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Ride", field.Name)
 		},
@@ -1156,10 +1156,10 @@ func (ec *executionContext) fieldContext_Query_myRides(_ context.Context, field 
 				return ec.fieldContext_Ride_participants(ctx, field)
 			case "settings":
 				return ec.fieldContext_Ride_settings(ctx, field)
-			case "Start":
-				return ec.fieldContext_Ride_Start(ctx, field)
-			case "Destination":
-				return ec.fieldContext_Ride_Destination(ctx, field)
+			case "start":
+				return ec.fieldContext_Ride_start(ctx, field)
+			case "destination":
+				return ec.fieldContext_Ride_destination(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Ride", field.Name)
 		},
@@ -1505,12 +1505,12 @@ func (ec *executionContext) fieldContext_Ride_settings(_ context.Context, field 
 	return fc, nil
 }
 
-func (ec *executionContext) _Ride_Start(ctx context.Context, field graphql.CollectedField, obj *model.Ride) (ret graphql.Marshaler) {
+func (ec *executionContext) _Ride_start(ctx context.Context, field graphql.CollectedField, obj *model.Ride) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Ride_Start,
+		ec.fieldContext_Ride_start,
 		func(ctx context.Context) (any, error) { return obj.Start, nil },
 		nil,
 		ec.marshalNGeoLocation2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐGeoLocation,
@@ -1519,7 +1519,7 @@ func (ec *executionContext) _Ride_Start(ctx context.Context, field graphql.Colle
 	)
 }
 
-func (ec *executionContext) fieldContext_Ride_Start(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Ride_start(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Ride",
 		Field:      field,
@@ -1538,12 +1538,12 @@ func (ec *executionContext) fieldContext_Ride_Start(_ context.Context, field gra
 	return fc, nil
 }
 
-func (ec *executionContext) _Ride_Destination(ctx context.Context, field graphql.CollectedField, obj *model.Ride) (ret graphql.Marshaler) {
+func (ec *executionContext) _Ride_destination(ctx context.Context, field graphql.CollectedField, obj *model.Ride) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Ride_Destination,
+		ec.fieldContext_Ride_destination,
 		func(ctx context.Context) (any, error) { return obj.Destination, nil },
 		nil,
 		ec.marshalNGeoLocation2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐGeoLocation,
@@ -1552,7 +1552,7 @@ func (ec *executionContext) _Ride_Destination(ctx context.Context, field graphql
 	)
 }
 
-func (ec *executionContext) fieldContext_Ride_Destination(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Ride_destination(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Ride",
 		Field:      field,
@@ -3707,13 +3707,13 @@ func (ec *executionContext) _Ride(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "Start":
-			out.Values[i] = ec._Ride_Start(ctx, field, obj)
+		case "start":
+			out.Values[i] = ec._Ride_start(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "Destination":
-			out.Values[i] = ec._Ride_Destination(ctx, field, obj)
+		case "destination":
+			out.Values[i] = ec._Ride_destination(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

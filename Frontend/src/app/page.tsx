@@ -3,13 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
-
-
-
 export default function LandingPage() {
 
   const router = useRouter()
-  
    return ( 
    <div className="flex-1 flex flex-col items-center justify-center">
         <div className="hero flex flex-col gap-5">

@@ -11,7 +11,7 @@ type Ride struct {
 	Participants []Participant       `bson:"participants" json:"participants"`
 	Settings     RideSettings        `bson:"settings" json:"settings"`
 	Start        GeoLocation         `bson:"start" json:"start"`
-	Destination  GeoLocation         `bson:"Destination" json:"Destination"`
+	Destination  GeoLocation         `bson:"destination" json:"destination"`
 }
 
 type Participant struct {

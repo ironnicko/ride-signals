@@ -22,13 +22,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func getGeoLocation(lat *float64, lng *float64) (*model.GeoLocation, error) {
-	if lat != nil && lng != nil {
-		return &model.GeoLocation{Lat: *lat, Lng: *lng}, nil
-	}
-	return nil, fmt.Errorf("Latitute or Longitude wasn't provided!")
-}
-
 // CreateRide is the resolver for the createRide field.
 func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64) (*model.Ride, error) {
 	userId := ctx.Value("userId").(string)
@@ -231,3 +224,18 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+/*
+	func getGeoLocation(lat *float64, lng *float64) (*model.GeoLocation, error) {
+	if lat != nil && lng != nil {
+		return &model.GeoLocation{Lat: *lat, Lng: *lng}, nil
+	}
+	return nil, fmt.Errorf("Latitute or Longitude wasn't provided!")
+}
+*/
