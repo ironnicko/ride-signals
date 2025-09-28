@@ -1,97 +1,76 @@
+import { PlaceAutocomplete } from "@/components/PlaceAutoComplete";
 import { GeoLocation } from "@/lib/graphql/schema";
-import { Autocomplete } from "@react-google-maps/api"
-import { Dispatch, RefObject, SetStateAction, useRef } from "react";
+import { Dispatch, SetStateAction } from "react";
 
-
-interface TripLocationInputsProps{
-    setFormIndex : Dispatch<SetStateAction<number>>,
-    setFromLocation: Dispatch<SetStateAction<GeoLocation | null>>,
-    setToLocation: Dispatch<SetStateAction<GeoLocation | null>>,
-    fromLocation: any,
-    toLocation: any
+interface TripLocationInputsProps {
+  setFormIndex: Dispatch<SetStateAction<number>>;
+  setFromLocation: Dispatch<SetStateAction<GeoLocation | null>>;
+  setToLocation: Dispatch<SetStateAction<GeoLocation | null>>;
+  fromLocation: GeoLocation | null;
+  toLocation: GeoLocation | null;
 }
 
-export const TripLocationInputs = ({ setFormIndex, setFromLocation, setToLocation, fromLocation, toLocation } : TripLocationInputsProps) =>{  
-    const autocompleteFromRef = useRef<google.maps.places.Autocomplete | null>(null);
-    const autocompleteToRef = useRef<google.maps.places.Autocomplete | null>(null);
-    const onLoadAutocomplete = (
-        autocompleteRef: RefObject<google.maps.places.Autocomplete | null>,
-        autocomplete: google.maps.places.Autocomplete
-    ) => {
-        autocompleteRef.current = autocomplete;
-    };
+export const TripLocationInputs = ({
+  setFormIndex,
+  setFromLocation,
+  setToLocation,
+  fromLocation,
+  toLocation,
+}: TripLocationInputsProps) => {
 
-    /** 
-     * Separate handler for "From" field 
-     */
-    const handleFromPlaceChanged = () => {
-        if (autocompleteFromRef.current) {
-        const place = autocompleteFromRef.current.getPlace();
-        if (place.geometry?.location) {
-            const lat = place.geometry.location.lat();
-            const lng = place.geometry.location.lng();
-            setFromLocation({ lat, lng });
-        }
-        }
-    };
+  const handleFromPlaceChanged = (place: google.maps.places.PlaceResult | null) => {
+    if (place?.geometry?.location) {
+      setFromLocation({
+        lat: place.geometry.location.lat(),
+        lng: place.geometry.location.lng(),
+      });
+    }
+  };
 
-    /** 
-     * Separate handler for "To" field 
-     */
-    const handleToPlaceChanged = () => {
-        if (autocompleteToRef.current) {
-        const place = autocompleteToRef.current.getPlace();
-        if (place.geometry?.location) {
-            const lat = place.geometry.location.lat();
-            const lng = place.geometry.location.lng();
-            setToLocation({ lat, lng });
-        }
-        }
-    };
+  const handleToPlaceChanged = (place: google.maps.places.PlaceResult | null) => {
+    if (place?.geometry?.location) {
+      setToLocation({
+        lat: place.geometry.location.lat(),
+        lng: place.geometry.location.lng(),
+      });
+    }
+  };
 
 
-    return (
-          <>
-          <div className="mb-4 text-center">
-                <h2 className="text-lg font-semibold">Plan Your Trip</h2>
-                <p className="text-sm text-gray-500">Select your Start and Destination</p>
-              </div>
+  return (
+    <>
+      <div className="mb-4 text-center">
+        <h2 className="text-lg font-semibold">Plan Your Trip</h2>
+        <p className="text-sm text-gray-500">Select your Start and Destination</p>
+      </div>
 
-              <div className="flex flex-col gap-3">
-                {/* From Location Input */}
-                <Autocomplete
-                  onLoad={(autocomplete) => onLoadAutocomplete(autocompleteFromRef, autocomplete)}
-                  onPlaceChanged={handleFromPlaceChanged}
-                >
-                  <input
-                    type="text"
-                    placeholder="Start..."
-                    required
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                  />
-                </Autocomplete>
+      <div className="flex flex-col gap-3">
+        {/* From Location Input */}
+        <PlaceAutocomplete
+          onPlaceSelect={handleFromPlaceChanged}
+          placeholder="Start..."
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+        />
 
-                {/* To Location Input */}
-                <Autocomplete
-                  onLoad={(autocomplete) => onLoadAutocomplete(autocompleteToRef, autocomplete)}
-                  onPlaceChanged={handleToPlaceChanged}
-                >
-                  <input
-                    type="text"
-                    required
-                    placeholder="Destination..."
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                  />
-                </Autocomplete>
-              </div>
+        {/* To Location Input */}
+        <PlaceAutocomplete
+          onPlaceSelect={handleToPlaceChanged}
+          placeholder="Destination..."
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+        />
+      </div>
 
-              <button disabled={!(fromLocation && toLocation)} onClick={() => setFormIndex(1)} className={`mt-6 w-full px-6 py-3 rounded-lg 
-                ${fromLocation && toLocation 
-                    ? "bg-black text-white hover:bg-gray-800 cursor-pointer" 
-                    : "bg-gray-300 text-gray-500"
-                }`}
-              >
-                Next
-              </button>
-          </>
-        )}
+      <button
+        disabled={!(fromLocation && toLocation)}
+        onClick={() => setFormIndex(1)}
+        className={`mt-6 w-full px-6 py-3 rounded-lg 
+          ${fromLocation && toLocation
+            ? "bg-black text-white hover:bg-gray-800 cursor-pointer"
+            : "bg-gray-300 text-gray-500"
+          }`}
+      >
+        Next
+      </button>
+    </>
+  );
+};
