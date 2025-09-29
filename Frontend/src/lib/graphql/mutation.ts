@@ -13,6 +13,8 @@ export const CREATE_RIDE = gql`
     $startLng: Float!
     $destinationLat: Float!
     $destinationLng: Float!
+    $startName: String!
+    $destinationName: String!
   ) {
     createRide(
       maxRiders: $maxRiders
@@ -21,6 +23,8 @@ export const CREATE_RIDE = gql`
       startLng: $startLng
       destinationLat: $destinationLat
       destinationLng: $destinationLng
+      startName: $startName
+      destinationName: $destinationName
     ) {
       id
       rideCode
@@ -38,10 +42,12 @@ export const CREATE_RIDE = gql`
         lat
         lng
       }
+      startName
       destination {
         lat
         lng
       }
+      destinationName
       createdAt
     }
   }

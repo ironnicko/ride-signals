@@ -23,7 +23,7 @@ import (
 )
 
 // CreateRide is the resolver for the createRide field.
-func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64) (*model.Ride, error) {
+func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64, startName string, destinationName string) (*model.Ride, error) {
 	userId := ctx.Value("userId").(string)
 	participants := []*model.Participant{
 		{
@@ -56,6 +56,8 @@ func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibi
 		CreatedBy:    userId,
 		Start:        startLocation,
 		Destination:  destinationLocation,
+		StartName: startName,
+		DestinationName: destinationName,
 	}
 
 	coll := db.GetCollection("bikeapp", "rides")
@@ -86,7 +88,7 @@ func (r *mutationResolver) JoinRide(ctx context.Context, rideCode string, role s
 	coll := db.GetCollection("bikeapp", "rides")
 
 	var ride model.Ride
-	err = coll.FindOne(ctx, bson.M{"rideCode": rideCode}).Decode(&ride)
+	err = coll.FindOne(ctx, bson.M{"ridecode": rideCode}).Decode(&ride)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, fmt.Errorf("ride not found")
@@ -113,7 +115,7 @@ func (r *mutationResolver) JoinRide(ctx context.Context, rideCode string, role s
 	update := bson.M{"$push": bson.M{"participants": participant}}
 	res := coll.FindOneAndUpdate(
 		ctx,
-		bson.M{"rideCode": rideCode},
+		bson.M{"ridecode": rideCode},
 		update,
 		options.FindOneAndUpdate().SetReturnDocument(options.After),
 	)
@@ -188,7 +190,7 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 func (r *queryResolver) Ride(ctx context.Context, rideCode string) (*model.Ride, error) {
 	coll := db.GetCollection("bikeapp", "rides")
 	var ride model.Ride
-	err := coll.FindOne(ctx, bson.M{"rideCode": rideCode}).Decode(&ride)
+	err := coll.FindOne(ctx, bson.M{"ridecode": rideCode}).Decode(&ride)
 	if err != nil {
 		return nil, err
 	}
@@ -199,7 +201,7 @@ func (r *queryResolver) Ride(ctx context.Context, rideCode string) (*model.Ride,
 func (r *queryResolver) MyRides(ctx context.Context) ([]*model.Ride, error) {
 	userID := ctx.Value("userId").(string)
 	coll := db.GetCollection("bikeapp", "rides")
-	cursor, err := coll.Find(ctx, bson.M{"participants.userId": userID})
+	cursor, err := coll.Find(ctx, bson.M{"participants.userid": userID})
 	if err != nil {
 		return nil, err
 	}
@@ -224,18 +226,3 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-/*
-	func getGeoLocation(lat *float64, lng *float64) (*model.GeoLocation, error) {
-	if lat != nil && lng != nil {
-		return &model.GeoLocation{Lat: *lat, Lng: *lng}, nil
-	}
-	return nil, fmt.Errorf("Latitute or Longitude wasn't provided!")
-}
-*/

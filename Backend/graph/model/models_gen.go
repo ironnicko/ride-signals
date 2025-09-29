@@ -20,16 +20,18 @@ type Query struct {
 }
 
 type Ride struct {
-	ID           string         `json:"id"`
-	RideCode     string         `json:"rideCode"`
-	Status       string         `json:"status"`
-	CreatedAt    string         `json:"createdAt"`
-	CreatedBy    string         `json:"createdBy"`
-	EndedAt      *string        `json:"endedAt,omitempty"`
-	Participants []*Participant `json:"participants"`
-	Settings     *RideSettings  `json:"settings"`
-	Start        *GeoLocation   `json:"start"`
-	Destination  *GeoLocation   `json:"destination"`
+	ID              string         `json:"id"`
+	RideCode        string         `json:"rideCode"`
+	Status          string         `json:"status"`
+	CreatedAt       string         `json:"createdAt"`
+	CreatedBy       string         `json:"createdBy"`
+	EndedAt         *string        `json:"endedAt,omitempty"`
+	Participants    []*Participant `json:"participants"`
+	Settings        *RideSettings  `json:"settings"`
+	Start           *GeoLocation   `json:"start"`
+	Destination     *GeoLocation   `json:"destination"`
+	StartName       string         `json:"startName"`
+	DestinationName string         `json:"destinationName"`
 }
 
 type RideSettings struct {

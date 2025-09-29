@@ -1,10 +1,12 @@
 import { PlaceAutocomplete } from "@/components/PlaceAutoComplete";
-import { GeoLocation } from "@/lib/graphql/schema";
+import { GeoLocation } from "@/lib/graphql/mutation";
 import { Dispatch, SetStateAction } from "react";
 
 interface TripLocationInputsProps {
   setFormIndex: Dispatch<SetStateAction<number>>;
   setFromLocation: Dispatch<SetStateAction<GeoLocation | null>>;
+  setToLocationName: Dispatch<SetStateAction<string | null>>
+  setFromLocationName: Dispatch<SetStateAction<string | null>>
   setToLocation: Dispatch<SetStateAction<GeoLocation | null>>;
   fromLocation: GeoLocation | null;
   toLocation: GeoLocation | null;
@@ -14,6 +16,8 @@ export const TripLocationInputs = ({
   setFormIndex,
   setFromLocation,
   setToLocation,
+  setFromLocationName,
+  setToLocationName,
   fromLocation,
   toLocation,
 }: TripLocationInputsProps) => {
@@ -24,6 +28,7 @@ export const TripLocationInputs = ({
         lat: place.geometry.location.lat(),
         lng: place.geometry.location.lng(),
       });
+      setFromLocationName(place.name!.toString());
     }
   };
 
@@ -33,6 +38,7 @@ export const TripLocationInputs = ({
         lat: place.geometry.location.lat(),
         lng: place.geometry.location.lng(),
       });
+      setToLocationName(place.name!.toString());
     }
   };
 

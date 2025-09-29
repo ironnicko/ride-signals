@@ -1,11 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useMutation } from "@apollo/client/react";
-import { CREATE_RIDE, GeoLocation } from "@/lib/graphql/schema";
+import { CREATE_RIDE, GeoLocation } from "@/lib/graphql/mutation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { TripLocationInputs } from "./TripLocationInputs";
 import { TripSettingsInputs } from "./TripSettingsInputs";
-
 import {
   AdvancedMarker,
   APIProvider,
@@ -13,6 +12,10 @@ import {
   useAdvancedMarkerRef,
   useMap,
 } from "@vis.gl/react-google-maps";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { useAuth } from "@/stores/useAuth";
 
 
 interface FitBoundsHandlerProps {
@@ -44,10 +47,14 @@ export default function DashboardPage() {
   const [formIndex, setFormIndex] = useState<number>(0);
   const [toLocation, setToLocation] = useState<GeoLocation | null>(null);
   const [fromLocation, setFromLocation] = useState<GeoLocation | null>(null);
+  const [toLocationName, setToLocationName] = useState<string | null>(null);
+  const [fromLocationName, setFromLocationName] = useState<string | null>(null);
   const [maxRiders, setMaxRiders] = useState<number>(1);
   const [visibility, setVisibility] = useState<"public" | "private">("private");
   const [toMarkerRef] = useAdvancedMarkerRef();
   const [fromMarkerRef] = useAdvancedMarkerRef();
+  const {user} = useAuth.getState();
+  const router = useRouter();
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -64,20 +71,22 @@ export default function DashboardPage() {
 
   const CreateRide = async () => {
     try {
-      const res = await createRide({
+      await createRide({
         variables: {
           maxRiders,
           visibility,
           startLat: fromLocation!.lat,
           startLng: fromLocation!.lng,
+          startName : fromLocationName,
           destinationLat: toLocation!.lat,
           destinationLng: toLocation!.lng,
+          destinationName : toLocationName,
         },
       });
-      if (res.error) {
-        console.log(res.error);
-      }
+      toast.success("Successfully Created Ride!");
+      router.push("/dashboard/myRides")
     } catch (err) {
+      toast.error("Failed to Create Ride!");
       // Handle Error!
     }
   };
@@ -87,6 +96,8 @@ export default function DashboardPage() {
       case 0:
         return (
           <TripLocationInputs
+            setFromLocationName={setFromLocationName}
+            setToLocationName={setToLocationName}
             setFormIndex={setFormIndex}
             setFromLocation={setFromLocation}
             setToLocation={setToLocation}
@@ -121,18 +132,29 @@ export default function DashboardPage() {
         >
           <Map
             defaultCenter={fromLocation}
-            defaultZoom={14}
+            defaultZoom={8}
             mapId={process.env.NEXT_PUBLIC_GOOGLE_MAP_ID}
             style={{ width: "100%", height: "100%" }}
           >
             {/* From marker */}
-            <AdvancedMarker ref={fromMarkerRef} position={fromLocation} />
+            {fromLocation && <AdvancedMarker ref={fromMarkerRef} position={fromLocation} />}
             {/* To marker */}
             {toLocation && <AdvancedMarker ref={toMarkerRef} position={toLocation} />}
             <FitBoundsHandler fromLocation={fromLocation} toLocation={toLocation} />
           </Map>
-
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
+          <div className="relative top-4">
+            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-md cursor-pointer">
+              <Image
+                src={(user?.picture ? user?.picture:"/user.svg")}
+                alt="Profile"
+                width={48}
+                height={48}
+                className="object-cover"
+                onClick={()=>router.push("/dashboard/myRides")}
+              />
+            </div>
+          </div>
           <div className="p-6 bg-white shadow-lg rounded-2xl border border-gray-200 w-80">
             {renderFormInput()}
           </div>

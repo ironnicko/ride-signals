@@ -18,6 +18,8 @@ type Ride {
   settings: RideSettings!
   start: GeoLocation!
   destination: GeoLocation!
+  startName: String!
+  destinationName: String!
 }
 
 type Participant {
@@ -59,6 +61,8 @@ type Mutation {
     startLng: Float!
     destinationLat: Float!
     destinationLng: Float!
+    startName: String!
+    destinationName: String!
   ): Ride!
   joinRide(rideCode: String!, role: String!): Ride!
   sendSignal(

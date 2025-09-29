@@ -52,7 +52,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateRide func(childComplexity int, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64) int
+		CreateRide func(childComplexity int, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64, startName string, destinationName string) int
 		JoinRide   func(childComplexity int, rideCode string, role string) int
 		SendSignal func(childComplexity int, rideCode string, signalType string, lat *float64, lng *float64) int
 	}
@@ -70,16 +70,18 @@ type ComplexityRoot struct {
 	}
 
 	Ride struct {
-		CreatedAt    func(childComplexity int) int
-		CreatedBy    func(childComplexity int) int
-		Destination  func(childComplexity int) int
-		EndedAt      func(childComplexity int) int
-		ID           func(childComplexity int) int
-		Participants func(childComplexity int) int
-		RideCode     func(childComplexity int) int
-		Settings     func(childComplexity int) int
-		Start        func(childComplexity int) int
-		Status       func(childComplexity int) int
+		CreatedAt       func(childComplexity int) int
+		CreatedBy       func(childComplexity int) int
+		Destination     func(childComplexity int) int
+		DestinationName func(childComplexity int) int
+		EndedAt         func(childComplexity int) int
+		ID              func(childComplexity int) int
+		Participants    func(childComplexity int) int
+		RideCode        func(childComplexity int) int
+		Settings        func(childComplexity int) int
+		Start           func(childComplexity int) int
+		StartName       func(childComplexity int) int
+		Status          func(childComplexity int) int
 	}
 
 	RideSettings struct {
@@ -107,7 +109,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreateRide(ctx context.Context, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64) (*model.Ride, error)
+	CreateRide(ctx context.Context, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64, startName string, destinationName string) (*model.Ride, error)
 	JoinRide(ctx context.Context, rideCode string, role string) (*model.Ride, error)
 	SendSignal(ctx context.Context, rideCode string, signalType string, lat *float64, lng *float64) (bool, error)
 }
@@ -159,7 +161,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateRide(childComplexity, args["maxRiders"].(int), args["visibility"].(string), args["startLat"].(float64), args["startLng"].(float64), args["destinationLat"].(float64), args["destinationLng"].(float64)), true
+		return e.complexity.Mutation.CreateRide(childComplexity, args["maxRiders"].(int), args["visibility"].(string), args["startLat"].(float64), args["startLng"].(float64), args["destinationLat"].(float64), args["destinationLng"].(float64), args["startName"].(string), args["destinationName"].(string)), true
 	case "Mutation.joinRide":
 		if e.complexity.Mutation.JoinRide == nil {
 			break
@@ -244,6 +246,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Ride.Destination(childComplexity), true
+	case "Ride.destinationName":
+		if e.complexity.Ride.DestinationName == nil {
+			break
+		}
+
+		return e.complexity.Ride.DestinationName(childComplexity), true
 	case "Ride.endedAt":
 		if e.complexity.Ride.EndedAt == nil {
 			break
@@ -280,6 +288,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Ride.Start(childComplexity), true
+	case "Ride.startName":
+		if e.complexity.Ride.StartName == nil {
+			break
+		}
+
+		return e.complexity.Ride.StartName(childComplexity), true
 	case "Ride.status":
 		if e.complexity.Ride.Status == nil {
 			break
@@ -498,6 +512,8 @@ type Ride {
   settings: RideSettings!
   start: GeoLocation!
   destination: GeoLocation!
+  startName: String!
+  destinationName: String!
 }
 
 type Participant {
@@ -539,6 +555,8 @@ type Mutation {
     startLng: Float!
     destinationLat: Float!
     destinationLng: Float!
+    startName: String!
+    destinationName: String!
   ): Ride!
   joinRide(rideCode: String!, role: String!): Ride!
   sendSignal(
@@ -589,6 +607,16 @@ func (ec *executionContext) field_Mutation_createRide_args(ctx context.Context, 
 		return nil, err
 	}
 	args["destinationLng"] = arg5
+	arg6, err := graphql.ProcessArgField(ctx, rawArgs, "startName", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["startName"] = arg6
+	arg7, err := graphql.ProcessArgField(ctx, rawArgs, "destinationName", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["destinationName"] = arg7
 	return args, nil
 }
 
@@ -770,7 +798,7 @@ func (ec *executionContext) _Mutation_createRide(ctx context.Context, field grap
 		ec.fieldContext_Mutation_createRide,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().CreateRide(ctx, fc.Args["maxRiders"].(int), fc.Args["visibility"].(string), fc.Args["startLat"].(float64), fc.Args["startLng"].(float64), fc.Args["destinationLat"].(float64), fc.Args["destinationLng"].(float64))
+			return ec.resolvers.Mutation().CreateRide(ctx, fc.Args["maxRiders"].(int), fc.Args["visibility"].(string), fc.Args["startLat"].(float64), fc.Args["startLng"].(float64), fc.Args["destinationLat"].(float64), fc.Args["destinationLng"].(float64), fc.Args["startName"].(string), fc.Args["destinationName"].(string))
 		},
 		nil,
 		ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐRide,
@@ -807,6 +835,10 @@ func (ec *executionContext) fieldContext_Mutation_createRide(ctx context.Context
 				return ec.fieldContext_Ride_start(ctx, field)
 			case "destination":
 				return ec.fieldContext_Ride_destination(ctx, field)
+			case "startName":
+				return ec.fieldContext_Ride_startName(ctx, field)
+			case "destinationName":
+				return ec.fieldContext_Ride_destinationName(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Ride", field.Name)
 		},
@@ -870,6 +902,10 @@ func (ec *executionContext) fieldContext_Mutation_joinRide(ctx context.Context, 
 				return ec.fieldContext_Ride_start(ctx, field)
 			case "destination":
 				return ec.fieldContext_Ride_destination(ctx, field)
+			case "startName":
+				return ec.fieldContext_Ride_startName(ctx, field)
+			case "destinationName":
+				return ec.fieldContext_Ride_destinationName(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Ride", field.Name)
 		},
@@ -1098,6 +1134,10 @@ func (ec *executionContext) fieldContext_Query_ride(ctx context.Context, field g
 				return ec.fieldContext_Ride_start(ctx, field)
 			case "destination":
 				return ec.fieldContext_Ride_destination(ctx, field)
+			case "startName":
+				return ec.fieldContext_Ride_startName(ctx, field)
+			case "destinationName":
+				return ec.fieldContext_Ride_destinationName(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Ride", field.Name)
 		},
@@ -1160,6 +1200,10 @@ func (ec *executionContext) fieldContext_Query_myRides(_ context.Context, field 
 				return ec.fieldContext_Ride_start(ctx, field)
 			case "destination":
 				return ec.fieldContext_Ride_destination(ctx, field)
+			case "startName":
+				return ec.fieldContext_Ride_startName(ctx, field)
+			case "destinationName":
+				return ec.fieldContext_Ride_destinationName(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Ride", field.Name)
 		},
@@ -1566,6 +1610,60 @@ func (ec *executionContext) fieldContext_Ride_destination(_ context.Context, fie
 				return ec.fieldContext_GeoLocation_lng(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type GeoLocation", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Ride_startName(ctx context.Context, field graphql.CollectedField, obj *model.Ride) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Ride_startName,
+		func(ctx context.Context) (any, error) { return obj.StartName, nil },
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Ride_startName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Ride",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Ride_destinationName(ctx context.Context, field graphql.CollectedField, obj *model.Ride) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Ride_destinationName,
+		func(ctx context.Context) (any, error) { return obj.DestinationName, nil },
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Ride_destinationName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Ride",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3714,6 +3812,16 @@ func (ec *executionContext) _Ride(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "destination":
 			out.Values[i] = ec._Ride_destination(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "startName":
+			out.Values[i] = ec._Ride_startName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "destinationName":
+			out.Values[i] = ec._Ride_destinationName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

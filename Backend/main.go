@@ -6,11 +6,11 @@ import (
 	// "github.com/99designs/gqlgen"
 	// "github.com/99designs/gqlgen/api"
 	// "github.com/99designs/gqlgen/internal/imports"
-	// "github.com/99designs/gqlgen/codegen/config"
+	// notConfig "github.com/99designs/gqlgen/codegen/config"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/ironnicko/ride-signals/Backend/config"
+	config "github.com/ironnicko/ride-signals/Backend/config"
 	"github.com/ironnicko/ride-signals/Backend/db"
 	"github.com/ironnicko/ride-signals/Backend/kafka"
 	"github.com/ironnicko/ride-signals/Backend/routes"
