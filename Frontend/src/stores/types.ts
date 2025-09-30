@@ -35,7 +35,6 @@ export const storage = {
 };
 
 export interface AuthState {
-    // isAuthenticated: boolean;
     accessToken: string | null;
     refreshToken: string | null;
     isAuthenticated: Boolean;
@@ -54,4 +53,5 @@ export interface UserState {
     createdAt: string | null
     lastLoginAt: string | null
     isActive: boolean | null
+    currentRide: string | null
 }

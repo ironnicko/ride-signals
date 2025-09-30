@@ -15,7 +15,7 @@ export const TripSettingsInputs = ({maxRiders, visibility, setMaxRiders, setVisi
     return (
       <>
         <div className="mb-4 text-center">
-          <h2 className="text-lg font-semibold">Trip Settings</h2>
+          <h2 className="text-2xl font-bold">Trip Settings</h2>
           <p className="text-sm text-gray-500">
             Set maximum riders and choose visibility
           </p>

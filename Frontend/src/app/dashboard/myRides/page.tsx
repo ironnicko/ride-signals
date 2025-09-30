@@ -1,17 +1,18 @@
 "use client";
 import { useQuery } from "@apollo/client/react";
 import { MY_RIDES, Ride } from "@/lib/graphql/query";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bike } from "lucide-react"; // you can swap the icon
+import { Bike } from "lucide-react";
+import { useState } from "react";
+import RidesList from "./RideList";
+import RideModal from "./RideModal";
 
-export default function MyRides() {
-  const [selectedRide, setSelectedRide] = useState<Ride | null>(null);
+export default function MyRidesPage() {
   const router = useRouter();
+  const [selectedRide, setSelectedRide] = useState<Ride | null>(null);
 
-  
   const { data, loading, error } = useQuery(MY_RIDES, {
-    fetchPolicy: "cache-and-network"
+    fetchPolicy: "cache-and-network",
   });
 
   if (loading) return <p className="p-4">Loading rides...</p>;
@@ -32,53 +33,19 @@ export default function MyRides() {
         <h1 className="text-2xl font-bold">My Rides</h1>
       </div>
 
-      {/* Ride list */}
-      <div className="flex flex-col space-y-4 overflow-y-auto max-h-[90vh]">
-        {rides.length ? (
-          rides.map((ride) => (
-            <div
-              key={ride.id}
-              className="flex cursor-pointer justify-center bg-white rounded-2xl shadow-md p-4 hover:shadow-lg transition-all"
-            >
-              {/* Ride Info */}
-              <div className="flex flex-col">
-                <div className="text-lg font-semibold text-gray-800">
-                  {ride.startName} <span className="text-gray-400">→</span>{" "}
-                  {ride.destinationName}
-                </div>
-                <div className="text-sm text-gray-600">
-                  Ride Code: <span className="font-medium">{ride.rideCode}</span>
-                </div>
-                <div className="text-sm text-gray-500">
-                  Created: {new Date(ride.createdAt).toLocaleString()}
-                </div>
-                <div className="text-sm">
-                  Visibility:{" "}
-                  <span
-                    className={`font-medium ${
-                      ride.settings.visibility === "Public"
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {ride.settings.visibility}
-                  </span>
-                </div>
-                <div className="text-sm text-gray-500">
-                  Participants: {ride.participants.length} /{" "}
-                  {ride.settings.maxRiders}
-                </div>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="flex flex-col items-center justify-center h-[60vh] text-center text-gray-500">
-            <Bike className="w-12 h-12 text-gray-400 mb-2" />
-            <p className="text-lg font-medium">No rides found</p>
-            <p className="text-sm">Looks like you haven’t joined or created any rides yet.</p>
-          </div>
-        )}
-      </div>
+      {rides.length ? (
+        <RidesList rides={rides} onRideClick={setSelectedRide} />
+      ) : (
+        <div className="flex flex-col items-center justify-center h-[60vh] text-center text-gray-500">
+          <Bike className="w-12 h-12 text-gray-400 mb-2" />
+          <p className="text-lg font-medium">No rides found</p>
+          <p className="text-sm">Looks like you haven’t joined or created any rides yet.</p>
+        </div>
+      )}
+
+      {selectedRide && (
+        <RideModal ride={selectedRide} onClose={() => setSelectedRide(null)} />
+      )}
     </div>
   );
 }

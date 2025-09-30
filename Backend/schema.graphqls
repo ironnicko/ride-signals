@@ -5,6 +5,7 @@ type User {
   createdAt: String!
   lastLoginAt: String!
   isActive: Boolean!
+  currentRide: String!
 }
 
 type Ride {

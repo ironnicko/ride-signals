@@ -100,6 +100,7 @@ type ComplexityRoot struct {
 
 	User struct {
 		CreatedAt   func(childComplexity int) int
+		CurrentRide func(childComplexity int) int
 		Email       func(childComplexity int) int
 		ID          func(childComplexity int) int
 		IsActive    func(childComplexity int) int
@@ -357,6 +358,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.User.CreatedAt(childComplexity), true
+	case "User.currentRide":
+		if e.complexity.User.CurrentRide == nil {
+			break
+		}
+
+		return e.complexity.User.CurrentRide(childComplexity), true
 	case "User.email":
 		if e.complexity.User.Email == nil {
 			break
@@ -499,6 +506,7 @@ var sources = []*ast.Source{
   createdAt: String!
   lastLoginAt: String!
   isActive: Boolean!
+  currentRide: String!
 }
 
 type Ride {
@@ -1082,6 +1090,8 @@ func (ec *executionContext) fieldContext_Query_me(_ context.Context, field graph
 				return ec.fieldContext_User_lastLoginAt(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "currentRide":
+				return ec.fieldContext_User_currentRide(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -2048,6 +2058,33 @@ func (ec *executionContext) fieldContext_User_isActive(_ context.Context, field 
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_currentRide(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_currentRide,
+		func(ctx context.Context) (any, error) { return obj.CurrentRide, nil },
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_currentRide(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3994,6 +4031,11 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "isActive":
 			out.Values[i] = ec._User_isActive(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "currentRide":
+			out.Values[i] = ec._User_currentRide(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

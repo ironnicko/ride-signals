@@ -109,6 +109,7 @@ func Login(c *gin.Context) {
 			"id":    user.ID.Hex(),
 			"name":  user.Name,
 			"email": user.Email,
+			"currentRide": user.CurrentRide,
 		},
 	})
 }

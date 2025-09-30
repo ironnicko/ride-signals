@@ -55,4 +55,5 @@ type User struct {
 	CreatedAt   string `json:"createdAt"`
 	LastLoginAt string `json:"lastLoginAt"`
 	IsActive    bool   `json:"isActive"`
+	CurrentRide string `json:"currentRide"`
 }

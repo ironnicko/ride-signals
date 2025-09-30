@@ -46,17 +46,17 @@ func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibi
 	ride := &model.Ride{
 		ID:       primitive.NewObjectID().Hex(),
 		RideCode: utils.GenRideCode(),
-		Status:   "active",
+		Status:   "not started",
 		Settings: &model.RideSettings{
 			MaxRiders:  maxRiders,
 			Visibility: visibility,
 		},
-		Participants: participants,
-		CreatedAt:    time.Now().UTC().Format(time.RFC3339),
-		CreatedBy:    userId,
-		Start:        startLocation,
-		Destination:  destinationLocation,
-		StartName: startName,
+		Participants:    participants,
+		CreatedAt:       time.Now().UTC().Format(time.RFC3339),
+		CreatedBy:       userId,
+		Start:           startLocation,
+		Destination:     destinationLocation,
+		StartName:       startName,
 		DestinationName: destinationName,
 	}
 
@@ -183,6 +183,7 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 		ID:    dbUser.ID.Hex(),
 		Name:  dbUser.Name,
 		Email: dbUser.Email,
+		CurrentRide: *dbUser.CurrentRide,
 	}, nil
 }
 

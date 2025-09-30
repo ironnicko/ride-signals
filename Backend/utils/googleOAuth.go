@@ -83,17 +83,18 @@ func handleGoogleUser(c *gin.Context, googleUser GoogleUser) (map[string]interfa
 		)
 	}
 
-	tokens, err := GenerateTokens(googleUser.Email)
+	tokens, err := GenerateTokens(userId)
 	if err != nil {
 		return nil, err
 	}
 
 	return map[string]interface{}{
 		"user": map[string]interface{}{
-			"id":      userId,
-			"name":    googleUser.Name,
-			"email":   googleUser.Email,
-			"picture": googleUser.Picture,
+			"id":          userId,
+			"name":        googleUser.Name,
+			"email":       googleUser.Email,
+			"picture":     googleUser.Picture,
+			"currentRide": dbUser.CurrentRide,
 		},
 		"accessToken":  tokens.AccessToken,
 		"refreshToken": tokens.RefreshToken,
