@@ -20,7 +20,7 @@ type Query struct {
 }
 
 type Ride struct {
-	ID              string         `json:"id"`
+	ID              *string        `json:"_id,omitempty"`
 	RideCode        string         `json:"rideCode"`
 	Status          string         `json:"status"`
 	CreatedAt       string         `json:"createdAt"`
@@ -40,7 +40,7 @@ type RideSettings struct {
 }
 
 type Signal struct {
-	ID        string       `json:"id"`
+	ID        *string      `json:"_id,omitempty"`
 	RideCode  string       `json:"rideCode"`
 	FromUser  string       `json:"fromUser"`
 	Type      string       `json:"type"`

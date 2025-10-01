@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "@/stores/useAuth";
 import { FitBoundsHandler } from "@/components/FitBoundsHelper";
+import { ArrowLeft } from "lucide-react";
 
 export default function DashboardPage() {
   const [createRide] = useMutation(CREATE_RIDE);
@@ -24,7 +25,7 @@ export default function DashboardPage() {
   const [fromLocation, setFromLocation] = useState<GeoLocation | null>(null);
   const [toLocationName, setToLocationName] = useState<string | null>(null);
   const [fromLocationName, setFromLocationName] = useState<string | null>(null);
-  const [maxRiders, setMaxRiders] = useState<number>(1);
+  const [maxRiders, setMaxRiders] = useState<number>(5);
   const [visibility, setVisibility] = useState<"public" | "private">("private");
   const [toMarkerRef] = useAdvancedMarkerRef();
   const [fromMarkerRef] = useAdvancedMarkerRef();
@@ -95,9 +96,7 @@ export default function DashboardPage() {
               Settings
             </li> */}
             <li
-              onClick={() => {
-                logout();
-              }}
+              onClick={logout}
               className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
             >
               Logout
@@ -119,6 +118,8 @@ export default function DashboardPage() {
             setToLocation={setToLocation}
             fromLocation={fromLocation}
             toLocation={toLocation}
+            fromLocationName={fromLocationName}
+            toLocationName={toLocationName}
           />
         );
       case 1:
@@ -139,11 +140,6 @@ export default function DashboardPage() {
   return (
     <ProtectedRoute>
       <div className="relative w-screen h-screen">
-        <APIProvider
-          apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string}
-          solutionChannel="GMP_devsite_samples_v3_rgmautocomplete"
-          libraries={["places"]}
-        >
           <Map
             defaultCenter={fromLocation}
             disableDefaultUI={true}
@@ -158,6 +154,15 @@ export default function DashboardPage() {
 
           {/* Bottom Section */}
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
+
+            {formIndex > 0 ? (<button
+                onClick={() => setFormIndex(Math.max(0, formIndex - 1))}
+                className="relative top-[10vh] flex items-center rounded-full gap-1 px-4 py-2 bg-white cursor-pointer"
+              >
+                <ArrowLeft size={18} />
+                {/* <span className="text-sm font-medium">Back</span> */}
+            </button>) : <></>}
+
             {/* Profile + Menu */}
             <div className="relative top-4 flex flex-col items-center">
               <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-md cursor-pointer">
@@ -183,7 +188,6 @@ export default function DashboardPage() {
               {renderFormInput()}
             </div>
           </div>
-        </APIProvider>
       </div>
     </ProtectedRoute>
   );

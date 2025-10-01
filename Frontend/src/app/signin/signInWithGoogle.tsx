@@ -24,7 +24,7 @@ export default function GoogleSignInButton() {
         const idToken = response.credential;
         try {
           await loginWithGoogle(idToken)
-          router.push("/dashboard")
+          router.replace("/dashboard")
         } catch (err) {
           console.error(err);
         }

@@ -1,9 +1,9 @@
 "use client";
-import { Ride } from "@/lib/graphql/query";
+import { RideState } from "@/stores/types";;
 
 interface RidesListProps {
-  rides: Ride[];
-  onRideClick: (ride: Ride) => void;
+  rides: RideState[];
+  onRideClick: (ride: RideState) => void;
 }
 
 export default function RidesList({ rides, onRideClick }: RidesListProps) {
@@ -11,7 +11,7 @@ export default function RidesList({ rides, onRideClick }: RidesListProps) {
     <div className="flex flex-col space-y-4 overflow-y-auto max-h-[90vh]">
       {rides.map((ride) => (
         <div
-          key={ride.id}
+          key={ride.rideCode}
           className="flex cursor-pointer justify-center bg-white rounded-2xl shadow-md p-4 hover:shadow-lg transition-all"
           onClick={() => onRideClick(ride)}
         >
@@ -24,22 +24,22 @@ export default function RidesList({ rides, onRideClick }: RidesListProps) {
               Ride Code: <span className="font-medium">{ride.rideCode}</span>
             </div>
             <div className="text-sm text-gray-500">
-              Created: {new Date(ride.createdAt).toLocaleString()}
+              Created: {new Date(ride.createdAt!).toLocaleString()}
             </div>
             <div className="text-sm">
               Visibility:{" "}
               <span
                 className={`font-medium ${
-                  ride.settings.visibility === "public"
+                  ride.settings!.visibility === "public"
                     ? "text-green-600"
                     : "text-red-600"
                 }`}
               >
-                {ride.settings.visibility}
+                {ride.settings!.visibility}
               </span>
             </div>
             <div className="text-sm text-gray-500">
-              Participants: {ride.participants.length} / {ride.settings.maxRiders}
+              Participants: {ride.participants!.length} / {ride.settings!.maxRiders}
             </div>
           </div>
         </div>

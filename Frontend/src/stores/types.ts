@@ -23,6 +23,39 @@
 //       removeItem: (name: string) => localStorage.removeItem(name),
 //     };
 
+export interface GeoLocation {
+    lat: number
+    lng: number
+}
+
+export interface Participant { userId: string; role: string; joinedAt: string }
+export interface Settings { maxRiders: number; visibility: string }
+
+export interface RideState {
+    _id: string | null;
+    rideCode: string | null;
+    status: string | null;
+    createdAt: string | null;
+    endedAt?: string | null;
+    participants: Participant[] | null;
+    settings: Settings | null;
+    start: GeoLocation | null;
+    destination: GeoLocation | null;
+    startName: string | null;
+    destinationName: string | null;
+}
+
+
+export interface UserState {
+    id: string | null
+    name: string | null
+    email: string | null
+    picture?: string | null
+    createdAt: string | null
+    lastLoginAt: string | null
+    isActive: boolean | null
+    currentRide: string | null
+}
 
 export const storage = {
     getItem: (name: string) => {
@@ -34,7 +67,7 @@ export const storage = {
     removeItem: (name: string) => localStorage.removeItem(name),
 };
 
-export interface AuthState {
+export interface AuthStore {
     accessToken: string | null;
     refreshToken: string | null;
     isAuthenticated: Boolean;
@@ -45,13 +78,11 @@ export interface AuthState {
     logout: () => void;
 }
 
-export interface UserState {
-    id: string | null
-    name: string | null
-    email: string | null
-    picture?: string | null
-    createdAt: string | null
-    lastLoginAt: string | null
-    isActive: boolean | null
-    currentRide: string | null
+export interface RidesStore {
+  rides: RideState[];
+  addRide: (ride: RideState) => void;
+  removeRide: (id: string) => void;
+  setRides: (rides: RideState[]) => void;
+  replaceRide: (ride: RideState) => void;
+  clearRides: () => void;
 }

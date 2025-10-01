@@ -55,6 +55,7 @@ type ComplexityRoot struct {
 		CreateRide func(childComplexity int, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64, startName string, destinationName string) int
 		JoinRide   func(childComplexity int, rideCode string, role string) int
 		SendSignal func(childComplexity int, rideCode string, signalType string, lat *float64, lng *float64) int
+		UpdateRide func(childComplexity int, rideCode string, maxRiders *int, visibility *string, endedAt *string, status *string) int
 	}
 
 	Participant struct {
@@ -111,6 +112,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateRide(ctx context.Context, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64, startName string, destinationName string) (*model.Ride, error)
+	UpdateRide(ctx context.Context, rideCode string, maxRiders *int, visibility *string, endedAt *string, status *string) (*model.Ride, error)
 	JoinRide(ctx context.Context, rideCode string, role string) (*model.Ride, error)
 	SendSignal(ctx context.Context, rideCode string, signalType string, lat *float64, lng *float64) (bool, error)
 }
@@ -185,6 +187,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.SendSignal(childComplexity, args["rideCode"].(string), args["signalType"].(string), args["lat"].(*float64), args["lng"].(*float64)), true
+	case "Mutation.updateRide":
+		if e.complexity.Mutation.UpdateRide == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateRide_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateRide(childComplexity, args["rideCode"].(string), args["maxRiders"].(*int), args["visibility"].(*string), args["endedAt"].(*string), args["status"].(*string)), true
 
 	case "Participant.joinedAt":
 		if e.complexity.Participant.JoinedAt == nil {
@@ -259,7 +272,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Ride.EndedAt(childComplexity), true
-	case "Ride.id":
+	case "Ride._id":
 		if e.complexity.Ride.ID == nil {
 			break
 		}
@@ -321,7 +334,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Signal.FromUser(childComplexity), true
-	case "Signal.id":
+	case "Signal._id":
 		if e.complexity.Signal.ID == nil {
 			break
 		}
@@ -510,7 +523,7 @@ var sources = []*ast.Source{
 }
 
 type Ride {
-  id: ID!
+  _id: ID
   rideCode: String!
   status: String!
   createdAt: String!
@@ -536,7 +549,7 @@ type RideSettings {
 }
 
 type Signal {
-  id: ID!
+  _id: ID
   rideCode: String!
   fromUser: ID!
   type: String!
@@ -565,6 +578,13 @@ type Mutation {
     destinationLng: Float!
     startName: String!
     destinationName: String!
+  ): Ride!
+  updateRide(
+    rideCode: String!
+    maxRiders: Int
+    visibility: String
+    endedAt: String
+    status: String
   ): Ride!
   joinRide(rideCode: String!, role: String!): Ride!
   sendSignal(
@@ -667,6 +687,37 @@ func (ec *executionContext) field_Mutation_sendSignal_args(ctx context.Context, 
 		return nil, err
 	}
 	args["lng"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateRide_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "rideCode", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["rideCode"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "maxRiders", ec.unmarshalOInt2ᚖint)
+	if err != nil {
+		return nil, err
+	}
+	args["maxRiders"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "visibility", ec.unmarshalOString2ᚖstring)
+	if err != nil {
+		return nil, err
+	}
+	args["visibility"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "endedAt", ec.unmarshalOString2ᚖstring)
+	if err != nil {
+		return nil, err
+	}
+	args["endedAt"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "status", ec.unmarshalOString2ᚖstring)
+	if err != nil {
+		return nil, err
+	}
+	args["status"] = arg4
 	return args, nil
 }
 
@@ -823,8 +874,8 @@ func (ec *executionContext) fieldContext_Mutation_createRide(ctx context.Context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_Ride_id(ctx, field)
+			case "_id":
+				return ec.fieldContext_Ride__id(ctx, field)
 			case "rideCode":
 				return ec.fieldContext_Ride_rideCode(ctx, field)
 			case "status":
@@ -865,6 +916,73 @@ func (ec *executionContext) fieldContext_Mutation_createRide(ctx context.Context
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_updateRide(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_updateRide,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().UpdateRide(ctx, fc.Args["rideCode"].(string), fc.Args["maxRiders"].(*int), fc.Args["visibility"].(*string), fc.Args["endedAt"].(*string), fc.Args["status"].(*string))
+		},
+		nil,
+		ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐRide,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateRide(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "_id":
+				return ec.fieldContext_Ride__id(ctx, field)
+			case "rideCode":
+				return ec.fieldContext_Ride_rideCode(ctx, field)
+			case "status":
+				return ec.fieldContext_Ride_status(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Ride_createdAt(ctx, field)
+			case "createdBy":
+				return ec.fieldContext_Ride_createdBy(ctx, field)
+			case "endedAt":
+				return ec.fieldContext_Ride_endedAt(ctx, field)
+			case "participants":
+				return ec.fieldContext_Ride_participants(ctx, field)
+			case "settings":
+				return ec.fieldContext_Ride_settings(ctx, field)
+			case "start":
+				return ec.fieldContext_Ride_start(ctx, field)
+			case "destination":
+				return ec.fieldContext_Ride_destination(ctx, field)
+			case "startName":
+				return ec.fieldContext_Ride_startName(ctx, field)
+			case "destinationName":
+				return ec.fieldContext_Ride_destinationName(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Ride", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateRide_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_joinRide(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -890,8 +1008,8 @@ func (ec *executionContext) fieldContext_Mutation_joinRide(ctx context.Context, 
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_Ride_id(ctx, field)
+			case "_id":
+				return ec.fieldContext_Ride__id(ctx, field)
 			case "rideCode":
 				return ec.fieldContext_Ride_rideCode(ctx, field)
 			case "status":
@@ -1124,8 +1242,8 @@ func (ec *executionContext) fieldContext_Query_ride(ctx context.Context, field g
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_Ride_id(ctx, field)
+			case "_id":
+				return ec.fieldContext_Ride__id(ctx, field)
 			case "rideCode":
 				return ec.fieldContext_Ride_rideCode(ctx, field)
 			case "status":
@@ -1190,8 +1308,8 @@ func (ec *executionContext) fieldContext_Query_myRides(_ context.Context, field 
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_Ride_id(ctx, field)
+			case "_id":
+				return ec.fieldContext_Ride__id(ctx, field)
 			case "rideCode":
 				return ec.fieldContext_Ride_rideCode(ctx, field)
 			case "status":
@@ -1329,21 +1447,21 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Ride_id(ctx context.Context, field graphql.CollectedField, obj *model.Ride) (ret graphql.Marshaler) {
+func (ec *executionContext) _Ride__id(ctx context.Context, field graphql.CollectedField, obj *model.Ride) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Ride_id,
+		ec.fieldContext_Ride__id,
 		func(ctx context.Context) (any, error) { return obj.ID, nil },
 		nil,
-		ec.marshalNID2string,
+		ec.marshalOID2ᚖstring,
 		true,
-		true,
+		false,
 	)
 }
 
-func (ec *executionContext) fieldContext_Ride_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Ride__id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Ride",
 		Field:      field,
@@ -1733,21 +1851,21 @@ func (ec *executionContext) fieldContext_RideSettings_visibility(_ context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _Signal_id(ctx context.Context, field graphql.CollectedField, obj *model.Signal) (ret graphql.Marshaler) {
+func (ec *executionContext) _Signal__id(ctx context.Context, field graphql.CollectedField, obj *model.Signal) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Signal_id,
+		ec.fieldContext_Signal__id,
 		func(ctx context.Context) (any, error) { return obj.ID, nil },
 		nil,
-		ec.marshalNID2string,
+		ec.marshalOID2ᚖstring,
 		true,
-		true,
+		false,
 	)
 }
 
-func (ec *executionContext) fieldContext_Signal_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Signal__id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Signal",
 		Field:      field,
@@ -3592,6 +3710,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "updateRide":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateRide(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "joinRide":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_joinRide(ctx, field)
@@ -3805,11 +3930,8 @@ func (ec *executionContext) _Ride(ctx context.Context, sel ast.SelectionSet, obj
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Ride")
-		case "id":
-			out.Values[i] = ec._Ride_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
+		case "_id":
+			out.Values[i] = ec._Ride__id(ctx, field, obj)
 		case "rideCode":
 			out.Values[i] = ec._Ride_rideCode(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -3940,11 +4062,8 @@ func (ec *executionContext) _Signal(ctx context.Context, sel ast.SelectionSet, o
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Signal")
-		case "id":
-			out.Values[i] = ec._Signal_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
+		case "_id":
+			out.Values[i] = ec._Signal__id(ctx, field, obj)
 		case "rideCode":
 			out.Values[i] = ec._Signal_rideCode(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -4921,6 +5040,42 @@ func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel as
 	_ = sel
 	res := graphql.MarshalFloatContext(*v)
 	return graphql.WrapContextMarshaler(ctx, res)
+}
+
+func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v any) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalID(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalID(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v any) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalInt(*v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {

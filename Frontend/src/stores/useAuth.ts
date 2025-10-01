@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { AuthState, storage } from "./types"
+import { AuthStore, storage } from "./types"
 import Error from "next/error";
 
-export const useAuth = create<AuthState>()(
+export const useAuth = create<AuthStore>()(
     persist(
         (set) => ({
             accessToken: null,

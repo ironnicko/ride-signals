@@ -1,15 +1,18 @@
 "use client";
 import { useQuery } from "@apollo/client/react";
-import { MY_RIDES, Ride } from "@/lib/graphql/query";
+import { MY_RIDES } from "@/lib/graphql/query";
 import { useRouter } from "next/navigation";
-import { Bike } from "lucide-react";
+import { ArrowLeft, Bike } from "lucide-react";
 import { useState } from "react";
 import RidesList from "./RideList";
 import RideModal from "./RideModal";
+import { RideState } from "@/stores/types";
+import { useRides } from "@/stores/useRides";
 
 export default function MyRidesPage() {
   const router = useRouter();
-  const [selectedRide, setSelectedRide] = useState<Ride | null>(null);
+  const [selectedRide, setSelectedRide] = useState<RideState | null>(null);
+  const {rides, setRides} = useRides.getState();
 
   const { data, loading, error } = useQuery(MY_RIDES, {
     fetchPolicy: "cache-and-network",
@@ -18,8 +21,10 @@ export default function MyRidesPage() {
   if (loading) return <p className="p-4">Loading rides...</p>;
   if (error) return <p className="p-4 text-red-600">Error loading rides: {error.message}</p>;
 
-  // @ts-ignore
-  const rides: Ride[] = data?.myRides ?? [];
+  if (rides.length === 0){
+    // @ts-ignore
+    setRides(data?.myRides)
+  }
 
   return (
     <div className="w-full h-screen p-4 bg-gray-50">
@@ -28,7 +33,8 @@ export default function MyRidesPage() {
           onClick={() => router.back()}
           className="cursor-pointer underline text-gray-600 hover:text-gray-800"
         >
-          Back
+                <ArrowLeft size={18} />
+
         </h1>
         <h1 className="text-2xl font-bold">My Rides</h1>
       </div>
@@ -44,7 +50,7 @@ export default function MyRidesPage() {
       )}
 
       {selectedRide && (
-        <RideModal ride={selectedRide} onClose={() => setSelectedRide(null)} />
+        <RideModal ride={selectedRide}  onClose={() => setSelectedRide(null)} />
       )}
     </div>
   );

@@ -21,7 +21,7 @@ export default function SignIn() {
     try {
       const isLoggedIn = await login(email, password)
       if (isLoggedIn == true)
-        router.push("/dashboard")
+        router.replace("/dashboard")
     } catch(err){
       throw err
     }

@@ -31,7 +31,7 @@ export const TripSettingsInputs = ({maxRiders, visibility, setMaxRiders, setVisi
               max={50}
               value={Math.min(50, maxRiders)}
               onChange={(e) => setMaxRiders(Number(e.target.value))}
-              className="w-3/4 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
               placeholder="Enter number of riders"
             />
           </div>

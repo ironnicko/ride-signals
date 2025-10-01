@@ -9,7 +9,7 @@ type User {
 }
 
 type Ride {
-  id: ID!
+  _id: ID
   rideCode: String!
   status: String!
   createdAt: String!
@@ -35,7 +35,7 @@ type RideSettings {
 }
 
 type Signal {
-  id: ID!
+  _id: ID
   rideCode: String!
   fromUser: ID!
   type: String!
@@ -64,6 +64,13 @@ type Mutation {
     destinationLng: Float!
     startName: String!
     destinationName: String!
+  ): Ride!
+  updateRide(
+    rideCode: String!
+    maxRiders: Int
+    visibility: String
+    endedAt: String
+    status: String
   ): Ride!
   joinRide(rideCode: String!, role: String!): Ride!
   sendSignal(

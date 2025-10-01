@@ -1,55 +1,58 @@
 "use client";
-import { Ride } from "@/lib/graphql/query";
-// import { UPDATE_RIDE } from "@/lib/graphql/mutation";
+import { RideState } from "@/stores/types";;
+import { UPDATE_RIDE } from "@/lib/graphql/mutation";
 import { X } from "lucide-react";
-import { APIProvider, Map, AdvancedMarker } from "@vis.gl/react-google-maps";
+import { Map, AdvancedMarker } from "@vis.gl/react-google-maps";
 import { useAuth } from "@/stores/useAuth";
 import { FitBoundsHandler } from "@/components/FitBoundsHelper";
 import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { toast } from "react-toastify";
+import { useRides } from "@/stores/useRides";
 
 interface RideModalProps {
-  ride: Ride;
+  ride: RideState;
   onClose: () => void;
 }
 
 export default function RideModal({ ride, onClose }: RideModalProps) {
   const { user } = useAuth.getState();
+  const {replaceRide} = useRides.getState();
   const [isEditing, setIsEditing] = useState(false);
-
+  const [currentRide, setCurrentRide] = useState(ride)
   const [formState, setFormState] = useState({
-    visibility: ride.settings.visibility,
-    maxRiders: ride.settings.maxRiders,
+    visibility: ride.settings!.visibility,
+    maxRiders: ride.settings!.maxRiders,
   });
 
-  // const [updateRide] = useMutation(UPDATE_RIDE);
+  const [updateRide] = useMutation(UPDATE_RIDE);
 
-function isRideOwner(ride: Ride, userId: string): boolean {
-  return ride.participants.some(
-    (p) => {
-      console.log(p, userId)
-      return p.userId === userId && p.role === "leader"
-    }
+const isRideOwner = (userId: string) => {
+  return currentRide.participants!.some(
+    (p) => p.userId === userId && p.role === "leader"
   );
 }
 
 
-  // const handleSave = async () => {
-  //   try {
-  //     await updateRide({
-  //       variables: {
-  //         id: ride.id,
-  //         ...formState,
-  //       },
-  //     });
-  //     toast.success("Ride updated!");
-  //     setIsEditing(false);
-  //   } catch (err) {
-  //     toast.error("Failed to update ride");
-  //     console.error(err);
-  //   }
-  // };
+  const handleSave = async () => {
+    try {
+      const {data, error} = await updateRide({
+        variables: {
+          rideCode: currentRide.rideCode,
+          ...formState,
+        },
+      });
+      // @ts-ignore
+      const updatedRide = data.updateRide;
+      setCurrentRide(updatedRide);
+      replaceRide(updatedRide);
+      toast.success("Ride updated!");
+      setIsEditing(false);
+    } catch (err) {
+      toast.error("Failed to update ride");
+      console.error(err);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -64,7 +67,7 @@ function isRideOwner(ride: Ride, userId: string): boolean {
 
         <h2 className="text-2xl font-bold mb-4">
             <>
-              {ride.startName} → {ride.destinationName}
+              {currentRide.startName} → {currentRide.destinationName}
             </>
         </h2>
 
@@ -72,11 +75,11 @@ function isRideOwner(ride: Ride, userId: string): boolean {
           {/* Ride Info */}
           <div className="space-y-2">
             <p>
-              <span className="font-medium">Ride Code:</span> {ride.rideCode}
+              <span className="font-medium">Ride Code:</span> {currentRide.rideCode}
             </p>
             <p>
               <span className="font-medium">Created:</span>{" "}
-              {new Date(ride.createdAt).toLocaleString()}
+              {new Date(currentRide.createdAt!).toLocaleString()}
             </p>
             <p>
               <span className="font-medium">Visibility:</span>{" "}
@@ -92,12 +95,12 @@ function isRideOwner(ride: Ride, userId: string): boolean {
                   <option value="private">private</option>
                 </select>
               ) : (
-                ride.settings.visibility
+                currentRide.settings!.visibility
               )}
             </p>
             <p>
               <span className="font-medium">Participants:</span>{" "}
-              {ride.participants.length} /{" "}
+              {currentRide.participants!.length} /{" "}
               {isEditing ? (
                 <input
                   type="number"
@@ -108,16 +111,16 @@ function isRideOwner(ride: Ride, userId: string): boolean {
                   }
                 />
               ) : (
-                ride.settings.maxRiders
+                currentRide.settings!.maxRiders
               )}
             </p>
           {/* Edit Options if owner */}
-          {isRideOwner(ride, user?.id!) && (
+          {isRideOwner(user?.id!) && (
             <div className="flex justify-center gap-3">
               {isEditing ? (
                 <>
                   <button
-                    // onClick={handleSave}
+                    onClick={handleSave}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                   >
                     Save
@@ -143,9 +146,7 @@ function isRideOwner(ride: Ride, userId: string): boolean {
 
           {/* Map */}
           <div className="w-full h-64 rounded-lg overflow-hidden">
-            <APIProvider
-              apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string}
-            >
+
               <Map
                 mapId={process.env.NEXT_PUBLIC_GOOGLE_MAP_ID}
                 disableDefaultUI={true}
@@ -155,14 +156,13 @@ function isRideOwner(ride: Ride, userId: string): boolean {
                 draggable={false}
                 style={{ width: "100%", height: "100%" }}
               >
-                <AdvancedMarker position={ride.start} />
-                <AdvancedMarker position={ride.destination} />
+                <AdvancedMarker position={currentRide.start} />
+                <AdvancedMarker position={currentRide.destination} />
                 <FitBoundsHandler
-                  fromLocation={ride.start}
-                  toLocation={ride.destination}
+                  fromLocation={currentRide.start}
+                  toLocation={currentRide.destination}
                 />
               </Map>
-            </APIProvider>
           </div>
         </div>
       </div>

@@ -44,7 +44,6 @@ func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibi
 	}
 
 	ride := &model.Ride{
-		ID:       primitive.NewObjectID().Hex(),
 		RideCode: utils.GenRideCode(),
 		Status:   "not started",
 		Settings: &model.RideSettings{
@@ -66,6 +65,59 @@ func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibi
 		return nil, err
 	}
 	return ride, nil
+}
+
+// UpdateRide is the resolver for the updateRide field.
+func (r *mutationResolver) UpdateRide(ctx context.Context, rideCode string, maxRiders *int, visibility *string, endedAt *string, status *string) (*model.Ride, error) {
+	userId := ctx.Value("userId").(string)
+
+	coll := db.GetCollection("bikeapp", "rides")
+
+	// Ensure the ride exists and belongs to the user
+	var ride model.Ride
+	err := coll.FindOne(ctx, bson.M{"ridecode": rideCode}).Decode(&ride)
+	if err != nil {
+		return nil, fmt.Errorf("ride not found: %w", err)
+	}
+
+	if ride.CreatedBy != userId {
+		return nil, fmt.Errorf("unauthorized: you are not the owner of this ride")
+	}
+
+	update := bson.M{}
+	if maxRiders != nil {
+		update["settings.maxriders"] = *maxRiders
+	}
+	if visibility != nil {
+		update["settings.visibility"] = *visibility
+	}
+	if endedAt != nil {
+		update["endedat"] = *endedAt
+	}
+	if status != nil {
+		update["status"] = *status
+	}
+
+	if len(update) == 0 {
+		return &ride, nil // nothing to update
+	}
+
+	_, err = coll.UpdateOne(
+		ctx,
+		bson.M{"ridecode": rideCode},
+		bson.M{"$set": update},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update ride: %w", err)
+	}
+
+	// Return the updated ride
+	err = coll.FindOne(ctx, bson.M{"ridecode": rideCode}).Decode(&ride)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch updated ride: %w", err)
+	}
+
+	return &ride, nil
 }
 
 // JoinRide is the resolver for the joinRide field.
@@ -132,7 +184,6 @@ func (r *mutationResolver) JoinRide(ctx context.Context, rideCode string, role s
 func (r *mutationResolver) SendSignal(ctx context.Context, rideCode string, signalType string, lat *float64, lng *float64) (bool, error) {
 	userId := ctx.Value("userId").(string)
 	sig := model.Signal{
-		ID:        primitive.NewObjectID().Hex(),
 		RideCode:  rideCode,
 		FromUser:  userId,
 		Type:      signalType,
@@ -180,9 +231,9 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 	}
 
 	return &model.User{
-		ID:    dbUser.ID.Hex(),
-		Name:  dbUser.Name,
-		Email: dbUser.Email,
+		ID:          dbUser.ID.Hex(),
+		Name:        dbUser.Name,
+		Email:       dbUser.Email,
 		CurrentRide: *dbUser.CurrentRide,
 	}, nil
 }

@@ -1,9 +1,5 @@
 import { gql } from "@apollo/client";
 
-export interface GeoLocation {
-    lat: number
-    lng: number
-}
 
 export const CREATE_RIDE = gql`
   mutation CreateRide(
@@ -26,7 +22,6 @@ export const CREATE_RIDE = gql`
       startName: $startName
       destinationName: $destinationName
     ) {
-      id
       rideCode
       status
       settings {
@@ -49,6 +44,50 @@ export const CREATE_RIDE = gql`
       }
       destinationName
       createdAt
+    }
+  }
+`;
+
+
+export const UPDATE_RIDE = gql`
+  mutation UpdateRide(
+    $rideCode: String!
+    $maxRiders: Int
+    $visibility: String
+    $endedAt: String
+    $status: String
+  ) {
+    updateRide(
+      rideCode: $rideCode
+      maxRiders: $maxRiders
+      visibility: $visibility
+      endedAt: $endedAt
+      status: $status
+    ) {
+      rideCode
+      status
+      endedAt
+      settings {
+        maxRiders
+        visibility
+      }
+      participants {
+        userId
+        role
+        joinedAt
+      }
+      start {
+        lat
+        lng
+      }
+      startName
+      destination {
+        lat
+        lng
+      }
+      destinationName
+      createdAt
+      createdBy
     }
   }
 `;

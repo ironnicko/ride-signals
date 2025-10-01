@@ -1,17 +1,17 @@
 services:
-  backend:
-    image: ironnicko1413/ride-signals-backend:latest
-    build:
-      context: ./Backend
-      dockerfile: Dockerfile
-    restart: always
-    ports:
-      - "8080:8080"
-    env_file:
-      - ./.env
-    depends_on:
-      - kafka
-      - mongo
+  # backend:
+  #   image: ironnicko1413/ride-signals-backend:latest
+  #   build:
+  #     context: ./Backend
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   ports:
+  #     - "8080:8080"
+  #   env_file:
+  #     - ./.env
+  #   depends_on:
+  #     - kafka
+  #     - mongo
   mongo:
     image: mongo
     restart: always

@@ -9,7 +9,9 @@ interface TripLocationInputsProps {
   setFromLocationName: Dispatch<SetStateAction<string | null>>
   setToLocation: Dispatch<SetStateAction<GeoLocation | null>>;
   fromLocation: GeoLocation | null;
+  fromLocationName: string | null;
   toLocation: GeoLocation | null;
+  toLocationName: string | null;
 }
 
 export const TripLocationInputs = ({
@@ -19,7 +21,9 @@ export const TripLocationInputs = ({
   setFromLocationName,
   setToLocationName,
   fromLocation,
+  fromLocationName,
   toLocation,
+  toLocationName
 }: TripLocationInputsProps) => {
 
   const handleFromPlaceChanged = (place: google.maps.places.PlaceResult | null) => {
@@ -54,6 +58,7 @@ export const TripLocationInputs = ({
         {/* From Location Input */}
         <PlaceAutocomplete
           onPlaceSelect={handleFromPlaceChanged}
+          defaultValue={fromLocationName}
           placeholder="Start..."
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
         />
@@ -61,6 +66,7 @@ export const TripLocationInputs = ({
         {/* To Location Input */}
         <PlaceAutocomplete
           onPlaceSelect={handleToPlaceChanged}
+          defaultValue={toLocationName}
           placeholder="Destination..."
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
         />

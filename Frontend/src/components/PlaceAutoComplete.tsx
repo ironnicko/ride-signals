@@ -6,14 +6,16 @@ interface PlaceAutocompleteProps {
   onPlaceSelect: (place: google.maps.places.PlaceResult | null) => void;
   className: string;
   placeholder: string;
+  defaultValue: string | null;
 }
 
 export const PlaceAutocomplete = ({
   onPlaceSelect,
   className,
   placeholder,
+  defaultValue
 }: PlaceAutocompleteProps) => {
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState(defaultValue || "");
   const [predictions, setPredictions] = useState<google.maps.places.AutocompleteSuggestion[]>([]);
   const places = useMapsLibrary("places");
 
