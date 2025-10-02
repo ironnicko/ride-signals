@@ -6,6 +6,7 @@ import { Label } from "../../components/ui/label";
 import GoogleSignInButton from "./signInWithGoogle";
 import { useAuth } from "@/stores/useAuth";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 export default function SignIn() {
 
@@ -20,10 +21,10 @@ export default function SignIn() {
     e.preventDefault()
     try {
       const isLoggedIn = await login(email, password)
-      if (isLoggedIn == true)
+      if (isLoggedIn == true){
         router.replace("/dashboard")
+      }
     } catch(err){
-      throw err
     }
   }
 

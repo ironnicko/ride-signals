@@ -1,27 +1,40 @@
+import { ArrowLeft } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 
 interface TripSettingsInputsProps{
     setMaxRiders: Dispatch<SetStateAction<number>>,
     setVisibility: Dispatch<SetStateAction<"public" | "private">>
+    setFormIndex: Dispatch<SetStateAction<number>>
     maxRiders: number
     visibility: string
     CreateRide: () => void
+    formIndex: number
 
 }
 
 
-export const TripSettingsInputs = ({maxRiders, visibility, setMaxRiders, setVisibility, CreateRide}: TripSettingsInputsProps) => {
+export const TripSettingsInputs = ({maxRiders, setFormIndex, formIndex, visibility, setMaxRiders, setVisibility, CreateRide}: TripSettingsInputsProps) => {
 
     return (
       <>
-        <div className="mb-4 text-center">
-          <h2 className="text-2xl font-bold">Trip Settings</h2>
+        <div className="mb-3 text-center">
+
+          <h2 className="flex flex-row gap-4 text-2xl font-bold">
+            {formIndex > 0 ? (<button
+                onClick={() => setFormIndex(Math.max(0, formIndex - 1))}
+                className="flex items-center rounded-full gap-1 px-4 py-2 bg-white cursor-pointer"
+              >
+                <ArrowLeft size={18} />
+                {/* <span className="text-sm font-medium">Back</span> */}
+            </button>) : <></>}
+            Trip Settings
+          </h2>
           <p className="text-sm text-gray-500">
             Set maximum riders and choose visibility
           </p>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {/* Max Riders Input */}
           <div>
             <label className="block text-sm font-medium mb-1">Max Riders</label>
@@ -31,14 +44,14 @@ export const TripSettingsInputs = ({maxRiders, visibility, setMaxRiders, setVisi
               max={50}
               value={Math.min(50, maxRiders)}
               onChange={(e) => setMaxRiders(Number(e.target.value))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-3/4 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
               placeholder="Enter number of riders"
             />
           </div>
 
           {/* Visibility Selection */}
           <div>
-            <label className="block text-sm font-medium mb-1">Visibility</label>
+            {/* <label className="block text-sm font-medium mb-1">Visibility</label> */}
             <div className="flex gap-4 justify-center">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input

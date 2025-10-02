@@ -55,7 +55,7 @@ type ComplexityRoot struct {
 		CreateRide func(childComplexity int, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64, startName string, destinationName string) int
 		JoinRide   func(childComplexity int, rideCode string, role string) int
 		SendSignal func(childComplexity int, rideCode string, signalType string, lat *float64, lng *float64) int
-		UpdateRide func(childComplexity int, rideCode string, maxRiders *int, visibility *string, endedAt *string, status *string) int
+		UpdateRide func(childComplexity int, rideCode string, maxRiders *int, visibility *string, endedAt *string, startedAt *string, status *string) int
 	}
 
 	Participant struct {
@@ -82,6 +82,7 @@ type ComplexityRoot struct {
 		Settings        func(childComplexity int) int
 		Start           func(childComplexity int) int
 		StartName       func(childComplexity int) int
+		StartedAt       func(childComplexity int) int
 		Status          func(childComplexity int) int
 	}
 
@@ -112,7 +113,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateRide(ctx context.Context, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64, startName string, destinationName string) (*model.Ride, error)
-	UpdateRide(ctx context.Context, rideCode string, maxRiders *int, visibility *string, endedAt *string, status *string) (*model.Ride, error)
+	UpdateRide(ctx context.Context, rideCode string, maxRiders *int, visibility *string, endedAt *string, startedAt *string, status *string) (*model.Ride, error)
 	JoinRide(ctx context.Context, rideCode string, role string) (*model.Ride, error)
 	SendSignal(ctx context.Context, rideCode string, signalType string, lat *float64, lng *float64) (bool, error)
 }
@@ -197,7 +198,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateRide(childComplexity, args["rideCode"].(string), args["maxRiders"].(*int), args["visibility"].(*string), args["endedAt"].(*string), args["status"].(*string)), true
+		return e.complexity.Mutation.UpdateRide(childComplexity, args["rideCode"].(string), args["maxRiders"].(*int), args["visibility"].(*string), args["endedAt"].(*string), args["startedAt"].(*string), args["status"].(*string)), true
 
 	case "Participant.joinedAt":
 		if e.complexity.Participant.JoinedAt == nil {
@@ -308,6 +309,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Ride.StartName(childComplexity), true
+	case "Ride.startedAt":
+		if e.complexity.Ride.StartedAt == nil {
+			break
+		}
+
+		return e.complexity.Ride.StartedAt(childComplexity), true
 	case "Ride.status":
 		if e.complexity.Ride.Status == nil {
 			break
@@ -528,6 +535,7 @@ type Ride {
   status: String!
   createdAt: String!
   createdBy: String!
+  startedAt: String
   endedAt: String
   participants: [Participant!]!
   settings: RideSettings!
@@ -584,6 +592,7 @@ type Mutation {
     maxRiders: Int
     visibility: String
     endedAt: String
+    startedAt: String
     status: String
   ): Ride!
   joinRide(rideCode: String!, role: String!): Ride!
@@ -713,11 +722,16 @@ func (ec *executionContext) field_Mutation_updateRide_args(ctx context.Context, 
 		return nil, err
 	}
 	args["endedAt"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "status", ec.unmarshalOString2ᚖstring)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "startedAt", ec.unmarshalOString2ᚖstring)
 	if err != nil {
 		return nil, err
 	}
-	args["status"] = arg4
+	args["startedAt"] = arg4
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "status", ec.unmarshalOString2ᚖstring)
+	if err != nil {
+		return nil, err
+	}
+	args["status"] = arg5
 	return args, nil
 }
 
@@ -884,6 +898,8 @@ func (ec *executionContext) fieldContext_Mutation_createRide(ctx context.Context
 				return ec.fieldContext_Ride_createdAt(ctx, field)
 			case "createdBy":
 				return ec.fieldContext_Ride_createdBy(ctx, field)
+			case "startedAt":
+				return ec.fieldContext_Ride_startedAt(ctx, field)
 			case "endedAt":
 				return ec.fieldContext_Ride_endedAt(ctx, field)
 			case "participants":
@@ -924,7 +940,7 @@ func (ec *executionContext) _Mutation_updateRide(ctx context.Context, field grap
 		ec.fieldContext_Mutation_updateRide,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().UpdateRide(ctx, fc.Args["rideCode"].(string), fc.Args["maxRiders"].(*int), fc.Args["visibility"].(*string), fc.Args["endedAt"].(*string), fc.Args["status"].(*string))
+			return ec.resolvers.Mutation().UpdateRide(ctx, fc.Args["rideCode"].(string), fc.Args["maxRiders"].(*int), fc.Args["visibility"].(*string), fc.Args["endedAt"].(*string), fc.Args["startedAt"].(*string), fc.Args["status"].(*string))
 		},
 		nil,
 		ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋgraphᚋmodelᚐRide,
@@ -951,6 +967,8 @@ func (ec *executionContext) fieldContext_Mutation_updateRide(ctx context.Context
 				return ec.fieldContext_Ride_createdAt(ctx, field)
 			case "createdBy":
 				return ec.fieldContext_Ride_createdBy(ctx, field)
+			case "startedAt":
+				return ec.fieldContext_Ride_startedAt(ctx, field)
 			case "endedAt":
 				return ec.fieldContext_Ride_endedAt(ctx, field)
 			case "participants":
@@ -1018,6 +1036,8 @@ func (ec *executionContext) fieldContext_Mutation_joinRide(ctx context.Context, 
 				return ec.fieldContext_Ride_createdAt(ctx, field)
 			case "createdBy":
 				return ec.fieldContext_Ride_createdBy(ctx, field)
+			case "startedAt":
+				return ec.fieldContext_Ride_startedAt(ctx, field)
 			case "endedAt":
 				return ec.fieldContext_Ride_endedAt(ctx, field)
 			case "participants":
@@ -1252,6 +1272,8 @@ func (ec *executionContext) fieldContext_Query_ride(ctx context.Context, field g
 				return ec.fieldContext_Ride_createdAt(ctx, field)
 			case "createdBy":
 				return ec.fieldContext_Ride_createdBy(ctx, field)
+			case "startedAt":
+				return ec.fieldContext_Ride_startedAt(ctx, field)
 			case "endedAt":
 				return ec.fieldContext_Ride_endedAt(ctx, field)
 			case "participants":
@@ -1318,6 +1340,8 @@ func (ec *executionContext) fieldContext_Query_myRides(_ context.Context, field 
 				return ec.fieldContext_Ride_createdAt(ctx, field)
 			case "createdBy":
 				return ec.fieldContext_Ride_createdBy(ctx, field)
+			case "startedAt":
+				return ec.fieldContext_Ride_startedAt(ctx, field)
 			case "endedAt":
 				return ec.fieldContext_Ride_endedAt(ctx, field)
 			case "participants":
@@ -1570,6 +1594,33 @@ func (ec *executionContext) _Ride_createdBy(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) fieldContext_Ride_createdBy(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Ride",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Ride_startedAt(ctx context.Context, field graphql.CollectedField, obj *model.Ride) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Ride_startedAt,
+		func(ctx context.Context) (any, error) { return obj.StartedAt, nil },
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Ride_startedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Ride",
 		Field:      field,
@@ -3952,6 +4003,8 @@ func (ec *executionContext) _Ride(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "startedAt":
+			out.Values[i] = ec._Ride_startedAt(ctx, field, obj)
 		case "endedAt":
 			out.Values[i] = ec._Ride_endedAt(ctx, field, obj)
 		case "participants":

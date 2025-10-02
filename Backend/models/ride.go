@@ -8,6 +8,7 @@ type Ride struct {
 	Status          string              `bson:"status" json:"status"`
 	CreatedAt       primitive.DateTime  `bson:"createdAt" json:"createdAt"`
 	EndedAt         *primitive.DateTime `bson:"endedAt,omitempty" json:"endedAt,omitempty"`
+	StartedAt       *primitive.DateTime `bson:"startedAt,omitempty" json:"startedAt,omitempty"`
 	Participants    []Participant       `bson:"participants" json:"participants"`
 	Settings        RideSettings        `bson:"settings" json:"settings"`
 	Start           GeoLocation         `bson:"start" json:"start"`

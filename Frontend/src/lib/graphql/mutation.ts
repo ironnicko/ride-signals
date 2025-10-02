@@ -55,17 +55,20 @@ export const UPDATE_RIDE = gql`
     $maxRiders: Int
     $visibility: String
     $endedAt: String
+    $startedAt: String
     $status: String
   ) {
     updateRide(
       rideCode: $rideCode
       maxRiders: $maxRiders
       visibility: $visibility
+      startedAt: $startedAt
       endedAt: $endedAt
       status: $status
     ) {
       rideCode
       status
+      startedAt
       endedAt
       settings {
         maxRiders

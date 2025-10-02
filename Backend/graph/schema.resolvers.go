@@ -68,7 +68,7 @@ func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibi
 }
 
 // UpdateRide is the resolver for the updateRide field.
-func (r *mutationResolver) UpdateRide(ctx context.Context, rideCode string, maxRiders *int, visibility *string, endedAt *string, status *string) (*model.Ride, error) {
+func (r *mutationResolver) UpdateRide(ctx context.Context, rideCode string, maxRiders *int, visibility *string, endedAt *string, startedAt *string, status *string) (*model.Ride, error) {
 	userId := ctx.Value("userId").(string)
 
 	coll := db.GetCollection("bikeapp", "rides")
@@ -93,6 +93,9 @@ func (r *mutationResolver) UpdateRide(ctx context.Context, rideCode string, maxR
 	}
 	if endedAt != nil {
 		update["endedat"] = *endedAt
+	}
+	if startedAt != nil {
+		update["startedat"] = *startedAt
 	}
 	if status != nil {
 		update["status"] = *status

@@ -14,6 +14,7 @@ type Ride {
   status: String!
   createdAt: String!
   createdBy: String!
+  startedAt: String
   endedAt: String
   participants: [Participant!]!
   settings: RideSettings!
@@ -70,6 +71,7 @@ type Mutation {
     maxRiders: Int
     visibility: String
     endedAt: String
+    startedAt: String
     status: String
   ): Ride!
   joinRide(rideCode: String!, role: String!): Ride!

@@ -1,5 +1,5 @@
 import { PlaceAutocomplete } from "@/components/PlaceAutoComplete";
-import { GeoLocation } from "@/lib/graphql/mutation";
+import { GeoLocation } from "@/stores/types";
 import { Dispatch, SetStateAction } from "react";
 
 interface TripLocationInputsProps {

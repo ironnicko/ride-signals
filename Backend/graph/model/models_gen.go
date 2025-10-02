@@ -25,6 +25,7 @@ type Ride struct {
 	Status          string         `json:"status"`
 	CreatedAt       string         `json:"createdAt"`
 	CreatedBy       string         `json:"createdBy"`
+	StartedAt       *string        `json:"startedAt,omitempty"`
 	EndedAt         *string        `json:"endedAt,omitempty"`
 	Participants    []*Participant `json:"participants"`
 	Settings        *RideSettings  `json:"settings"`

@@ -34,9 +34,10 @@ export interface Settings { maxRiders: number; visibility: string }
 export interface RideState {
     _id: string | null;
     rideCode: string | null;
-    status: string | null;
+    status: "not started" | "started" | "ended" | null;
     createdAt: string | null;
     endedAt?: string | null;
+    startedAt?: string | null;
     participants: Participant[] | null;
     settings: Settings | null;
     start: GeoLocation | null;
@@ -79,10 +80,10 @@ export interface AuthStore {
 }
 
 export interface RidesStore {
-  rides: RideState[];
-  addRide: (ride: RideState) => void;
-  removeRide: (id: string) => void;
-  setRides: (rides: RideState[]) => void;
-  replaceRide: (ride: RideState) => void;
-  clearRides: () => void;
+    rides: RideState[];
+    addRide: (ride: RideState) => void;
+    removeRide: (id: string) => void;
+    setRides: (rides: RideState[]) => void;
+    replaceRide: (ride: RideState) => void;
+    clearRides: () => void;
 }

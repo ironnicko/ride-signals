@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { AuthStore, storage } from "./types"
 import Error from "next/error";
+import { toast } from "react-toastify";
 
 export const useAuth = create<AuthStore>()(
     persist(
@@ -19,8 +20,10 @@ export const useAuth = create<AuthStore>()(
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ email, password }),
                     });
-                    if (res.status != 200) {
-                        throw res.statusText
+                    if (!res.ok) {
+                        const errRes = await res.json();
+                        toast.error(errRes.error)
+                        throw errRes.error
                     }
                     const data = await res.json();
                     set({
@@ -29,6 +32,7 @@ export const useAuth = create<AuthStore>()(
                         isAuthenticated: true,
                         user: data.user
                     });
+                    toast.success("Signed In Successfully!")
                     return true;
                 } catch (err) {
                     set(useAuth.getInitialState());
@@ -44,9 +48,12 @@ export const useAuth = create<AuthStore>()(
                         body: JSON.stringify({ idToken }),
                     });
                     if (!res.ok) {
-                        throw Error
+                        const errRes = await res.json();
+                        toast.error(errRes.error)
+                        throw errRes.error
                     }
                     const data = await res.json();
+                    toast.success("Signed In Successfully!")
                     set({
                         accessToken: data.accessToken,
                         refreshToken: data.refreshToken,

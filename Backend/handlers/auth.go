@@ -93,7 +93,7 @@ func Login(c *gin.Context) {
 	_, _ = usersColl.UpdateByID(
 		context.Background(),
 		user.ID,
-		bson.M{"$set": bson.M{"lastloginat": primitive.NewDateTimeFromTime(time.Now().UTC())}},
+		bson.M{"$set": bson.M{"lastLoginAt": primitive.NewDateTimeFromTime(time.Now().UTC())}},
 	)
 
 	tokenPair, err := utils.GenerateTokens(user.ID.Hex())
