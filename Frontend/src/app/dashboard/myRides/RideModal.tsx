@@ -2,14 +2,14 @@
 import { RideState } from "@/stores/types";;
 import { UPDATE_RIDE } from "@/lib/graphql/mutation";
 import { X } from "lucide-react";
-import { Map, AdvancedMarker } from "@vis.gl/react-google-maps";
 import { useAuth } from "@/stores/useAuth";
-import { FitBoundsHandler } from "@/components/FitBoundsHelper";
 import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { toast } from "react-toastify";
 import { useRides } from "@/stores/useRides";
 import { useRouter } from "next/navigation";
+import { EmbedMap } from "@/components/EmbedMap";
+
 
 interface RideModalProps {
   ride: RideState;
@@ -223,24 +223,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
 
           {/* Map */}
           <div className="w-full h-64 rounded-lg overflow-hidden">
-            <Map
-              mapId={process.env.NEXT_PUBLIC_GOOGLE_MAP_ID}
-              disableDefaultUI={true}
-              scrollwheel={false}
-              keyboardShortcuts={false}
-              disableDoubleClickZoom={true}
-              style={{ width: "100%", height: "100%" }}
-              zoomControl={false}
-              gestureHandling='none'
-              clickableIcons={false}
-            >
-              <AdvancedMarker position={currentRide.start} />
-              <AdvancedMarker position={currentRide.destination} />
-              <FitBoundsHandler
-                fromLocation={currentRide.start}
-                toLocation={currentRide.destination}
-              />
-            </Map>
+          <EmbedMap start={currentRide.start!} destination={currentRide.destination!} />
           </div>
         </div>
       </div>

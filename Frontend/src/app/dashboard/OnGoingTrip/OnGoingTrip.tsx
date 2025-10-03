@@ -1,4 +1,5 @@
 import { Profile } from "@/components/Profile";
+import Timer from "@/components/Timer";
 import { UPDATE_RIDE } from "@/lib/graphql/mutation";
 import { RIDE } from "@/lib/graphql/query";
 import { GeoLocation, RideState } from "@/stores/types";
@@ -34,9 +35,8 @@ export const OnGoingTrip = ({setUserLocation} : OnGoingTripProps) => {
       (err) => console.error(err),
       { enableHighAccuracy: true, maximumAge: 0 }
     );
-    return () => navigator.geolocation.clearWatch(watchId); // cleanup
+    return () => navigator.geolocation.clearWatch(watchId);
   }, []);
-
 
   if (loading) return <p className="p-4">Loading Current Trip...</p>;
   if (error) return <p className="p-4 text-red-600">Error loading Current Trip: {error.message}</p>;
@@ -74,6 +74,7 @@ export const OnGoingTrip = ({setUserLocation} : OnGoingTripProps) => {
     <>
       <Profile className="absolute top-4 left-[12vw] flex flex-col items-center" />
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
+        <Timer ride={data?.ride!}></Timer>
         <div className="p-6 bg-white shadow-lg rounded-2xl border border-gray-200 w-80">
           <div className="grid grid-cols-3 gap-4 justify-items-center">
             {/* End Ride */}
