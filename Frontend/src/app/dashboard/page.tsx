@@ -8,19 +8,19 @@ import { TripSettingsInputs } from "./CreateTrip/TripSettingsInputs";
 import {
   AdvancedMarker,
   Map,
-  useAdvancedMarkerRef
 } from "@vis.gl/react-google-maps";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { FitBoundsHandler } from "@/components/FitBoundsHelper";
-import { GeoLocation } from "@/stores/types";
+import { GeoLocation, RideState } from "@/stores/types";
 import BottomSection from "./CreateTrip/BottomSection";
 import { useAuth } from "@/stores/useAuth";
 import { OnGoingTrip } from "./OnGoingTrip/OnGoingTrip";
 import { CircleDot } from "lucide-react";
+import { useRides } from "@/stores/useRides";
 
 export default function DashboardPage() {
-  const [createRide] = useMutation(CREATE_RIDE);
+  const [createRide] = useMutation<{createRide: RideState}>(CREATE_RIDE);
   const [formIndex, setFormIndex] = useState<number>(0);
   const [toLocation, setToLocation] = useState<GeoLocation | null>(null);
   const [userLocation, setUserLocation] = useState<GeoLocation | null>(null);
@@ -29,9 +29,9 @@ export default function DashboardPage() {
   const [fromLocationName, setFromLocationName] = useState<string | null>(null);
   const [maxRiders, setMaxRiders] = useState<number>(5);
   const {user} = useAuth.getState();
+  const {rides, setRides} = useRides.getState();
   const [visibility, setVisibility] = useState<"public" | "private">("private");
-  const [toMarkerRef] = useAdvancedMarkerRef();
-  const [fromMarkerRef] = useAdvancedMarkerRef();
+
   const router = useRouter();
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function DashboardPage() {
 
   const CreateRide = async () => {
     try {
-      await createRide({
+      const {data} = await createRide({
         variables: {
           maxRiders,
           visibility,
@@ -62,6 +62,8 @@ export default function DashboardPage() {
           destinationName: toLocationName,
         },
       });
+      rides.push(data?.createRide!);
+      setRides(rides);
       toast.success("Successfully Created Ride!");
       router.push("/dashboard/myRides");
     } catch (err) {
@@ -112,22 +114,18 @@ export default function DashboardPage() {
             defaultZoom={15}
             style={{ width: "100%", height: "100%" }}
           >
-            {fromLocation && <AdvancedMarker ref={fromMarkerRef} position={fromLocation} />}
-            {toLocation && <AdvancedMarker ref={toMarkerRef} position={toLocation} />}
-            {userLocation && (
-              <>
-                <AdvancedMarker position={userLocation}>
-                  <CircleDot className="text-blue-800 w-6 h-6" />
-                </AdvancedMarker>
-              </>
-            )}
+            {fromLocation && <AdvancedMarker  position={fromLocation} />}
+            {toLocation && <AdvancedMarker position={toLocation} />}
+            {userLocation && <AdvancedMarker position={userLocation}><CircleDot className="text-blue-800 w-6 h-6" /></AdvancedMarker>}
 
             <FitBoundsHandler fromLocation={fromLocation} toLocation={toLocation} />
           </Map>
           {
             !!user?.currentRide 
           ?
-            <OnGoingTrip>
+            <OnGoingTrip
+              setUserLocation={setUserLocation}
+            >
             </OnGoingTrip>
           : <BottomSection
             renderFormInput={renderFormInput}

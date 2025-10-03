@@ -144,7 +144,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
             <p>
               <span className="font-medium">Participants:</span>{" "}
               {currentRide.participants!.length} /{" "}
-              {isEditing ? (
+              {(isEditing && !currentRide.endedAt) ? (
                 <input
                   type="number"
                   className="w-16 border rounded p-1"
@@ -159,24 +159,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
             </p>
             <p>
               <span className="font-medium">Status:</span>{" "}
-              {isEditing ? (
-                <select
-                  className="border rounded p-1"
-                  value={formState.status as string}
-                  onChange={(e) =>
-                    setFormState((s) => ({
-                      ...s,
-                      status: e.target.value as RideState["status"],
-                    }))
-                  }
-                >
-                  <option value="not started">not started</option>
-                  <option value="started">started</option>
-                  <option value="ended">ended</option>
-                </select>
-              ) : (
-                currentRide.status
-              )}
+                {currentRide.status}
             </p>
             <p>
               <span className="font-medium">Ended At:</span>{" "}

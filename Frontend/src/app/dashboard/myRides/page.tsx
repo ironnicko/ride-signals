@@ -14,18 +14,18 @@ export default function MyRidesPage() {
   const [selectedRide, setSelectedRide] = useState<RideState | null>(null);
   const {rides, setRides} = useRides.getState();
 
-  const { data, loading, error } = useQuery(MY_RIDES, {
+  const { data, loading, error } = useQuery<{myRides : RideState[]}>(MY_RIDES, {
     fetchPolicy: "cache-and-network",
   });
 
+  
   if (loading) return <p className="p-4">Loading rides...</p>;
   if (error) return <p className="p-4 text-red-600">Error loading rides: {error.message}</p>;
 
-  if (rides.length === 0){
-    // @ts-ignore
-    setRides(data?.myRides)
+  if (data?.myRides){
+    setRides(data.myRides)
   }
-
+  
   return (
     <div className="w-full h-screen p-4 bg-gray-50">
       <div className="flex flex-row gap-5 items-center mb-4">

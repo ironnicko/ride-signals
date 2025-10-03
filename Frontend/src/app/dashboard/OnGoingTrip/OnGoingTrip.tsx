@@ -1,26 +1,45 @@
 import { Profile } from "@/components/Profile";
 import { UPDATE_RIDE } from "@/lib/graphql/mutation";
 import { RIDE } from "@/lib/graphql/query";
-import { RideState } from "@/stores/types";
+import { GeoLocation, RideState } from "@/stores/types";
 import { useAuth } from "@/stores/useAuth";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Fuel, Square, ArrowLeft, ArrowRight, RefreshCcw, OctagonX } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import { toast } from "react-toastify";
 
-export const OnGoingTrip = () => {
+interface OnGoingTripProps{
+  setUserLocation: Dispatch<SetStateAction<GeoLocation | null>>
+}
+
+export const OnGoingTrip = ({setUserLocation} : OnGoingTripProps) => {
   const { user, setUser } = useAuth.getState();
-  const [updateRide] = useMutation(UPDATE_RIDE);
   const router = useRouter();
+  const [updateRide] = useMutation(UPDATE_RIDE);
   const { data, loading, error } = useQuery<{ ride: RideState }>(RIDE, {
     variables: { rideCode: user?.currentRide! },
     fetchPolicy: "cache-and-network",
   });
 
+  useEffect(() => {
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        setUserLocation({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        });
+        console.log("Fetching Location...")
+      },
+      (err) => console.error(err),
+      { enableHighAccuracy: true, maximumAge: 0 }
+    );
+    return () => navigator.geolocation.clearWatch(watchId); // cleanup
+  }, []);
+
+
   if (loading) return <p className="p-4">Loading Current Trip...</p>;
   if (error) return <p className="p-4 text-red-600">Error loading Current Trip: {error.message}</p>;
-
 
 
   const handleSave = async (newRide : {status : string, endedAt: string}) => {
