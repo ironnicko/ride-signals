@@ -29,7 +29,7 @@ export interface GeoLocation {
 }
 
 export interface Participant { userId: string; role: string; joinedAt: string }
-export interface Settings { maxRiders: number; visibility: string }
+export interface Settings { maxRiders: number; visibility: "public" | "private" }
 
 export interface RideState {
     _id: string | null;
@@ -46,6 +46,16 @@ export interface RideState {
     destinationName: string | null;
 }
 
+export interface DashboardState {
+  formIndex: number;
+  toLocation: GeoLocation | null;
+  fromLocation: GeoLocation | null;
+  userLocation: GeoLocation | null;
+  toLocationName: string | null;
+  fromLocationName: string | null;
+  maxRiders: number;
+  visibility: "public" | "private";
+}
 
 export interface UserState {
     id: string | null

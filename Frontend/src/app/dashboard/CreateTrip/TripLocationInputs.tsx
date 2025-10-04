@@ -1,48 +1,37 @@
 import { PlaceAutocomplete } from "@/components/PlaceAutoComplete";
-import { GeoLocation } from "@/stores/types";
-import { Dispatch, SetStateAction } from "react";
+import { DashboardState } from "@/stores/types";
 
 interface TripLocationInputsProps {
-  setFormIndex: Dispatch<SetStateAction<number>>;
-  setFromLocation: Dispatch<SetStateAction<GeoLocation | null>>;
-  setToLocationName: Dispatch<SetStateAction<string | null>>
-  setFromLocationName: Dispatch<SetStateAction<string | null>>
-  setToLocation: Dispatch<SetStateAction<GeoLocation | null>>;
-  fromLocation: GeoLocation | null;
-  fromLocationName: string | null;
-  toLocation: GeoLocation | null;
-  toLocationName: string | null;
+  dashboardState: DashboardState
+  updateDashboard: (updates: Partial<DashboardState>) => void
+
 }
 
 export const TripLocationInputs = ({
-  setFormIndex,
-  setFromLocation,
-  setToLocation,
-  setFromLocationName,
-  setToLocationName,
-  fromLocation,
-  fromLocationName,
-  toLocation,
-  toLocationName
+  dashboardState,
+  updateDashboard
 }: TripLocationInputsProps) => {
+
+
+  const { fromLocation,fromLocationName,toLocation,toLocationName } = dashboardState
 
   const handleFromPlaceChanged = (place: google.maps.places.PlaceResult | null) => {
     if (place?.geometry?.location) {
-      setFromLocation({
+      updateDashboard({fromLocation :{
         lat: place.geometry.location.lat(),
         lng: place.geometry.location.lng(),
-      });
-      setFromLocationName(place.name!.toString());
+      }});
+      updateDashboard({fromLocationName: place.name!.toString()});
     }
   };
 
   const handleToPlaceChanged = (place: google.maps.places.PlaceResult | null) => {
     if (place?.geometry?.location) {
-      setToLocation({
+      updateDashboard({toLocation :{
         lat: place.geometry.location.lat(),
         lng: place.geometry.location.lng(),
-      });
-      setToLocationName(place.name!.toString());
+      }});
+      updateDashboard({toLocationName: place.name!.toString()});
     }
   };
 
@@ -74,7 +63,7 @@ export const TripLocationInputs = ({
 
       <button
         disabled={!(fromLocation && toLocation)}
-        onClick={() => setFormIndex(1)}
+        onClick={() => updateDashboard({formIndex : 1})}
         className={`mt-6 w-full px-6 py-3 rounded-lg 
           ${fromLocation && toLocation
             ? "bg-black text-white hover:bg-gray-800 cursor-pointer"

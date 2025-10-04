@@ -4,6 +4,7 @@ import { useAuth } from "@/stores/useAuth";
 import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 export default function GoogleSignInButton() {
   const {loginWithGoogle} = useAuth.getState();
@@ -27,6 +28,8 @@ export default function GoogleSignInButton() {
           router.replace("/dashboard")
         } catch (err) {
           console.error(err);
+          toast.error("Failed to Login In")
+          
         }
       },
     });

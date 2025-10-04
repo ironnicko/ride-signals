@@ -1,6 +1,5 @@
 # Start from lightweight Go image
-FROM golang:1.25.1-alpine
-
+FROM golang:alpine
 WORKDIR /app
 
 # Install dependencies

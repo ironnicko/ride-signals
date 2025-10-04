@@ -1,7 +1,7 @@
 "use client";
-import { RideState } from "@/stores/types";;
+import { DashboardState, RideState } from "@/stores/types";;
 import { UPDATE_RIDE } from "@/lib/graphql/mutation";
-import { X } from "lucide-react";
+import { OctagonX, X, PenSquareIcon, Bike, Save } from "lucide-react";
 import { useAuth } from "@/stores/useAuth";
 import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
@@ -17,20 +17,21 @@ interface RideModalProps {
 }
 
 interface UpdateRideParams{
-    visibility: string | null,
-    maxRiders: number | null,
-    endedAt: string | null,
-    startedAt: string | null,
-    status: "ended" | "started" | "not started"| null,
-
+  endedAt : string
+  startedAt: string
+  status: "ended" | "started" | "not started"| null
+  visibility: "private" | "public",
+  maxRiders: number,
 }
+
+
 
 export default function RideModal({ ride, onClose }: RideModalProps) {
   const { user, setUser } = useAuth.getState();
   const { replaceRide } = useRides.getState();
   const [isEditing, setIsEditing] = useState(false);
   const [currentRide, setCurrentRide] = useState(ride);
-  const [formState, setFormState] = useState<UpdateRideParams>({
+  const [formState, setFormState] = useState<Partial<UpdateRideParams>>({
     visibility: ride.settings!.visibility,
     maxRiders: ride.settings!.maxRiders,
     endedAt: ride.endedAt!,
@@ -47,7 +48,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
     );
   };
 
-  const handleSave = async (newRide : UpdateRideParams | null) => {
+  const handleSave = async (newRide : Partial<UpdateRideParams> | null) => {
     try {
       const replaceData = !!newRide ? newRide : formState
       const { data } = await updateRide({
@@ -125,7 +126,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
               <span className="font-medium">Visibility:</span>{" "}
               {isEditing ? (
                 <select
-                  className="border rounded p-1"
+                  className="border rounded p-1/2"
                   value={formState.visibility!}
                   onChange={(e) =>
                     setFormState((s) => ({
@@ -147,7 +148,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
               {(isEditing && !currentRide.endedAt) ? (
                 <input
                   type="number"
-                  className="w-16 border rounded p-1"
+                  className="w-16 border rounded p-1/2"
                   value={formState.maxRiders!}
                   onChange={(e) =>
                     setFormState((s) => ({ ...s, maxRiders: +e.target.value }))
@@ -171,20 +172,22 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
             </p>
             {/* Edit Options if owner */}
             {isRideOwner(user?.id!) && (
-              <div className="flex justify-center gap-3 pt-2">
+              <div className="flex justify-center gap-14 mt-2">
                 {isEditing ? (
                   <>
                     <button
                       onClick={() => handleSave(null)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer"
-                    >
-                      Save
+                        className="flex flex-col items-center cursor-pointer text-blue-600 hover:text-blue-800"
+                      >
+                        <Save />
+                        <span className="text-xs mt-1">Save</span>
                     </button>
                     <button
                       onClick={() => setIsEditing(false)}
-                      className="px-4 py-2 bg-gray-300 text-white rounded-lg hover:bg-gray-400 cursor-pointer"
-                    >
-                      Cancel
+                        className="flex flex-col items-center cursor-pointer text-gray-600 hover:text-gray-800"
+                      >
+                        <X />
+                        <span className="text-xs mt-1">Cancel</span>
                     </button>
                   </>
                 ) : (
@@ -193,26 +196,29 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
                     {currentRide.status === "not started" && (
                       <button
                         onClick={handleStartRide}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer"
+                        className="flex flex-col items-center cursor-pointer text-green-600 hover:text-green-800"
                       >
-                        Start Ride
+                        <Bike />
+                        <span className="text-xs mt-1">Start Ride</span>
                       </button>
                     )}
 
                     {currentRide.status === "started" && (
                       <button
                         onClick={handleEndRide}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
+                        className="flex flex-col items-center cursor-pointer text-red-600 hover:text-red-800"
                       >
-                        End Ride
+                        <OctagonX />
+                        <span className="text-xs mt-1">End Ride</span>
                       </button>
                     )}
 
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer"
+                      className="flex flex-col items-center cursor-pointer text-blue-600 hover:text-blue-800"
                     >
-                      Edit Ride
+                      <PenSquareIcon />
+                      <span className="text-xs mt-1">Edit Ride</span>
                     </button>
                   </>
                 )}

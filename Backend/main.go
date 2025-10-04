@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	config "github.com/ironnicko/ride-signals/Backend/config"
 	"github.com/ironnicko/ride-signals/Backend/db"
-	"github.com/ironnicko/ride-signals/Backend/kafka"
 	"github.com/ironnicko/ride-signals/Backend/routes"
 	"github.com/ironnicko/ride-signals/Backend/utils"
 	"github.com/joho/godotenv"
@@ -28,7 +27,7 @@ func main() {
 	fmt.Println(cfg)
 
 	db.Connect(cfg.MongoURI)
-	kafka.InitProducer(cfg.KafkaBrokers)
+	// kafka.InitProducer(cfg.KafkaBrokers)
 	utils.InitJWT(cfg.JWTSecret, cfg.RefreshJWTSecret)
 	utils.InitGoogleOAuth(
 		cfg.Google_Client_ID,

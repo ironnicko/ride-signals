@@ -25,7 +25,7 @@ func LoadConfig() *Config {
 		Google_Client_ID:     getEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", ""),
 		Google_Client_Secret: getEnv("GOOGLE_CLIENT_SECRET", ""),
 		Google_Redirect_URL:  getEnv("GOOGLE_REDIRECT_URL", ""),
-		ServerPort:           getEnv("PORT", "8080"),
+		ServerPort:           getEnv("SERVER_PORT", "8000"),
 		Mode:                 getEnv("MODE", "local"),
 	}
 }

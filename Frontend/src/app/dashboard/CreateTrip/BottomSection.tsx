@@ -1,11 +1,34 @@
 import { Profile } from "@/components/Profile";
-import { JSX } from "react";
+import { TripLocationInputs } from "./TripLocationInputs";
+import { TripSettingsInputs } from "./TripSettingsInputs";
+import { DashboardState } from "@/stores/types";
 
 interface BottomSectionProps{
-    renderFormInput: () => JSX.Element | undefined
+      dashboardState: DashboardState
+      updateDashboard: (updates: Partial<DashboardState>) => void
 }
 
-export default function BottomSection({renderFormInput} : BottomSectionProps){
+export default function BottomSection({dashboardState, updateDashboard} : BottomSectionProps){
+    const {formIndex} = dashboardState
+
+    const renderFormInput = () => {
+        switch (formIndex) {
+        case 0:
+            return (
+            <TripLocationInputs
+                dashboardState={dashboardState}
+                updateDashboard={updateDashboard}
+            />
+            );
+        case 1:
+            return (
+            <TripSettingsInputs
+                dashboardState={dashboardState}
+                updateDashboard={updateDashboard}
+            />
+            );
+        }
+    };
     return (
     <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
     {/* Profile + Menu */}

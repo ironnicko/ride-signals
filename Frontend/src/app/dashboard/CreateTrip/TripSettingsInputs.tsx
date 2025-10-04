@@ -1,19 +1,51 @@
 import { ArrowLeft } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
+import { DashboardState, RideState } from "@/stores/types";
+import { useMutation } from "@apollo/client/react";
+import { CREATE_RIDE } from "@/lib/graphql/mutation";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+import { useRides } from "@/stores/useRides";
 
 interface TripSettingsInputsProps{
-    setMaxRiders: Dispatch<SetStateAction<number>>,
-    setVisibility: Dispatch<SetStateAction<"public" | "private">>
-    setFormIndex: Dispatch<SetStateAction<number>>
-    maxRiders: number
-    visibility: string
-    CreateRide: () => void
-    formIndex: number
-
+    dashboardState: DashboardState
+    updateDashboard: (updates: Partial<DashboardState>) => void
 }
 
 
-export const TripSettingsInputs = ({maxRiders, setFormIndex, formIndex, visibility, setMaxRiders, setVisibility, CreateRide}: TripSettingsInputsProps) => {
+
+export const TripSettingsInputs = ({dashboardState, updateDashboard}: TripSettingsInputsProps) => {
+
+    const {formIndex, maxRiders, visibility, fromLocation, fromLocationName, toLocation, toLocationName} = dashboardState
+    const [createRide] = useMutation<{ createRide: RideState }>(CREATE_RIDE);
+
+    const { rides, setRides } = useRides.getState();
+    const router = useRouter();
+
+    const CreateRide = async () => {
+      try {
+        const { data, error } = await createRide({
+          variables: {
+            maxRiders,
+            visibility,
+            startLat: fromLocation!.lat,
+            startLng: fromLocation!.lng,
+            startName: fromLocationName,
+            destinationLat: toLocation!.lat,
+            destinationLng: toLocation!.lng,
+            destinationName: toLocationName,
+          },
+        });
+
+        if (error) throw error;
+
+        setRides([...rides, data!.createRide]);
+        toast.success("Successfully Created Ride!");
+        router.push("/dashboard/myRides");
+      } catch (err) {
+        toast.error("Failed to Create Ride!");
+        console.error(err);
+      }
+    };
 
     return (
       <>
@@ -21,7 +53,7 @@ export const TripSettingsInputs = ({maxRiders, setFormIndex, formIndex, visibili
 
           <h2 className="flex flex-row gap-4 text-2xl font-bold">
             {formIndex > 0 ? (<button
-                onClick={() => setFormIndex(Math.max(0, formIndex - 1))}
+                onClick={() => updateDashboard({formIndex : Math.max(0, formIndex - 1)})}
                 className="flex items-center rounded-full gap-1 px-4 py-2 bg-white cursor-pointer"
               >
                 <ArrowLeft size={18} />
@@ -43,7 +75,7 @@ export const TripSettingsInputs = ({maxRiders, setFormIndex, formIndex, visibili
               min={1}
               max={50}
               value={Math.min(50, maxRiders)}
-              onChange={(e) => setMaxRiders(Number(e.target.value))}
+              onChange={(e) => updateDashboard({maxRiders : Number(e.target.value)})}
               className="w-3/4 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
               placeholder="Enter number of riders"
             />
@@ -58,7 +90,7 @@ export const TripSettingsInputs = ({maxRiders, setFormIndex, formIndex, visibili
                   type="radio"
                   value="public"
                   checked={visibility === "public"}
-                  onChange={() => setVisibility("public")}
+                  onChange={() => updateDashboard({visibility : "public"})}
                 />
                 <span>Public</span>
               </label>
@@ -68,7 +100,7 @@ export const TripSettingsInputs = ({maxRiders, setFormIndex, formIndex, visibili
                   type="radio"
                   value="private"
                   checked={visibility === "private"}
-                  onChange={() => setVisibility("private")}
+                  onChange={() => updateDashboard({visibility : "private"})}
                 />
                 <span>Private</span>
               </label>

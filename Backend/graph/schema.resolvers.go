@@ -6,14 +6,12 @@ package graph
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
 
 	"github.com/ironnicko/ride-signals/Backend/db"
 	"github.com/ironnicko/ride-signals/Backend/graph/model"
-	"github.com/ironnicko/ride-signals/Backend/kafka"
 	"github.com/ironnicko/ride-signals/Backend/models"
 	"github.com/ironnicko/ride-signals/Backend/utils"
 	"go.mongodb.org/mongo-driver/bson"
@@ -70,12 +68,11 @@ func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibi
 // UpdateRide is the resolver for the updateRide field.
 func (r *mutationResolver) UpdateRide(ctx context.Context, rideCode string, maxRiders *int, visibility *string, endedAt *string, startedAt *string, status *string) (*model.Ride, error) {
 	userId := ctx.Value("userId").(string)
-
-	coll := db.GetCollection("bikeapp", "rides")
-
+	ridesColl := db.GetCollection("bikeapp", "rides")
+	
 	// Ensure the ride exists and belongs to the user
 	var ride model.Ride
-	err := coll.FindOne(ctx, bson.M{"ridecode": rideCode}).Decode(&ride)
+	err := ridesColl.FindOne(ctx, bson.M{"ridecode": rideCode}).Decode(&ride)
 	if err != nil {
 		return nil, fmt.Errorf("ride not found: %w", err)
 	}
@@ -105,7 +102,7 @@ func (r *mutationResolver) UpdateRide(ctx context.Context, rideCode string, maxR
 		return &ride, nil // nothing to update
 	}
 
-	_, err = coll.UpdateOne(
+	_, err = ridesColl.UpdateOne(
 		ctx,
 		bson.M{"ridecode": rideCode},
 		bson.M{"$set": update},
@@ -115,7 +112,7 @@ func (r *mutationResolver) UpdateRide(ctx context.Context, rideCode string, maxR
 	}
 
 	// Return the updated ride
-	err = coll.FindOne(ctx, bson.M{"ridecode": rideCode}).Decode(&ride)
+	err = ridesColl.FindOne(ctx, bson.M{"ridecode": rideCode}).Decode(&ride)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch updated ride: %w", err)
 	}
@@ -206,10 +203,10 @@ func (r *mutationResolver) SendSignal(ctx context.Context, rideCode string, sign
 		return false, err
 	}
 
-	msg, _ := json.Marshal(sig)
-	if err := kafka.PublishSignal(rideCode, msg); err != nil {
-		return false, err
-	}
+	// msg, _ := json.Marshal(sig)
+	// if err := kafka.PublishSignal(rideCode, msg); err != nil {
+	// 	return false, err
+	// }
 
 	return true, nil
 }

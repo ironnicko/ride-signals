@@ -25,6 +25,8 @@ export default function SignIn() {
         router.replace("/dashboard")
       }
     } catch(err){
+      console.error(err)
+      toast.error("Failed to Login In")
     }
   }
 
