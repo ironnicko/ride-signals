@@ -6,7 +6,8 @@ import { Label } from "../../components/ui/label";
 
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import GoogleSignInButton from "@/components/signInWithGoogle";
+import GoogleSignInButton from "@/app/signin/signInWithGoogle";
+import { useAuth } from "@/stores/useAuth";
 
 export default function SignUp() {
   const [name, setName] = useState<string>("");
@@ -16,37 +17,21 @@ export default function SignUp() {
 
   const router = useRouter();
 
+  const {signup} = useAuth.getState()
+
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
-
+    e.preventDefault()
     try {
-      const res = await fetch("/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, email, password }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to sign up");
+      const isLoggedIn = await signup(name, email, password)
+      if (isLoggedIn == true){
+        router.replace("/dashboard")
       }
-
-      toast.success("Account created successfully!");
-      router.replace("/signin"); // redirect to signin page
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err.message || "Failed to sign up");
+    } catch(err){
+      console.error(err)
+      toast.error("Failed to Sign Up")
     }
-  };
+  }
 
-  // Disable button if passwords don't match or fields are empty
   const isSignUpDisabled =
     !name || !email || !password || !confirmPassword || password !== confirmPassword;
 

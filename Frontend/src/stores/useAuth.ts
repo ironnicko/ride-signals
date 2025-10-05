@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { AuthStore, storage } from "./types"
 import { toast } from "react-toastify";
+import { useRides } from "./useRides";
 
 export const useAuth = create<AuthStore>()(
     persist(
@@ -38,7 +39,32 @@ export const useAuth = create<AuthStore>()(
                     return false;
                 }
             },
-
+            signup: async (name, email, password) => {
+                try {
+                    const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/signup", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name, email, password }),
+                    });
+                    if (!res.ok) {
+                        const errRes = await res.json();
+                        toast.error(errRes.error)
+                        throw errRes.error
+                    }
+                    const data = await res.json();
+                    set({
+                        accessToken: data.accessToken,
+                        refreshToken: data.refreshToken,
+                        isAuthenticated: true,
+                        user: data.user
+                    });
+                    toast.success("Signed Up Successfully!")
+                    return true;
+                } catch (err) {
+                    set(useAuth.getInitialState());
+                    return false;
+                }
+            },
             loginWithGoogle: async (idToken) => {
                 try {
                     const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/auth/google", {

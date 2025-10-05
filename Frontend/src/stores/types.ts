@@ -47,14 +47,14 @@ export interface RideState {
 }
 
 export interface DashboardState {
-  formIndex: number;
-  toLocation: GeoLocation | null;
-  fromLocation: GeoLocation | null;
-  userLocation: GeoLocation | null;
-  toLocationName: string | null;
-  fromLocationName: string | null;
-  maxRiders: number;
-  visibility: "public" | "private";
+    formIndex: number;
+    toLocation: GeoLocation | null;
+    fromLocation: GeoLocation | null;
+    userLocation: GeoLocation | null;
+    toLocationName: string | null;
+    fromLocationName: string | null;
+    maxRiders: number;
+    visibility: "public" | "private";
 }
 
 export interface UserState {
@@ -84,6 +84,7 @@ export interface AuthStore {
     isAuthenticated: Boolean;
     user: UserState | null;
     login: (email: string, password: string) => Promise<Boolean>;
+    signup: (name: string, email: string, password: string) => Promise<Boolean>;
     setUser: (user: UserState) => void
     loginWithGoogle: (idToken: string) => Promise<void>;
     logout: () => void;

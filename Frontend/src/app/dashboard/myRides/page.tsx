@@ -49,7 +49,10 @@ export default function MyRidesPage() {
       )}
 
       {selectedRide && (
-        <RideModal ride={selectedRide}  onClose={() => setSelectedRide(null)} />
+        <RideModal ride={selectedRide}  onClose={() => {
+          setSelectedRide(null);
+          router.refresh();
+        }} />
       )}
     </div>
   );
