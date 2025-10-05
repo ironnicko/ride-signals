@@ -60,8 +60,8 @@ func handleGoogleUser(c *gin.Context, googleUser GoogleUser) (map[string]interfa
 				Name:         googleUser.Name,
 				Email:        googleUser.Email,
 				PasswordHash: GenerateRandomHash(),
-				CreatedAt:    primitive.NewDateTimeFromTime(time.Now().UTC()),
-				LastLoginAt:  primitive.NewDateTimeFromTime(time.Now().UTC()),
+				CreatedAt:    time.Now().UTC().Format(time.RFC3339),
+				LastLoginAt:  time.Now().UTC().Format(time.RFC3339),
 				IsActive:     true,
 			}
 
@@ -79,7 +79,7 @@ func handleGoogleUser(c *gin.Context, googleUser GoogleUser) (map[string]interfa
 		_, _ = coll.UpdateOne(
 			context.Background(),
 			bson.M{"_id": dbUser.ID},
-			bson.M{"$set": bson.M{"lastLoginAt": primitive.NewDateTimeFromTime(time.Now().UTC())}},
+			bson.M{"$set": bson.M{"lastLoginAt": time.Now().UTC().Format(time.RFC3339)}},
 		)
 	}
 

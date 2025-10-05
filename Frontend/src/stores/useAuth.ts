@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { AuthStore, storage } from "./types"
-import Error from "next/error";
 import { toast } from "react-toastify";
 
 export const useAuth = create<AuthStore>()(

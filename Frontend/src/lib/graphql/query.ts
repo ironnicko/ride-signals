@@ -32,19 +32,13 @@ export const MY_RIDES = gql`
 `;
 
 export const RIDE = gql`
-query Ride($rideCode : String!){
-    ride(rideCode : $rideCode){
+    query Ride($rideCode: String!) {
+    ride(rideCode: $rideCode) {
         rideCode
         status
-        createdAt
-        createdBy
         startedAt
         endedAt
-        participants{
-            userId
-            role
-            joinedAt
-        }
+        createdAt
         settings{
             maxRiders
             visibility
@@ -59,6 +53,12 @@ query Ride($rideCode : String!){
         }
         startName
         destinationName
+        participants{
+            userId
+            role
+            joinedAt
+        }
     }
 }
+
 `

@@ -7,8 +7,8 @@ type User struct {
 	Name         string             `bson:"name" json:"name"`
 	Email        string             `bson:"email" json:"email"`
 	PasswordHash string             `bson:"passwordHash" json:"-"`
-	CreatedAt    primitive.DateTime `bson:"createdAt" json:"createdAt"`
-	LastLoginAt  primitive.DateTime `bson:"lastLoginAt" json:"lastLoginAt"`
+	CreatedAt    string             `bson:"createdAt" json:"createdAt"`
+	LastLoginAt  string             `bson:"lastLoginAt" json:"lastLoginAt"`
 	IsActive     bool               `bson:"isActive" json:"isActive"`
 	CurrentRide  *string            `bson:"currentRide,omitempty" json:"currentRide,omitempty"`
 }

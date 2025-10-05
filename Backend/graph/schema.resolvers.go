@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/ironnicko/ride-signals/Backend/db"
-	"github.com/ironnicko/ride-signals/Backend/graph/model"
 	"github.com/ironnicko/ride-signals/Backend/models"
 	"github.com/ironnicko/ride-signals/Backend/utils"
 	"go.mongodb.org/mongo-driver/bson"
@@ -20,128 +19,117 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// CreateRide is the resolver for the createRide field.
-func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64, startName string, destinationName string) (*model.Ride, error) {
-	userId := ctx.Value("userId").(string)
-	participants := []*model.Participant{
+// --- CreateRide ---
+func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64, startName string, destinationName string) (*models.Ride, error) {
+	userIDHex := ctx.Value("userId").(string)
+	userID, err := primitive.ObjectIDFromHex(userIDHex)
+	if err != nil {
+		return nil, fmt.Errorf("invalid userId: %w", err)
+	}
+
+	participants := []models.Participant{
 		{
-			UserID:   userId,
+			UserID:   userID,
 			Role:     "leader",
 			JoinedAt: time.Now().UTC().Format(time.RFC3339),
 		},
 	}
 
-	startLocation, err := getGeoLocation(&startLat, &startLng)
-	if err != nil {
-		return nil, fmt.Errorf("invalid start location: %w", err)
-	}
+	startLocation := models.GeoLocation{Lat: startLat, Lng: startLng}
+	destLocation := models.GeoLocation{Lat: destinationLat, Lng: destinationLng}
 
-	destinationLocation, err := getGeoLocation(&destinationLat, &destinationLng)
-	if err != nil {
-		return nil, fmt.Errorf("invalid destination location: %w", err)
-	}
-
-	ride := &model.Ride{
-		RideCode: utils.GenRideCode(),
-		Status:   "not started",
-		Settings: &model.RideSettings{
-			MaxRiders:  maxRiders,
-			Visibility: visibility,
-		},
-		Participants:    participants,
+	ride := &models.Ride{
+		ID:              primitive.NewObjectID(),
+		RideCode:        utils.GenRideCode(),
+		Status:          "not started",
 		CreatedAt:       time.Now().UTC().Format(time.RFC3339),
-		CreatedBy:       userId,
+		Participants:    participants,
+		Settings:        models.RideSettings{MaxRiders: maxRiders, Visibility: visibility},
 		Start:           startLocation,
-		Destination:     destinationLocation,
+		Destination:     destLocation,
 		StartName:       startName,
 		DestinationName: destinationName,
+		CreatedBy:       userID,
 	}
 
 	coll := db.GetCollection("bikeapp", "rides")
-	_, err = coll.InsertOne(ctx, ride)
-	if err != nil {
+	if _, err := coll.InsertOne(ctx, ride); err != nil {
 		return nil, err
 	}
+
 	return ride, nil
 }
 
-// UpdateRide is the resolver for the updateRide field.
-func (r *mutationResolver) UpdateRide(ctx context.Context, rideCode string, maxRiders *int, visibility *string, endedAt *string, startedAt *string, status *string) (*model.Ride, error) {
-	userId := ctx.Value("userId").(string)
-	ridesColl := db.GetCollection("bikeapp", "rides")
-	
-	// Ensure the ride exists and belongs to the user
-	var ride model.Ride
-	err := ridesColl.FindOne(ctx, bson.M{"ridecode": rideCode}).Decode(&ride)
+// --- UpdateRide ---
+func (r *mutationResolver) UpdateRide(ctx context.Context, rideCode string, requestType *string, maxRiders *int, visibility *string, endedAt *string, startedAt *string, status *string) (*models.Ride, error) {
+	userIDHex := ctx.Value("userId").(string)
+	userID, err := primitive.ObjectIDFromHex(userIDHex)
 	if err != nil {
-		return nil, fmt.Errorf("ride not found: %w", err)
+		return nil, fmt.Errorf("invalid userId: %w", err)
 	}
 
-	if ride.CreatedBy != userId {
-		return nil, fmt.Errorf("unauthorized: you are not the owner of this ride")
+	ridesColl := db.GetCollection("bikeapp", "rides")
+
+	var ride models.Ride
+	if err := ridesColl.FindOne(ctx, bson.M{"rideCode": rideCode}).Decode(&ride); err != nil {
+		return nil, fmt.Errorf("ride not found: %w", err)
 	}
 
 	update := bson.M{}
 	if maxRiders != nil {
-		update["settings.maxriders"] = *maxRiders
+		update["settings.maxRiders"] = *maxRiders
 	}
 	if visibility != nil {
 		update["settings.visibility"] = *visibility
 	}
-	if endedAt != nil {
-		update["endedat"] = *endedAt
-	}
 	if startedAt != nil {
-		update["startedat"] = *startedAt
+		update["startedAt"] = *startedAt
+	}
+	if endedAt != nil {
+		update["endedAt"] = *endedAt
 	}
 	if status != nil {
 		update["status"] = *status
 	}
 
-	if len(update) == 0 {
-		return &ride, nil // nothing to update
+	if len(update) > 0 {
+		if _, err := ridesColl.UpdateOne(ctx, bson.M{"rideCode": rideCode}, bson.M{"$set": update}); err != nil {
+			return nil, fmt.Errorf("failed to update ride: %w", err)
+		}
 	}
 
-	_, err = ridesColl.UpdateOne(
-		ctx,
-		bson.M{"ridecode": rideCode},
-		bson.M{"$set": update},
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to update ride: %w", err)
+	if requestType != nil {
+		usersColl := db.GetCollection("bikeapp", "users")
+		switch *requestType {
+		case "start":
+			_, err = usersColl.UpdateOne(ctx, bson.M{"_id": userID}, bson.M{"$set": bson.M{"currentRide": rideCode}})
+		case "end":
+			_, err = usersColl.UpdateOne(ctx, bson.M{"_id": userID}, bson.M{"$set": bson.M{"currentRide": ""}})
+		}
+		if err != nil {
+			return nil, fmt.Errorf("failed to update user: %w", err)
+		}
 	}
 
-	// Return the updated ride
-	err = ridesColl.FindOne(ctx, bson.M{"ridecode": rideCode}).Decode(&ride)
-	if err != nil {
+	if err := ridesColl.FindOne(ctx, bson.M{"rideCode": rideCode}).Decode(&ride); err != nil {
 		return nil, fmt.Errorf("failed to fetch updated ride: %w", err)
 	}
 
 	return &ride, nil
 }
 
-// JoinRide is the resolver for the joinRide field.
-func (r *mutationResolver) JoinRide(ctx context.Context, rideCode string, role string) (*model.Ride, error) {
-	userIdVal := ctx.Value("userId")
-	if userIdVal == nil {
-		return nil, errors.New("unauthorized: no userId in context")
-	}
-
-	userIdHex, ok := userIdVal.(string)
-	if !ok {
-		return nil, errors.New("invalid userId type in context")
-	}
-
-	userID, err := primitive.ObjectIDFromHex(userIdHex)
+// --- JoinRide ---
+func (r *mutationResolver) JoinRide(ctx context.Context, rideCode string, role string) (*models.Ride, error) {
+	userIDHex := ctx.Value("userId").(string)
+	userID, err := primitive.ObjectIDFromHex(userIDHex)
 	if err != nil {
-		return nil, fmt.Errorf("invalid userId format: %w", err)
+		return nil, fmt.Errorf("invalid userId: %w", err)
 	}
 
 	coll := db.GetCollection("bikeapp", "rides")
 
-	var ride model.Ride
-	err = coll.FindOne(ctx, bson.M{"ridecode": rideCode}).Decode(&ride)
-	if err != nil {
+	var ride models.Ride
+	if err := coll.FindOne(ctx, bson.M{"rideCode": rideCode}).Decode(&ride); err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, fmt.Errorf("ride not found")
 		}
@@ -149,7 +137,7 @@ func (r *mutationResolver) JoinRide(ctx context.Context, rideCode string, role s
 	}
 
 	for _, p := range ride.Participants {
-		if p.UserID == userID.Hex() {
+		if p.UserID == userID {
 			return &ride, nil
 		}
 	}
@@ -158,110 +146,112 @@ func (r *mutationResolver) JoinRide(ctx context.Context, rideCode string, role s
 		return nil, fmt.Errorf("ride is full: max riders = %d", ride.Settings.MaxRiders)
 	}
 
-	participant := model.Participant{
-		UserID:   userID.Hex(),
+	newParticipant := models.Participant{
+		UserID:   userID,
 		Role:     role,
 		JoinedAt: time.Now().UTC().Format(time.RFC3339),
 	}
 
-	update := bson.M{"$push": bson.M{"participants": participant}}
+	update := bson.M{"$push": bson.M{"participants": newParticipant}}
 	res := coll.FindOneAndUpdate(
 		ctx,
-		bson.M{"ridecode": rideCode},
+		bson.M{"rideCode": rideCode},
 		update,
 		options.FindOneAndUpdate().SetReturnDocument(options.After),
 	)
 
-	var updatedRide model.Ride
-	if err := res.Decode(&updatedRide); err != nil {
+	var updated models.Ride
+	if err := res.Decode(&updated); err != nil {
 		return nil, fmt.Errorf("failed to decode updated ride: %w", err)
 	}
 
-	return &updatedRide, nil
+	return &updated, nil
 }
 
-// SendSignal is the resolver for the sendSignal field.
+// --- SendSignal ---
 func (r *mutationResolver) SendSignal(ctx context.Context, rideCode string, signalType string, lat *float64, lng *float64) (bool, error) {
-	userId := ctx.Value("userId").(string)
-	sig := model.Signal{
-		RideCode:  rideCode,
-		FromUser:  userId,
-		Type:      signalType,
-		Timestamp: time.Now().UTC().Format(time.RFC3339),
+	userIDHex := ctx.Value("userId").(string)
+	userID, err := primitive.ObjectIDFromHex(userIDHex)
+	if err != nil {
+		return false, fmt.Errorf("invalid userId: %w", err)
 	}
 
-	var err error
-	sig.Location, err = getGeoLocation(lat, lng)
+	var location *models.GeoLocation
+	if lat != nil && lng != nil {
+		location = &models.GeoLocation{Lat: *lat, Lng: *lng}
+	}
 
-	if err != nil {
-		return false, err
+	signal := models.Signal{
+		ID:        primitive.NewObjectID(),
+		RideCode:  rideCode,
+		FromUser:  userID,
+		Type:      signalType,
+		Timestamp: time.Now().UTC().Format(time.RFC3339),
+		Location:  location,
 	}
 
 	coll := db.GetCollection("bikeapp", "signals")
-	_, err = coll.InsertOne(ctx, sig)
-	if err != nil {
+	if _, err := coll.InsertOne(ctx, signal); err != nil {
 		return false, err
 	}
-
-	// msg, _ := json.Marshal(sig)
-	// if err := kafka.PublishSignal(rideCode, msg); err != nil {
-	// 	return false, err
-	// }
 
 	return true, nil
 }
 
-// Me is the resolver for the me field.
-func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
-	var dbUser models.User
-	coll := db.GetCollection("bikeapp", "users")
+// --- Participant Field Resolvers ---
+func (r *participantResolver) UserID(ctx context.Context, obj *models.Participant) (string, error) {
+	return obj.UserID.Hex(), nil
+}
 
-	userId := ctx.Value("userId").(string)
-	oid, err := primitive.ObjectIDFromHex(userId)
+// --- Query Resolvers ---
+func (r *queryResolver) Me(ctx context.Context) (*models.User, error) {
+	userIDHex := ctx.Value("userId").(string)
+	userID, err := primitive.ObjectIDFromHex(userIDHex)
 	if err != nil {
-		return nil, errors.New("userId invalid")
+		return nil, fmt.Errorf("invalid userId: %w", err)
 	}
 
-	err = coll.FindOne(ctx, bson.M{"_id": oid}).Decode(&dbUser)
-	if err != nil {
+	coll := db.GetCollection("bikeapp", "users")
+
+	var user models.User
+	if err := coll.FindOne(ctx, bson.M{"_id": userID}).Decode(&user); err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, errors.New("user not found")
 		}
 		return nil, err
 	}
-
-	return &model.User{
-		ID:          dbUser.ID.Hex(),
-		Name:        dbUser.Name,
-		Email:       dbUser.Email,
-		CurrentRide: *dbUser.CurrentRide,
-	}, nil
+	return &user, nil
 }
 
 // Ride is the resolver for the ride field.
-func (r *queryResolver) Ride(ctx context.Context, rideCode string) (*model.Ride, error) {
+func (r *queryResolver) Ride(ctx context.Context, rideCode string) (*models.Ride, error) {
 	coll := db.GetCollection("bikeapp", "rides")
-	var ride model.Ride
-	err := coll.FindOne(ctx, bson.M{"ridecode": rideCode}).Decode(&ride)
-	if err != nil {
+
+	var ride models.Ride
+	if err := coll.FindOne(ctx, bson.M{"rideCode": rideCode}).Decode(&ride); err != nil {
 		return nil, err
 	}
 	return &ride, nil
 }
 
 // MyRides is the resolver for the myRides field.
-func (r *queryResolver) MyRides(ctx context.Context) ([]*model.Ride, error) {
-	userID := ctx.Value("userId").(string)
+func (r *queryResolver) MyRides(ctx context.Context) ([]*models.Ride, error) {
+	userIDHex := ctx.Value("userId").(string)
+	userID, err := primitive.ObjectIDFromHex(userIDHex)
+	if err != nil {
+		return nil, fmt.Errorf("invalid userId: %w", err)
+	}
+
 	coll := db.GetCollection("bikeapp", "rides")
-	cursor, err := coll.Find(ctx, bson.M{"participants.userid": userID})
+	cursor, err := coll.Find(ctx, bson.M{"participants.userId": userID})
 	if err != nil {
 		return nil, err
 	}
 	defer cursor.Close(ctx)
 
-	var rides []*model.Ride
+	var rides []*models.Ride
 	for cursor.Next(ctx) {
-		var ride model.Ride
+		var ride models.Ride
 		if err := cursor.Decode(&ride); err != nil {
 			return nil, err
 		}
@@ -270,11 +260,52 @@ func (r *queryResolver) MyRides(ctx context.Context) ([]*model.Ride, error) {
 	return rides, nil
 }
 
+// --- Ride Field Resolvers ---
+func (r *rideResolver) ID(ctx context.Context, obj *models.Ride) (string, error) {
+	return obj.ID.Hex(), nil
+}
+
+// CreatedBy is the resolver for the createdBy field.
+func (r *rideResolver) CreatedBy(ctx context.Context, obj *models.Ride) (string, error) {
+	return obj.CreatedBy.Hex(), nil
+}
+
+// --- Signal Field Resolvers ---
+func (r *signalResolver) ID(ctx context.Context, obj *models.Signal) (string, error) {
+	return obj.ID.Hex(), nil
+}
+
+// FromUser is the resolver for the fromUser field.
+func (r *signalResolver) FromUser(ctx context.Context, obj *models.Signal) (string, error) {
+	return obj.FromUser.Hex(), nil
+}
+
+// --- User Field Resolvers ---
+func (r *userResolver) ID(ctx context.Context, obj *models.User) (string, error) {
+	return obj.ID.Hex(), nil
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
+
+// Participant returns ParticipantResolver implementation.
+func (r *Resolver) Participant() ParticipantResolver { return &participantResolver{r} }
 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+// Ride returns RideResolver implementation.
+func (r *Resolver) Ride() RideResolver { return &rideResolver{r} }
+
+// Signal returns SignalResolver implementation.
+func (r *Resolver) Signal() SignalResolver { return &signalResolver{r} }
+
+// User returns UserResolver implementation.
+func (r *Resolver) User() UserResolver { return &userResolver{r} }
+
 type mutationResolver struct{ *Resolver }
+type participantResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type rideResolver struct{ *Resolver }
+type signalResolver struct{ *Resolver }
+type userResolver struct{ *Resolver }

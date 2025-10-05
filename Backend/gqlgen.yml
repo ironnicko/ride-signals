@@ -6,12 +6,24 @@ exec:
   layout: single-file
   filename: graph/generated.go
 
-model:
-  filename: graph/model/models_gen.go
-  package: model
 
 resolver:
-  package: graph
   layout: follow-schema
   dir: graph
+  package: graph
   filename_template: "{name}.resolvers.go"
+
+# Map GraphQL types to your custom Go structs in the `models` package
+models:
+  Ride:
+    model: github.com/ironnicko/ride-signals/Backend/models.Ride
+  User:
+    model: github.com/ironnicko/ride-signals/Backend/models.User
+  RideSettings:
+    model: github.com/ironnicko/ride-signals/Backend/models.RideSettings
+  GeoLocation:
+    model: github.com/ironnicko/ride-signals/Backend/models.GeoLocation
+  Participant:
+    model: github.com/ironnicko/ride-signals/Backend/models.Participant
+  Signal:
+    model: github.com/ironnicko/ride-signals/Backend/models.Signal

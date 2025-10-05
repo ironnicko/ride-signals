@@ -15,7 +15,7 @@ interface OnGoingTripProps{
 export const OnGoingTrip = ({updateDashboard} : OnGoingTripProps) => {
   const { user } = useAuth.getState();
   const { data, loading, error } = useQuery<{ ride: RideState }>(RIDE, {
-    variables: { rideCode: user?.currentRide! },
+    variables: { rideCode: user.currentRide },
     fetchPolicy: "cache-and-network",
   });
 
@@ -42,7 +42,7 @@ export const OnGoingTrip = ({updateDashboard} : OnGoingTripProps) => {
     <>
       <Profile className="absolute top-4 left-[12vw] flex flex-col items-center" />
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
-        <Timer ride={data?.ride!}></Timer>
+        <Timer ride={data.ride}></Timer>
         <div className="p-6 bg-white shadow-lg rounded-2xl border border-gray-200 w-80">
           <div className="grid grid-cols-3 gap-4 justify-items-center">
 

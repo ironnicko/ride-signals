@@ -50,22 +50,24 @@ export const CREATE_RIDE = gql`
 
 
 export const UPDATE_RIDE = gql`
-  mutation UpdateRide(
-    $rideCode: String!
-    $maxRiders: Int
-    $visibility: String
-    $endedAt: String
-    $startedAt: String
-    $status: String
-  ) {
-    updateRide(
-      rideCode: $rideCode
-      maxRiders: $maxRiders
-      visibility: $visibility
-      startedAt: $startedAt
-      endedAt: $endedAt
-      status: $status
-    ) {
+mutation UpdateRide(
+  $rideCode: String!,
+  $requestType: String,
+  $maxRiders: Int,
+  $visibility: String,
+  $startedAt: String,
+  $endedAt: String,
+  $status: String
+) {
+  updateRide(
+    rideCode: $rideCode,
+    requestType: $requestType,
+    maxRiders: $maxRiders,
+    visibility: $visibility,
+    startedAt: $startedAt,
+    endedAt: $endedAt,
+    status: $status
+  )  {
       rideCode
       status
       startedAt

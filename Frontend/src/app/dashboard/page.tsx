@@ -66,7 +66,7 @@ export default function DashboardPage() {
           {toLocation && <AdvancedMarker position={toLocation} />}
           {userLocation && (
             <AdvancedMarker position={userLocation}>
-              <CircleDot className="text-blue-800 w-6 h-6" />
+              <CircleDot className="text-blue-800 w-8 h-8" />
             </AdvancedMarker>
           )}
 

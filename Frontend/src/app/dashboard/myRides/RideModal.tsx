@@ -1,5 +1,5 @@
 "use client";
-import { DashboardState, RideState } from "@/stores/types";;
+import { RideState } from "@/stores/types";;
 import { UPDATE_RIDE } from "@/lib/graphql/mutation";
 import { OctagonX, X, PenSquareIcon, Bike, Save } from "lucide-react";
 import { useAuth } from "@/stores/useAuth";
@@ -22,6 +22,7 @@ interface UpdateRideParams{
   status: "ended" | "started" | "not started"| null
   visibility: "private" | "public",
   maxRiders: number,
+  requestType: "start" | "end" | null
 }
 
 
@@ -48,52 +49,56 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
     );
   };
 
-  const handleSave = async (newRide : Partial<UpdateRideParams> | null) => {
+  const handleRideChange = async (
+    newStatus: "started" | "ended" | null
+  ) => {
     try {
-      const replaceData = !!newRide ? newRide : formState
+      const now = new Date().toISOString();
+
+      const updates: Partial<UpdateRideParams> = {
+        ...formState,
+        status: newStatus,
+        startedAt: newStatus === "started" ? now : formState.startedAt,
+        endedAt: newStatus === "ended" ? now : formState.endedAt,
+        requestType : newStatus == "started" ? "start" : (newStatus == 'ended' ? "end" : null),
+      };
+
       const { data } = await updateRide({
         variables: {
           rideCode: currentRide.rideCode,
-          ...replaceData,
+          ...updates,
         },
       });
+
       // @ts-ignore
       const updatedRide = data.updateRide;
       setCurrentRide(updatedRide);
       replaceRide(updatedRide);
-      toast.success("Ride updated!");
-      setIsEditing(false);
+
+      // Update user state safely
+      if (newStatus === "started") {
+        setUser({ ...user!, currentRide: ride.rideCode });
+        router.push("/dashboard");
+        toast.success("Ride started!");
+      } else if (newStatus === "ended") {
+        setUser({ ...user!, currentRide: null });
+        toast.success("Ride ended!");
+      } else{
+        toast.success("Ride Updated!")
+        setIsEditing(false);
+      }
+
     } catch (err) {
-      toast.error("Failed to update ride");
+      toast.error(`Failed to ${newStatus} ride`);
       console.error(err);
     }
   };
 
-  const handleEndRide = async () => {
-    const now = new Date();
-    const isoString = now.toISOString();
-    formState.status = "ended"
-    formState.endedAt = isoString
 
-    if (user?.currentRide === ride.rideCode){
-      user.currentRide = null
-      setUser(user);
-    }
+  const handleStartRide = () => handleRideChange("started");
+  const handleEndRide = () => handleRideChange("ended");
 
-    await handleSave(formState);
-  }
 
-  const handleStartRide = async () => {
-    const now = new Date();
-    const isoString = now.toISOString();
-    formState.status = "started"
-    formState.startedAt = isoString
-    user!.currentRide = ride.rideCode
-    setUser(user!);
-    await handleSave(formState);
-    router.push("/dashboard")
-  }
-  
   return (
     <div className="fixed inset-0 bg-gray-200/[.75] flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl w-[90vw] max-w-3xl p-6 relative">
@@ -176,7 +181,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
                 {isEditing ? (
                   <>
                     <button
-                      onClick={() => handleSave(null)}
+                      onClick={() => handleRideChange(null)}
                         className="flex flex-col items-center cursor-pointer text-blue-600 hover:text-blue-800"
                       >
                         <Save />

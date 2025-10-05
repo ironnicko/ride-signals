@@ -5,11 +5,11 @@ type User {
   createdAt: String!
   lastLoginAt: String!
   isActive: Boolean!
-  currentRide: String!
+  currentRide: String
 }
 
 type Ride {
-  _id: ID
+  id: ID!
   rideCode: String!
   status: String!
   createdAt: String!
@@ -35,18 +35,18 @@ type RideSettings {
   visibility: String!
 }
 
+type GeoLocation {
+  lat: Float!
+  lng: Float!
+}
+
 type Signal {
-  _id: ID
+  id: ID!
   rideCode: String!
   fromUser: ID!
   type: String!
   timestamp: String!
-  location: GeoLocation!
-}
-
-type GeoLocation {
-  lat: Float!
-  lng: Float!
+  location: GeoLocation
 }
 
 type Query {
@@ -66,15 +66,19 @@ type Mutation {
     startName: String!
     destinationName: String!
   ): Ride!
+
   updateRide(
     rideCode: String!
+    requestType: String
     maxRiders: Int
     visibility: String
     endedAt: String
     startedAt: String
     status: String
   ): Ride!
+
   joinRide(rideCode: String!, role: String!): Ride!
+
   sendSignal(
     rideCode: String!
     signalType: String!

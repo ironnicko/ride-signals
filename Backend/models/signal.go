@@ -9,6 +9,6 @@ type Signal struct {
     RideCode  string             `bson:"rideCode" json:"rideCode"`
     FromUser  primitive.ObjectID `bson:"fromUser" json:"fromUser"`
     Type      string             `bson:"type" json:"type"`
-    Timestamp primitive.DateTime `bson:"timestamp" json:"timestamp"`
+    Timestamp string `bson:"timestamp" json:"timestamp"`
     Location  *GeoLocation       `bson:"location,omitempty" json:"location,omitempty"`
 }
