@@ -22,7 +22,7 @@ type Ride {
   destination: GeoLocation!
   startName: String!
   destinationName: String!
-  tripName : String!
+  tripName: String!
 }
 
 type Participant {
@@ -54,6 +54,7 @@ type Query {
   me: User!
   ride(rideCode: String!): Ride!
   myRides: [Ride!]!
+  user(userId: String!): User!
 }
 
 type Mutation {

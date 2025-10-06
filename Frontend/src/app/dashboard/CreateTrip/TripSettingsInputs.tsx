@@ -45,7 +45,7 @@ export const TripSettingsInputs = ({dashboardState, updateDashboard}: TripSettin
 
         setRides([...rides, data!.createRide]);
         toast.success("Successfully Created Ride!");
-        router.push("/dashboard/myRides");
+        router.push("/myRides");
       } catch (err) {
         toast.error("Failed to Create Ride!");
         console.error(err);

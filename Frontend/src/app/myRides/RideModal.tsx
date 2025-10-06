@@ -103,6 +103,19 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
 
   const handleStartRide = () => handleRideChange("started");
   const handleEndRide = () => handleRideChange("ended");
+  const isCurrentRide = user?.currentRide === currentRide.rideCode;
+
+  const handleSetCurrentRide = () => {
+    setUser({ ...user!, currentRide: currentRide.rideCode });
+    router.push("/dashboard");
+    toast.success("This ride is now your current ride!");
+  };
+
+  const handleRemoveCurrentRide = () => {
+    setUser({ ...user!, currentRide: null });
+    toast.success("Removed ride from current ride.");
+  };
+
 
 
   return (
@@ -249,6 +262,29 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
                       <span className="text-xs mt-1">Edit Ride</span>
                     </button>
                   </>
+                )}
+              </div>
+            )}
+
+            {/* Non-owner controls */}
+            {!isRideOwner(user?.id!) && (
+              <div className="flex justify-end gap-6 mt-2">
+                {!isCurrentRide ? (
+                  <button
+                    onClick={handleSetCurrentRide}
+                    className="flex flex-col items-center cursor-pointer text-green-600 hover:text-green-800"
+                  >
+                    <Bike />
+                    <span className="text-xs mt-1">Set Current Ride</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleRemoveCurrentRide}
+                    className="flex flex-col items-center cursor-pointer text-red-600 hover:text-red-800"
+                  >
+                    <OctagonX />
+                    <span className="text-xs mt-1">Remove Current Ride</span>
+                  </button>
                 )}
               </div>
             )}

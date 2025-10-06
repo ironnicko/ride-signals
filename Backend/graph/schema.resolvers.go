@@ -264,6 +264,23 @@ func (r *queryResolver) MyRides(ctx context.Context) ([]*models.Ride, error) {
 	return rides, nil
 }
 
+// User is the resolver for the user field.
+func (r *queryResolver) User(ctx context.Context, userID string) (*models.User, error) {
+	coll := db.GetCollection("bikeapp", "users")
+
+	userIDObj, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid userId: %w", err)
+	}
+
+
+	var user models.User
+	if err := coll.FindOne(ctx, bson.M{"_id": userIDObj}).Decode(&user); err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 // --- Ride Field Resolvers ---
 func (r *rideResolver) ID(ctx context.Context, obj *models.Ride) (string, error) {
 	return obj.ID.Hex(), nil

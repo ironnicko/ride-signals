@@ -102,3 +102,14 @@ mutation UpdateRide(
     }
   }
 `;
+
+export const JOIN_RIDE = gql`
+  mutation JoinRide($rideCode: String!, $role: String!) {
+    joinRide(rideCode: $rideCode, role: $role) {
+      rideCode
+      participants {
+        userId
+      }
+    }
+  }
+`;

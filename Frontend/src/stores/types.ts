@@ -36,6 +36,7 @@ export interface RideState {
     rideCode: string | null;
     status: "not started" | "started" | "ended" | null;
     createdAt: string | null;
+    createdBy: string | null;
     endedAt?: string | null;
     startedAt?: string | null;
     participants: Participant[] | null;

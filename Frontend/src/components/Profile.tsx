@@ -27,7 +27,7 @@ export const  Profile = ({
             <ul className="flex flex-col">
                 <li
                 onClick={() => {
-                    router.push("/dashboard/myRides");
+                    router.push("/myRides");
                 }}
                 className="px-2 py-2 hover:bg-gray-100 cursor-pointer"
                 >

@@ -9,12 +9,21 @@ interface RidesListProps {
 
 export default function RidesList({ rides, onRideClick }: RidesListProps) {
   const {user} = useAuth.getState();
+  const sortedRides = [...rides].sort((a, b) => {
+    if (a.rideCode === user.currentRide) return -1;
+    if (b.rideCode === user.currentRide) return 1;
+    return 0;
+  });
+
   return (
-    <div className="flex flex-col space-y-4 overflow-y-auto max-h-[90vh]">
-      {rides.map((ride) => (
+    <div className="flex flex-col space-y-4 overflow-y-auto max-h-[90vh] p-4">
+      {sortedRides.map((ride) => (
         <div
           key={ride.rideCode}
-          className="flex cursor-pointer justify-center bg-white rounded-2xl shadow-md p-4 hover:shadow-lg transition-all"
+          className={`flex cursor-pointer justify-center bg-white rounded-2xl shadow-md p-4 hover:shadow-lg transition-all ${
+                    (user.currentRide == ride.rideCode) ? "outline outline-2 outline-red-500" : ""
+                  }`}
+
           onClick={() => onRideClick(ride)}
         >
           <div className="flex flex-col">
