@@ -5,6 +5,7 @@ import { CREATE_RIDE } from "@/lib/graphql/mutation";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { useRides } from "@/stores/useRides";
+import { useRef } from "react";
 
 interface TripSettingsInputsProps{
     dashboardState: DashboardState
@@ -15,13 +16,16 @@ interface TripSettingsInputsProps{
 
 export const TripSettingsInputs = ({dashboardState, updateDashboard}: TripSettingsInputsProps) => {
 
-    const {formIndex, maxRiders, visibility, fromLocation, fromLocationName, toLocation, toLocationName} = dashboardState
+    const {formIndex, maxRiders, visibility, fromLocation, fromLocationName, tripName, toLocation, toLocationName} = dashboardState
     const [createRide] = useMutation<{ createRide: RideState }>(CREATE_RIDE);
+    const buttonBoolean = useRef<boolean>(false);
 
     const { rides, setRides } = useRides.getState();
     const router = useRouter();
 
     const CreateRide = async () => {
+      if (buttonBoolean.current) return
+      buttonBoolean.current = true;
       try {
         const { data, error } = await createRide({
           variables: {
@@ -33,6 +37,7 @@ export const TripSettingsInputs = ({dashboardState, updateDashboard}: TripSettin
             destinationLat: toLocation!.lat,
             destinationLng: toLocation!.lng,
             destinationName: toLocationName,
+            tripName: tripName
           },
         });
 
@@ -44,6 +49,7 @@ export const TripSettingsInputs = ({dashboardState, updateDashboard}: TripSettin
       } catch (err) {
         toast.error("Failed to Create Ride!");
         console.error(err);
+        buttonBoolean.current = false;
       }
     };
 
@@ -110,6 +116,7 @@ export const TripSettingsInputs = ({dashboardState, updateDashboard}: TripSettin
 
         <button
           onClick={CreateRide}
+          disabled={buttonBoolean.current}
           className="cursor-pointer mt-6 w-full bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800"
         >
           Create

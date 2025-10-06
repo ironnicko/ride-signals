@@ -22,6 +22,7 @@ type Ride {
   destination: GeoLocation!
   startName: String!
   destinationName: String!
+  tripName : String!
 }
 
 type Participant {
@@ -65,6 +66,7 @@ type Mutation {
     destinationLng: Float!
     startName: String!
     destinationName: String!
+    tripName: String!
   ): Ride!
 
   updateRide(
@@ -75,6 +77,7 @@ type Mutation {
     endedAt: String
     startedAt: String
     status: String
+    tripName: String
   ): Ride!
 
   joinRide(rideCode: String!, role: String!): Ride!

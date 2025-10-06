@@ -20,7 +20,7 @@ import (
 )
 
 // --- CreateRide ---
-func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64, startName string, destinationName string) (*models.Ride, error) {
+func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64, startName string, destinationName string, tripName string) (*models.Ride, error) {
 	userIDHex := ctx.Value("userId").(string)
 	userID, err := primitive.ObjectIDFromHex(userIDHex)
 	if err != nil {
@@ -49,6 +49,7 @@ func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibi
 		Destination:     destLocation,
 		StartName:       startName,
 		DestinationName: destinationName,
+		TripName:        tripName,
 		CreatedBy:       userID,
 	}
 
@@ -61,7 +62,7 @@ func (r *mutationResolver) CreateRide(ctx context.Context, maxRiders int, visibi
 }
 
 // --- UpdateRide ---
-func (r *mutationResolver) UpdateRide(ctx context.Context, rideCode string, requestType *string, maxRiders *int, visibility *string, endedAt *string, startedAt *string, status *string) (*models.Ride, error) {
+func (r *mutationResolver) UpdateRide(ctx context.Context, rideCode string, requestType *string, maxRiders *int, visibility *string, endedAt *string, startedAt *string, status *string, tripName *string) (*models.Ride, error) {
 	userIDHex := ctx.Value("userId").(string)
 	userID, err := primitive.ObjectIDFromHex(userIDHex)
 	if err != nil {
@@ -90,6 +91,9 @@ func (r *mutationResolver) UpdateRide(ctx context.Context, rideCode string, requ
 	}
 	if status != nil {
 		update["status"] = *status
+	}
+	if tripName != nil {
+		update["tripName"] = *tripName
 	}
 
 	if len(update) > 0 {

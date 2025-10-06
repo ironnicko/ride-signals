@@ -12,8 +12,7 @@ export const TripLocationInputs = ({
   updateDashboard
 }: TripLocationInputsProps) => {
 
-
-  const { fromLocation,fromLocationName,toLocation,toLocationName } = dashboardState
+  const { fromLocation,fromLocationName,toLocation,toLocationName,tripName } = dashboardState
 
   const handleFromPlaceChanged = (place: google.maps.places.PlaceResult | null) => {
     if (place?.geometry?.location) {
@@ -44,6 +43,14 @@ export const TripLocationInputs = ({
       </div>
 
       <div className="flex flex-col gap-3">
+
+        <input
+          value={tripName || ""}
+          onChange={(e) => updateDashboard({tripName: e.target.value})}
+          placeholder="Trip Name..."
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+        />
+
         {/* From Location Input */}
         <PlaceAutocomplete
           onPlaceSelect={handleFromPlaceChanged}
@@ -62,7 +69,7 @@ export const TripLocationInputs = ({
       </div>
 
       <button
-        disabled={!(fromLocation && toLocation)}
+        disabled={!(fromLocation && toLocation && tripName)}
         onClick={() => updateDashboard({formIndex : 1})}
         className={`mt-6 w-full px-6 py-3 rounded-lg 
           ${fromLocation && toLocation

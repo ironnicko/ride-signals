@@ -22,7 +22,8 @@ interface UpdateRideParams{
   status: "ended" | "started" | "not started"| null
   visibility: "private" | "public",
   maxRiders: number,
-  requestType: "start" | "end" | null
+  requestType: "start" | "end" | null,
+  tripName : string
 }
 
 
@@ -32,12 +33,14 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
   const { replaceRide } = useRides.getState();
   const [isEditing, setIsEditing] = useState(false);
   const [currentRide, setCurrentRide] = useState(ride);
+  const [buttonBoolean, setButtonBoolean] = useState<boolean>(false);
   const [formState, setFormState] = useState<Partial<UpdateRideParams>>({
-    visibility: ride.settings!.visibility,
-    maxRiders: ride.settings!.maxRiders,
-    endedAt: ride.endedAt!,
-    startedAt: ride.startedAt!,
+    visibility: ride.settings.visibility,
+    maxRiders: ride.settings.maxRiders,
+    endedAt: ride.endedAt,
+    startedAt: ride.startedAt,
     status: ride.status,
+    tripName : ride.tripName
   });
   const router = useRouter();
 
@@ -52,6 +55,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
   const handleRideChange = async (
     newStatus: "started" | "ended" | null
   ) => {
+    setButtonBoolean(true);
     try {
       const now = new Date().toISOString();
 
@@ -61,6 +65,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
         startedAt: newStatus === "started" ? now : formState.startedAt,
         endedAt: newStatus === "ended" ? now : formState.endedAt,
         requestType : newStatus == "started" ? "start" : (newStatus == 'ended' ? "end" : null),
+        tripName : formState.tripName,
       };
 
       const { data } = await updateRide({
@@ -92,6 +97,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
       toast.error(`Failed to ${newStatus} ride`);
       console.error(err);
     }
+    setButtonBoolean(false);
   };
 
 
@@ -101,7 +107,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
 
   return (
     <div className="fixed inset-0 bg-gray-200/[.75] flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl w-[90vw] max-w-3xl p-6 relative">
+      <div className="bg-white rounded-2xl w-[90vw] max-w-xl p-6 relative">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -111,14 +117,28 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
         </button>
 
         <h2 className="text-2xl font-bold mb-4">
-          <>
-            {currentRide.startName} → {currentRide.destinationName}
-          </>
+          {isEditing ? (
+            <input
+              type="text"
+              className="border rounded-lg p-1 w-1/2 text-lg"
+              value={formState.tripName || ""}
+              onChange={(e) =>
+                setFormState((s) => ({ ...s, tripName: e.target.value }))
+              }
+            />
+          ) : (
+            <>
+              {currentRide.tripName
+                ? currentRide.tripName
+                : `${currentRide.startName} → ${currentRide.destinationName}`}
+            </>
+          )}
         </h2>
+
 
         <div className="grid grid-cols-2 items-start gap-6">
           {/* Ride Info */}
-          <div className="space-y-2">
+          <div className="space-y-2 text-right">
             <p>
               <span className="font-medium">Ride Code:</span>{" "}
               {currentRide.rideCode}
@@ -131,7 +151,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
               <span className="font-medium">Visibility:</span>{" "}
               {isEditing ? (
                 <select
-                  className="border rounded p-1/2"
+                  className="border rounded p-1"
                   value={formState.visibility!}
                   onChange={(e) =>
                     setFormState((s) => ({
@@ -153,7 +173,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
               {(isEditing && !currentRide.endedAt) ? (
                 <input
                   type="number"
-                  className="w-16 border rounded p-1/2"
+                  className="w-8 border rounded p-1/2"
                   value={formState.maxRiders!}
                   onChange={(e) =>
                     setFormState((s) => ({ ...s, maxRiders: +e.target.value }))
@@ -177,11 +197,12 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
             </p>
             {/* Edit Options if owner */}
             {isRideOwner(user?.id!) && (
-              <div className="flex justify-center gap-14 mt-2">
+              <div className="flex justify-end gap-6 mt-2">
                 {isEditing ? (
                   <>
                     <button
                       onClick={() => handleRideChange(null)}
+                      disabled={buttonBoolean}
                         className="flex flex-col items-center cursor-pointer text-blue-600 hover:text-blue-800"
                       >
                         <Save />
@@ -201,6 +222,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
                     {currentRide.status === "not started" && (
                       <button
                         onClick={handleStartRide}
+                        disabled={buttonBoolean}
                         className="flex flex-col items-center cursor-pointer text-green-600 hover:text-green-800"
                       >
                         <Bike />
@@ -211,6 +233,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
                     {currentRide.status === "started" && (
                       <button
                         onClick={handleEndRide}
+                        disabled={buttonBoolean}
                         className="flex flex-col items-center cursor-pointer text-red-600 hover:text-red-800"
                       >
                         <OctagonX />

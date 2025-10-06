@@ -23,6 +23,7 @@ export default function DashboardPage() {
     fromLocationName: null,
     maxRiders: 5,
     visibility: "private",
+    tripName : null
   });
 
   const {

@@ -44,6 +44,7 @@ export interface RideState {
     destination: GeoLocation | null;
     startName: string | null;
     destinationName: string | null;
+    tripName: string | null;
 }
 
 export interface DashboardState {
@@ -55,6 +56,7 @@ export interface DashboardState {
     fromLocationName: string | null;
     maxRiders: number;
     visibility: "public" | "private";
+    tripName: string | null;
 }
 
 export interface UserState {

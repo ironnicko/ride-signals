@@ -34,7 +34,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <html lang="en">
         
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <ToastContainer></ToastContainer>
+          <ToastContainer
+          draggable
+          draggablePercent={50}
+          ></ToastContainer>
           <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-blue-50 to-white text-center">
             <APIProvider
               apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string}

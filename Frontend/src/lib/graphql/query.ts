@@ -8,6 +8,7 @@ export const MY_RIDES = gql`
             startedAt
             endedAt
             createdAt
+            createdBy
             settings{
                 maxRiders
                 visibility
@@ -22,6 +23,7 @@ export const MY_RIDES = gql`
             }
             startName
             destinationName
+            tripName
             participants{
                 userId
                 role
@@ -39,6 +41,7 @@ export const RIDE = gql`
         startedAt
         endedAt
         createdAt
+        createdBy
         settings{
             maxRiders
             visibility
@@ -53,6 +56,7 @@ export const RIDE = gql`
         }
         startName
         destinationName
+        tripName
         participants{
             userId
             role

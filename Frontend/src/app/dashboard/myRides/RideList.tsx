@@ -1,5 +1,6 @@
 "use client";
-import { RideState } from "@/stores/types";;
+import { RideState } from "@/stores/types";import { useAuth } from "@/stores/useAuth";
+;
 
 interface RidesListProps {
   rides: RideState[];
@@ -7,6 +8,7 @@ interface RidesListProps {
 }
 
 export default function RidesList({ rides, onRideClick }: RidesListProps) {
+  const {user} = useAuth.getState();
   return (
     <div className="flex flex-col space-y-4 overflow-y-auto max-h-[90vh]">
       {rides.map((ride) => (
@@ -17,15 +19,15 @@ export default function RidesList({ rides, onRideClick }: RidesListProps) {
         >
           <div className="flex flex-col">
             <div className="text-lg font-semibold text-gray-800">
+              {ride.tripName}
+            </div>
+            <div className="text-sm text-gray-600">
               {ride.startName} <span className="text-gray-400">→</span>{" "}
               {ride.destinationName}
             </div>
-            <div className="text-sm text-gray-600">
-              Ride Code: <span className="font-medium">{ride.rideCode}</span>
-            </div>
-            <div className="text-sm text-gray-500">
+            {/* <div className="text-sm text-gray-500">
               Created: {new Date(ride.createdAt!).toLocaleString()}
-            </div>
+            </div> */}
             <div className="text-sm">
               Visibility:{" "}
               <span

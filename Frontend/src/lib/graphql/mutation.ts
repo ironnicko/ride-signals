@@ -11,6 +11,7 @@ export const CREATE_RIDE = gql`
     $destinationLng: Float!
     $startName: String!
     $destinationName: String!
+    $tripName: String!
   ) {
     createRide(
       maxRiders: $maxRiders
@@ -19,6 +20,7 @@ export const CREATE_RIDE = gql`
       startLng: $startLng
       destinationLat: $destinationLat
       destinationLng: $destinationLng
+      tripName: $tripName
       startName: $startName
       destinationName: $destinationName
     ) {
@@ -43,6 +45,7 @@ export const CREATE_RIDE = gql`
         lng
       }
       destinationName
+      tripName
       createdAt
     }
   }
@@ -57,7 +60,8 @@ mutation UpdateRide(
   $visibility: String,
   $startedAt: String,
   $endedAt: String,
-  $status: String
+  $status: String,
+  $tripName: String,
 ) {
   updateRide(
     rideCode: $rideCode,
@@ -66,6 +70,7 @@ mutation UpdateRide(
     visibility: $visibility,
     startedAt: $startedAt,
     endedAt: $endedAt,
+    tripName : $tripName,
     status: $status
   )  {
       rideCode
@@ -91,6 +96,7 @@ mutation UpdateRide(
         lng
       }
       destinationName
+      tripName
       createdAt
       createdBy
     }

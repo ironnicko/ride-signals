@@ -12,6 +12,7 @@ export default function SignIn() {
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("")
+  const [buttonBoolean, setButtonBoolean] = useState<boolean>(false);
 
   const router = useRouter()
 
@@ -19,6 +20,7 @@ export default function SignIn() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
+    setButtonBoolean(true);
     try {
       const isLoggedIn = await login(email, password)
       if (isLoggedIn == true){
@@ -28,6 +30,7 @@ export default function SignIn() {
       console.error(err)
       toast.error("Failed to Login In")
     }
+    setButtonBoolean(false);
   }
 
   return (
@@ -66,7 +69,7 @@ export default function SignIn() {
             </div>
           </div>
 
-          <Button className="w-full mt-4" >
+          <Button disabled={buttonBoolean} className="w-full mt-4" >
             Sign In
           </Button>
         </form>

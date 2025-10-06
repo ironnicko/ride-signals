@@ -16,6 +16,7 @@ type Ride struct {
 	Destination     GeoLocation        `bson:"destination" json:"destination"`
 	StartName       string             `bson:"startName" json:"startName"`
 	DestinationName string             `bson:"destinationName" json:"destinationName"`
+	TripName        string             `bson:"tripName" json:"tripName"`
 }
 
 type Participant struct {
