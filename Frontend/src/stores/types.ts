@@ -84,10 +84,10 @@ export const storage = {
 export interface AuthStore {
     accessToken: string | null;
     refreshToken: string | null;
-    isAuthenticated: Boolean;
+    isAuthenticated: boolean;
     user: UserState | null;
-    login: (email: string, password: string) => Promise<Boolean>;
-    signup: (name: string, email: string, password: string) => Promise<Boolean>;
+    login: (email: string, password: string) => Promise<boolean>;
+    signup: (name: string, email: string, password: string) => Promise<boolean>;
     setUser: (user: UserState) => void
     loginWithGoogle: (idToken: string) => Promise<void>;
     logout: () => void;

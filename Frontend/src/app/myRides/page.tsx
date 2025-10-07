@@ -23,7 +23,8 @@ export default function MyRidesPage() {
   if (loading) return <p className="p-4">Loading rides...</p>;
   if (error) return <p className="p-4 text-red-600">Error loading rides: {error.message}</p>;
 
-  setRides(data.myRides)
+  setRides(data?.myRides)
+
 
   
   return (
@@ -40,7 +41,7 @@ export default function MyRidesPage() {
           <h1 className="text-2xl font-bold">My Rides</h1>
         </div>
 
-        {rides.length ? (
+        {rides?.length ? (
           <RidesList rides={rides} onRideClick={setSelectedRide} />
         ) : (
           <div className="flex flex-col items-center justify-center h-[60vh] text-center text-gray-500">
@@ -51,9 +52,10 @@ export default function MyRidesPage() {
         )}
 
         {selectedRide && (
-          <RideModal ride={selectedRide}  onClose={() => {
+          <RideModal ride={selectedRide}  onClose={(changed=false) => {
             setSelectedRide(null);
-            router.refresh();
+            if (changed)
+              router.refresh();
           }} />
         )}
       </div>

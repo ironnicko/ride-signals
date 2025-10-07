@@ -3,7 +3,7 @@ import { RideState } from "@/stores/types";;
 import { UPDATE_RIDE } from "@/lib/graphql/mutation";
 import { OctagonX, X, PenSquareIcon, Bike, Save } from "lucide-react";
 import { useAuth } from "@/stores/useAuth";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { toast } from "react-toastify";
 import { useRides } from "@/stores/useRides";
@@ -13,7 +13,7 @@ import { EmbedMap } from "@/components/EmbedMap";
 
 interface RideModalProps {
   ride: RideState;
-  onClose: () => void;
+  onClose: (changed: boolean) => void;
 }
 
 interface UpdateRideParams{
@@ -22,7 +22,7 @@ interface UpdateRideParams{
   status: "ended" | "started" | "not started"| null
   visibility: "private" | "public",
   maxRiders: number,
-  requestType: "start" | "end" | null,
+  requestType: "start" | "end" | "remove" | null,
   tripName : string
 }
 
@@ -32,6 +32,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
   const { user, setUser } = useAuth.getState();
   const { replaceRide } = useRides.getState();
   const [isEditing, setIsEditing] = useState(false);
+  const didEdit = useRef(false);
   const [currentRide, setCurrentRide] = useState(ride);
   const [buttonBoolean, setButtonBoolean] = useState<boolean>(false);
   const [formState, setFormState] = useState<Partial<UpdateRideParams>>({
@@ -53,18 +54,27 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
   };
 
   const handleRideChange = async (
-    newStatus: "started" | "ended" | null
+    newStatus: "started" | "ended"  | null,
+    requestType?: "start" | "end" | "remove" ,
   ) => {
     setButtonBoolean(true);
     try {
-      const now = new Date().toISOString();
+      const now = new Date().toISOString()
+      switch(newStatus){
+        case "started":
+          requestType = "start"
+          break;
+        case "ended":
+          requestType = "end"
+          break;
+      }
 
       const updates: Partial<UpdateRideParams> = {
         ...formState,
         status: newStatus,
         startedAt: newStatus === "started" ? now : formState.startedAt,
         endedAt: newStatus === "ended" ? now : formState.endedAt,
-        requestType : newStatus == "started" ? "start" : (newStatus == 'ended' ? "end" : null),
+        requestType : requestType,
         tripName : formState.tripName,
       };
 
@@ -90,6 +100,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
         toast.success("Ride ended!");
       } else{
         toast.success("Ride Updated!")
+        didEdit.current = true;
         setIsEditing(false);
       }
 
@@ -105,15 +116,25 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
   const handleEndRide = () => handleRideChange("ended");
   const isCurrentRide = user?.currentRide === currentRide.rideCode;
 
-  const handleSetCurrentRide = () => {
+  const handleSetCurrentRide = async () => {
     setUser({ ...user!, currentRide: currentRide.rideCode });
-    router.push("/dashboard");
-    toast.success("This ride is now your current ride!");
+    try{
+      await handleRideChange(null, "start")
+      router.push("/dashboard");
+    } catch(err){
+      toast.error("Unable to set current ride");
+    }
   };
 
-  const handleRemoveCurrentRide = () => {
+  const handleRemoveCurrentRide = async () => {
+
     setUser({ ...user!, currentRide: null });
-    toast.success("Removed ride from current ride.");
+    
+    try{
+      await handleRideChange(null, "remove")
+    } catch(err){
+      toast.error("Unable to remove current ride");
+    }
   };
 
 
@@ -123,7 +144,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
       <div className="bg-white rounded-2xl w-[90vw] max-w-xl p-6 relative">
         {/* Close Button */}
         <button
-          onClick={onClose}
+          onClick={() => onClose(didEdit.current)}
           className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 cursor-pointer"
         >
           <X className="w-5 h-5 text-gray-700" />
