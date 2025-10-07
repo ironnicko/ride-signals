@@ -14,11 +14,11 @@ export default function JoinRidePage() {
   const params = useSearchParams();
   const rideCode = params.get("rideCode");
   const [invitedBy, setInvitiedBy] = useState<string | null>(params.get("invitedBy"));
-  const { user } = useAuth.getState();
+  const { user, isAuthenticated } = useAuth.getState();
   const router = useRouter();
   const { data, loading, error } = useQuery<{ ride: RideState }>(RIDE, {
     variables: { rideCode: rideCode || "" },
-    skip: !rideCode,
+    skip: !rideCode || !isAuthenticated,
   });
 
   const { data: inviterData } = useQuery<{ user: UserState }>(gql`
@@ -29,7 +29,7 @@ export default function JoinRidePage() {
   }
     `, {
     variables: { userId: invitedBy || "" },
-    skip: !invitedBy,
+    skip: !invitedBy || !isAuthenticated,
   });
 
   const [joinRide, { loading: joining }] =
@@ -88,7 +88,7 @@ export default function JoinRidePage() {
           {/* Ride Info */}
           <div className="flex flex-col gap-2 mt-4 text-center">
             <p className="text-lg font-medium text-gray-800">
-              {ride.startName} → {ride.destinationName}
+              {ride?.startName} → {ride?.destinationName}
             </p>
             <p className="font-medium text-gray-800">
               {inviterName} invited you

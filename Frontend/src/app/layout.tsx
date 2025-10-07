@@ -1,33 +1,15 @@
 "use client";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ApolloClient, InMemoryCache, ApolloLink, Observable } from "@apollo/client";
 import { ToastContainer } from 'react-toastify';
 import { ApolloProvider } from "@apollo/client/react";
-import api from "@/lib/axios";
 import "./globals.css";
 import { APIProvider } from "@vis.gl/react-google-maps";
+import { gqlClient } from "@/lib/graphql/client";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-
-  const axiosLink = new ApolloLink((operation) => {
-    return new Observable((observer) => {
-      api.post("/graphql", {
-        query: operation.query.loc?.source.body,
-        variables: operation.variables,
-      })
-        .then((result) => {
-          observer.next(result.data);
-          observer.complete();
-        })
-        .catch((error) => {
-          observer.error(error);
-        });
-    });
-  });
-  const client = new ApolloClient({ link: axiosLink, cache: new InMemoryCache() });
 
   return (
     
@@ -44,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               solutionChannel="GMP_devsite_samples_v3_rgmautocomplete"
               libraries={["places"]}
             >
-              <ApolloProvider client={client}>
+              <ApolloProvider client={gqlClient}>
                 {children}
               </ApolloProvider>
             </APIProvider>

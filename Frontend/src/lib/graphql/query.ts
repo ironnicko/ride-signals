@@ -64,5 +64,18 @@ export const RIDE = gql`
         }
     }
 }
-
 `
+
+export const GET_USERS_BY_IDS = gql`
+  query GetUsersByIds($ids: [ID!]!) {
+    usersByIds(ids: $ids) {
+      id
+      name
+      picture
+      email
+      createdAt
+      lastLoginAt
+      isActive
+    }
+  }
+`;

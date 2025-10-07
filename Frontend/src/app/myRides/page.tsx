@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Bike } from "lucide-react";
 import { useState } from "react";
 import RidesList from "./RideList";
-import RideModal from "./RideModal";
+import RideModal from "./RideModal/RideModal";
 import { RideState } from "@/stores/types";
 import { useRides } from "@/stores/useRides";
 import ProtectedRoute from "@/components/ProtectedRoute";

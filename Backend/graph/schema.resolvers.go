@@ -275,13 +275,49 @@ func (r *queryResolver) User(ctx context.Context, userID string) (*models.User, 
 		return nil, fmt.Errorf("invalid userId: %w", err)
 	}
 
-
 	var user models.User
 	if err := coll.FindOne(ctx, bson.M{"_id": userIDObj}).Decode(&user); err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
+
+// UsersByIds is the resolver for the usersByIds field.
+func (r *queryResolver) UsersByIds(ctx context.Context, ids []string) ([]*models.User, error) {
+	coll := db.GetCollection("bikeapp", "users")
+
+	objectIDs := make([]primitive.ObjectID, 0, len(ids))
+	for _, idStr := range ids {
+		objID, err := primitive.ObjectIDFromHex(idStr)
+		if err != nil {
+			return nil, fmt.Errorf("invalid user id: %s, err: %w", idStr, err)
+		}
+		objectIDs = append(objectIDs, objID)
+	}
+
+
+	cursor, err := coll.Find(ctx, bson.M{"_id": bson.M{"$in": objectIDs}})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var users []*models.User
+	for cursor.Next(ctx) {
+		var u models.User
+		if err := cursor.Decode(&u); err != nil {
+			return nil, err
+		}
+		users = append(users, &u)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
 
 // --- Ride Field Resolvers ---
 func (r *rideResolver) ID(ctx context.Context, obj *models.Ride) (string, error) {

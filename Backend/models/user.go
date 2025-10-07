@@ -11,4 +11,5 @@ type User struct {
 	LastLoginAt  string             `bson:"lastLoginAt" json:"lastLoginAt"`
 	IsActive     bool               `bson:"isActive" json:"isActive"`
 	CurrentRide  *string            `bson:"currentRide,omitempty" json:"currentRide,omitempty"`
+	Picture      *string            `bson:"picture,omitempty" json:"picture,omitempty"`
 }

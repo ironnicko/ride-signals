@@ -101,3 +101,12 @@ export interface RidesStore {
     replaceRide: (ride: RideState) => void;
     clearRides: () => void;
 }
+
+export interface OtherUsersStore {
+  users: Record<string, UserState>; // key = userId
+  addUser: (user: UserState) => void;
+  addUsers: (users: UserState[]) => void;
+  getUserById: (id: string) => UserState | undefined;
+  fetchUsersByIds: (ids: string[]) => Promise<void>;
+  clearUsers: () => void;
+}

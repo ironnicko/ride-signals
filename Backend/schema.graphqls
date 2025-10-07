@@ -6,6 +6,7 @@ type User {
   lastLoginAt: String!
   isActive: Boolean!
   currentRide: String
+  picture: String
 }
 
 type Ride {
@@ -55,6 +56,8 @@ type Query {
   ride(rideCode: String!): Ride!
   myRides: [Ride!]!
   user(userId: String!): User!
+  usersByIds(ids: [ID!]!): [User!]!
+
 }
 
 type Mutation {
