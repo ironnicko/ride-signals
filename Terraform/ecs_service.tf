@@ -15,7 +15,7 @@ resource "aws_ecs_service" "backend" {
   load_balancer {
     target_group_arn = aws_lb_target_group.backend.arn
     container_name   = "backend"
-    container_port   = 8080
+    container_port   = 8000
   }
   depends_on = [
     aws_lb_target_group.backend

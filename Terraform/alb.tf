@@ -26,7 +26,7 @@ resource "aws_lb_target_group" "frontend" {
 
 resource "aws_lb_target_group" "backend" {
   name     = "backend-tg"
-  port     = 8080
+  port     = 8000
   protocol = "HTTP"
   vpc_id   = module.vpc.vpc_id
 

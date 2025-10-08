@@ -15,7 +15,7 @@ resource "aws_ecs_task_definition" "backend" {
       image     = "ironnicko1413/ride-signals-backend:latest"
       essential = true
       portMappings = [
-        { containerPort = 8080, protocol = "tcp" }
+        { containerPort = 8000, protocol = "tcp" }
       ]
       environment = [
         for key, value in local.backend_env : { name = key, value = value }

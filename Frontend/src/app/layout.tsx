@@ -5,6 +5,8 @@ import { ApolloProvider } from "@apollo/client/react";
 import "./globals.css";
 import { APIProvider } from "@vis.gl/react-google-maps";
 import { gqlClient } from "@/lib/graphql/client";
+import { Suspense } from "react";
+import { Loader } from "lucide-react";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -26,7 +28,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               libraries={["places"]}
             >
               <ApolloProvider client={gqlClient}>
-                {children}
+                <Suspense fallback={<Loader className="animate-spin"/>}>
+                  {children}
+                </Suspense>
               </ApolloProvider>
             </APIProvider>
           </main>
