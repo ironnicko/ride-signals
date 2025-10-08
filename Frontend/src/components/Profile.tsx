@@ -10,7 +10,7 @@ interface ProfileProps{
 export const  Profile = ({
     className
 } : ProfileProps) => {
-    const { user, logout } = useAuth.getState();
+    const { user, logout } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
     const router = useRouter();
 

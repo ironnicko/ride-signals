@@ -14,7 +14,7 @@ export default function ParticipantsList({ ride }: { ride: RideState }) {
   }, [ride.participants]);
 
   return (
-    <div className="w-full max-w-3xl bg-white/80 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/20">
+    <div className="w-full max-w-2xl bg-white/80 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/20">
       <div className="flex flex-wrap justify-center gap-6">
         {ride.participants?.map((p) => {
           const user = getUserById(p.userId);

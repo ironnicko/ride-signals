@@ -42,7 +42,7 @@ export default function RideControlsCard({
 
   const OwnerControls = () => (
     <>
-      {ride.status === "not started" && (
+      {(ride.status === "not started" && !isEditing) && (
         <ControlButton
           onClick={handleStartRide}
           busy={buttonBusy}
@@ -51,7 +51,7 @@ export default function RideControlsCard({
           label="Start Ride"
         />
       )}
-      {ride.status === "started" && (
+      {(ride.status === "started"  && !isEditing)&& (
         <ControlButton
           onClick={handleEndRide}
           busy={buttonBusy}
@@ -133,7 +133,7 @@ export default function RideControlsCard({
   };
 
   return (
-    <div className="w-full max-w-3xl bg-white/80 backdrop-blur-md rounded-xl p-6 flex flex-wrap justify-center gap-6 shadow-lg border border-white/20">
+    <div className="w-full max-w-2xl bg-white/80 backdrop-blur-md rounded-xl p-6 flex flex-wrap justify-center gap-24 shadow-lg border border-white/20">
       {owner ? <OwnerControls /> : <NonOwnerControls />}
     </div>
   );

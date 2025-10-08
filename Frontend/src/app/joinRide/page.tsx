@@ -14,11 +14,11 @@ export default function JoinRidePage() {
   const params = useSearchParams();
   const rideCode = params.get("rideCode");
   const [invitedBy, setInvitiedBy] = useState<string | null>(params.get("invitedBy"));
-  const { user, isAuthenticated } = useAuth.getState();
+  const { user } = useAuth();
   const router = useRouter();
   const { data, loading, error } = useQuery<{ ride: RideState }>(RIDE, {
     variables: { rideCode: rideCode || "" },
-    skip: !rideCode || !isAuthenticated,
+    skip: !rideCode,
   });
 
   const { data: inviterData } = useQuery<{ user: UserState }>(gql`
@@ -29,7 +29,7 @@ export default function JoinRidePage() {
   }
     `, {
     variables: { userId: invitedBy || "" },
-    skip: !invitedBy || !isAuthenticated,
+    skip: !invitedBy,
   });
 
   const [joinRide, { loading: joining }] =
@@ -60,14 +60,14 @@ export default function JoinRidePage() {
   };
 
   if (!rideCode)
-    return <p className="text-center mt-10">No ride code provided.</p>;
+    return <ProtectedRoute><p className="text-center mt-10">No ride code provided.</p></ProtectedRoute>;
   if (!invitedBy)
-    return <p className="text-center mt-10">You must be invited by someone to join.</p>;
+    return <ProtectedRoute><p className="text-center mt-10">You must be invited by someone to join.</p></ProtectedRoute>;
   if (loading)
-    return <p className="text-center mt-10">Loading ride details...</p>;
+    return <ProtectedRoute><p className="text-center mt-10">Loading ride details...</p></ProtectedRoute>;
   if (error)
     return (
-      <p className="text-center mt-10 text-red-500">Error: {error.message}</p>
+      <ProtectedRoute><p className="text-center mt-10 text-red-500">Error: {error.message}</p></ProtectedRoute>
     );
 
   const ride = data?.ride;

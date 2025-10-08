@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 export default function GoogleSignInButton() {
-  const {loginWithGoogle} = useAuth.getState();
+  const {loginWithGoogle} = useAuth();
   const router = useRouter();
   useEffect(() => {
     const script = document.createElement("script");

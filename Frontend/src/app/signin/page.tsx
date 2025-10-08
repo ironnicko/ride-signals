@@ -16,7 +16,7 @@ export default function SignIn() {
 
   const router = useRouter()
 
-  const {login} = useAuth.getState()
+  const {login} = useAuth()
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()

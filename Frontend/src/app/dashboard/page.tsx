@@ -12,7 +12,7 @@ import { CircleDot } from "lucide-react";
 
 export default function DashboardPage() {
   
-  const { user } = useAuth.getState();
+  const { user } = useAuth();
 
   const [dashboardState, setDashboardState] = useState<DashboardState>({
     formIndex: 0,
@@ -34,24 +34,24 @@ export default function DashboardPage() {
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
-      (pos) =>
-        setDashboardState((prev) => ({
-          ...prev,
-          userLocation: {
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-          },
-        })),
-      (err) => console.error(err),
-      { enableHighAccuracy: true }
-    );
+    (pos) =>
+      setDashboardState((prev) => ({
+        ...prev,
+        userLocation: {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        },
+      })),
+    (err) => console.error(err),
+    { enableHighAccuracy: true }
+  );
   }, []);
 
   const updateDashboard = (updates: Partial<DashboardState>) =>
     setDashboardState((prev) => ({ ...prev, ...updates }));
 
 
-  if (!userLocation) return <p className="p-4">Fetching user location...</p>;
+  if (!userLocation) return <ProtectedRoute><p className="p-4">Fetching user location...</p></ProtectedRoute>;
 
   return (
     <ProtectedRoute>

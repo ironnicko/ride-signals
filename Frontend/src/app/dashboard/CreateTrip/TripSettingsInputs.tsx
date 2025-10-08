@@ -20,7 +20,7 @@ export const TripSettingsInputs = ({dashboardState, updateDashboard}: TripSettin
     const [createRide] = useMutation<{ createRide: RideState }>(CREATE_RIDE);
     const buttonBoolean = useRef<boolean>(false);
 
-    const { rides, setRides } = useRides.getState();
+    const { rides, setRides } = useRides();
     const router = useRouter();
 
     const CreateRide = async () => {

@@ -24,12 +24,12 @@ export interface UpdateRideParams {
 
 interface RideModalProps {
   ride: RideState;
-  onClose: (changed: boolean) => void;
+  onClose: () => void;
 }
 
 export default function RideModal({ ride, onClose }: RideModalProps) {
-  const { user, setUser } = useAuth.getState();
-  const { replaceRide } = useRides.getState();
+  const { user, setUser } = useAuth();
+  const { replaceRide } = useRides();
   const [currentRide, setCurrentRide] = useState(ride);
   const [formState, setFormState] = useState<Partial<UpdateRideParams>>({
     visibility: ride.settings.visibility,
@@ -41,7 +41,6 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
   });
   const [isEditing, setIsEditing] = useState(false);
   const [buttonBusy, setButtonBusy] = useState(false);
-  const didEdit = useRef(false);
   const router = useRouter();
   const [updateRide] = useMutation<{updateRide : RideState}>(UPDATE_RIDE);
 
@@ -69,7 +68,6 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
       const updatedRide = data.updateRide;
       setCurrentRide(updatedRide);
       replaceRide(updatedRide);
-      didEdit.current = true;
 
       if (newStatus === "started") {
         setUser({ ...user!, currentRide: ride.rideCode });
@@ -105,7 +103,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
     <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex flex-col overflow-y-auto">
       <HeroMap
         ride={currentRide}
-        onClose={() => onClose(didEdit.current)}
+        onClose={onClose}
         formState={formState}
       />
       <div className="flex flex-col items-center gap-6 px-6 mt-6 pb-10">

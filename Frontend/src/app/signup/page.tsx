@@ -17,7 +17,7 @@ export default function SignUp() {
 
   const router = useRouter();
 
-  const {signup} = useAuth.getState()
+  const {signup} = useAuth()
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()

@@ -8,7 +8,7 @@ interface RidesListProps {
 }
 
 export default function RidesList({ rides, onRideClick }: RidesListProps) {
-  const {user} = useAuth.getState();
+  const {user} = useAuth();
   const sortedRides = [...rides].sort((a, b) => {
     if (a.rideCode === user.currentRide) return -1;
     if (b.rideCode === user.currentRide) return 1;

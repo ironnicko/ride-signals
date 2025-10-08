@@ -13,8 +13,8 @@ export default function RideInfoCard({
   onChange: (updater: any) => void;
 }) {
   return (
-    <div className="w-full max-w-3xl bg-white/80 backdrop-blur-md rounded-xl p-6 shadow-lg border border-gray-200">
-      <dl className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm text-gray-800">
+    <div className="w-full max-w-2xl bg-white/80 backdrop-blur-md rounded-xl p-6 shadow-lg border border-gray-200">
+      <dl className="grid grid-cols-3 gap-x-8 gap-y-3 text-sm text-gray-800">
         <div>
           <dt className="font-medium text-gray-500">Ride Code</dt>
           <dd className="text-black">{ride.rideCode}</dd>
@@ -65,23 +65,27 @@ export default function RideInfoCard({
           </dd>
         </div>
 
-        {ride.startedAt && (
-          <div>
-            <dt className="font-medium text-gray-500">Started At</dt>
-            <dd className="text-black">
-              {new Date(ride.startedAt).toLocaleString()}
-            </dd>
+        {(ride.startedAt || ride.endedAt) && (
+          <div className="col-span-3 flex justify-center gap-12">
+            {ride.startedAt && (
+              <div>
+                <dt className="font-medium text-gray-500 text-center">Started At</dt>
+                <dd className="text-black text-center">
+                  {new Date(ride.startedAt).toLocaleString()}
+                </dd>
+              </div>
+            )}
+            {ride.endedAt && (
+              <div>
+                <dt className="font-medium text-gray-500 text-center">Ended At</dt>
+                <dd className="text-black text-center">
+                  {new Date(ride.endedAt).toLocaleString()}
+                </dd>
+              </div>
+            )}
           </div>
         )}
 
-        {ride.endedAt && (
-          <div>
-            <dt className="font-medium text-gray-500">Ended At</dt>
-            <dd className="text-black">
-              {new Date(ride.endedAt).toLocaleString()}
-            </dd>
-          </div>
-        )}
       </dl>
     </div>
   );

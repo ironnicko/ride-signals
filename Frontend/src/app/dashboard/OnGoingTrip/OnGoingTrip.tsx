@@ -13,7 +13,7 @@ interface OnGoingTripProps{
 }
 
 export const OnGoingTrip = ({updateDashboard} : OnGoingTripProps) => {
-  const { user } = useAuth.getState();
+  const { user } = useAuth();
   const { data, loading, error } = useQuery<{ ride: RideState }>(RIDE, {
     variables: { rideCode: user.currentRide },
     fetchPolicy: "cache-and-network",

@@ -2,8 +2,8 @@
 import { useQuery } from "@apollo/client/react";
 import { MY_RIDES } from "@/lib/graphql/query";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Bike } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, Bike, Loader } from "lucide-react";
+import { useEffect, useState } from "react";
 import RidesList from "./RideList";
 import RideModal from "./RideModal/RideModal";
 import { RideState } from "@/stores/types";
@@ -13,20 +13,22 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 export default function MyRidesPage() {
   const router = useRouter();
   const [selectedRide, setSelectedRide] = useState<RideState | null>(null);
-  const {rides, setRides} = useRides.getState();
+  const {rides, setRides} = useRides();
 
   const { data, loading, error } = useQuery<{myRides : RideState[]}>(MY_RIDES, {
     fetchPolicy: "cache-and-network",
   });
 
-  
-  if (loading) return <p className="p-4">Loading rides...</p>;
-  if (error) return <p className="p-4 text-red-600">Error loading rides: {error.message}</p>;
+  useEffect(() => {
+    if (data?.myRides?.length){
+      setRides(data.myRides)
+    }
+  }, [setRides, data])
 
-  setRides(data?.myRides)
+  if (loading) return <ProtectedRoute><Loader className="animate-spin"/></ProtectedRoute>;
+  if (error) return <ProtectedRoute><p className="p-4 text-red-600">Error loading rides: {error.message}</p></ProtectedRoute>;
 
 
-  
   return (
     <ProtectedRoute>
       <div className="w-full h-screen p-4 bg-gray-50">
@@ -52,10 +54,8 @@ export default function MyRidesPage() {
         )}
 
         {selectedRide && (
-          <RideModal ride={selectedRide}  onClose={(changed=false) => {
+          <RideModal ride={selectedRide}  onClose={() => {
             setSelectedRide(null);
-            if (changed)
-              router.refresh();
           }} />
         )}
       </div>
