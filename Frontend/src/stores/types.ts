@@ -89,7 +89,7 @@ export interface AuthStore {
     login: (email: string, password: string) => Promise<boolean>;
     signup: (name: string, email: string, password: string) => Promise<boolean>;
     setUser: (user: UserState) => void
-    loginWithGoogle: (idToken: string) => Promise<void>;
+    loginWithGoogle: (respnose: AuthStore) => void;
     logout: () => void;
 }
 

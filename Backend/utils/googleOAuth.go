@@ -2,12 +2,16 @@ package utils
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/ironnicko/ride-signals/Backend/config"
 	"github.com/ironnicko/ride-signals/Backend/db"
 	"github.com/ironnicko/ride-signals/Backend/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -146,40 +150,55 @@ func GoogleLoginHandler(c *gin.Context) {
 
 func GoogleCallbackHandler(c *gin.Context) {
 	code := c.Query("code")
+	state := c.Query("state")
+	cfg := config.LoadConfig()
+
 	if code == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Code not found"})
+		c.Redirect(http.StatusTemporaryRedirect, "/signin")
 		return
 	}
 
 	token, err := googleOAuthConfig.Exchange(context.Background(), code)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Failed to exchange token"})
+		c.Redirect(http.StatusTemporaryRedirect, "/signin")
 		return
 	}
 
 	client := googleOAuthConfig.Client(context.Background(), token)
 	resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user info"})
+		c.Redirect(http.StatusTemporaryRedirect, "/signin")
 		return
 	}
 	defer resp.Body.Close()
 
 	var googleUser GoogleUser
 	if err := json.NewDecoder(resp.Body).Decode(&googleUser); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse user info"})
+		c.Redirect(http.StatusTemporaryRedirect, "/signin")
 		return
 	}
 
 	if !googleUser.VerifiedEmail {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Google account email not verified"})
-		return
-	}
-	userResponse, err := handleGoogleUser(c, googleUser)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.Redirect(http.StatusTemporaryRedirect, "/signin")
 		return
 	}
 
-	c.JSON(http.StatusOK, userResponse)
+	userResponse, err := handleGoogleUser(c, googleUser)
+	if err != nil {
+		c.Redirect(http.StatusTemporaryRedirect, "/signin")
+		return
+	}
+
+	frontendRedirect := fmt.Sprintf(
+		"%s/google-redirect?response=%s&redirect=%s",
+		cfg.Frontend_URL,
+		url.QueryEscape(base64.StdEncoding.EncodeToString(mustJSON(userResponse))),
+		url.QueryEscape(state),
+	)
+	c.Redirect(http.StatusTemporaryRedirect, frontendRedirect)
+}
+
+func mustJSON(v interface{}) []byte {
+	data, _ := json.Marshal(v)
+	return data
 }

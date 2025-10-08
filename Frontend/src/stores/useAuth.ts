@@ -65,25 +65,13 @@ export const useAuth = create<AuthStore>()(
                     return false;
                 }
             },
-            loginWithGoogle: async (idToken) => {
+            loginWithGoogle: (response: AuthStore) => {
                 try {
-                    const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/auth/google", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ idToken }),
-                    });
-                    if (!res.ok) {
-                        const errRes = await res.json();
-                        toast.error(errRes.error)
-                        throw errRes.error
-                    }
-                    const data = await res.json();
-                    toast.success("Signed In Successfully!")
                     set({
-                        accessToken: data.accessToken,
-                        refreshToken: data.refreshToken,
+                        accessToken: response.accessToken,
+                        refreshToken: response.refreshToken,
                         isAuthenticated: true,
-                        user: data.user
+                        user: response.user
                     });
 
                 } catch (err) {

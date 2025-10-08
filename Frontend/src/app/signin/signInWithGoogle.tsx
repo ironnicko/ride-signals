@@ -1,54 +1,42 @@
 "use client";
-import { useEffect } from "react";
-import { useAuth } from "@/stores/useAuth";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
-import { useRouter, useSearchParams } from "next/navigation";
-import { toast } from "react-toastify";
+import { useSearchParams } from "next/navigation";
 
 export default function GoogleSignInButton() {
-  const {loginWithGoogle} = useAuth();
   const searchParams = useSearchParams();
-  const router = useRouter();
+  const [busyButton, setBusyButton] = useState(false);
 
+  // Redirect after login; default to /dashboard
   const redirectUrl = searchParams.get("redirect") || "/dashboard";
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
-  
-  
-  const handleGoogleLogin = () => {
-    // @ts-ignore
-    window.google.accounts.id.initialize({
-      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-      callback: async (response: any) => {
-        const idToken = response.credential;
-        try {
-          await loginWithGoogle(idToken)
-          router.replace(redirectUrl)
-        } catch (err) {
-          console.error(err);
-          toast.error("Failed to Login In")
-          
-        }
-      },
-    });
 
-    // @ts-ignore
-    window.google.accounts.id.prompt();
+  const handleGoogleLogin = () => {
+    setBusyButton(true);
+
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    const redirectUri = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/callback`; // your Go backend callback
+    const googleOAuthUrl =
+      `https://accounts.google.com/o/oauth2/v2/auth?` +
+      `client_id=${clientId}` +
+      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+      `&response_type=code` +
+      `&scope=openid email profile` +
+      `&prompt=select_account` +
+      `&state=${encodeURIComponent(redirectUrl)}`;
+
+    window.location.href = googleOAuthUrl;
   };
 
   return (
-          <Button
-            variant="outline"
-            className="w-full flex items-center justify-center gap-2"
-            onClick={handleGoogleLogin}
-          >
-            <FcGoogle size={20} />
-            Sign in with Google
-          </Button>
+    <Button
+      variant="outline"
+      className="w-full flex items-center justify-center gap-2"
+      onClick={handleGoogleLogin}
+      disabled={busyButton}
+    >
+      <FcGoogle size={20} />
+      Sign in with Google
+    </Button>
   );
-};
+}

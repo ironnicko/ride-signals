@@ -14,6 +14,7 @@ type Config struct {
 	Google_Redirect_URL  string
 	Mode                 string
 	ServerPort           string
+	Frontend_URL         string
 }
 
 func LoadConfig() *Config {
@@ -26,6 +27,7 @@ func LoadConfig() *Config {
 		Google_Client_Secret: getEnv("GOOGLE_CLIENT_SECRET", ""),
 		Google_Redirect_URL:  getEnv("GOOGLE_REDIRECT_URL", ""),
 		ServerPort:           getEnv("SERVER_PORT", "8000"),
+		Frontend_URL:         getEnv("FRONTEND_URL", ""),
 		Mode:                 getEnv("MODE", "local"),
 	}
 }
