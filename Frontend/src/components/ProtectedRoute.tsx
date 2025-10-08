@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import api from "@/lib/axios";
 import { Loader } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 interface ProtectedProps {
   children: React.ReactNode;
@@ -11,25 +11,29 @@ interface ProtectedProps {
 
 export default function ProtectedRoute({ children }: ProtectedProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const res = await api.post("/authenticated");
-        if (res.status === 200){
+        if (res.status === 200) {
           setIsAuthenticated(true);
         } 
       } catch (err) {
         setIsAuthenticated(false);
-        router.push("/signin")
+
+        const currentUrl = `${pathname}${searchParams?.toString() ? `?${searchParams.toString()}` : ""}`;
+        router.push(`/signin?redirect=${encodeURIComponent(currentUrl)}`);
       }
     };
 
     checkAuth();
-  }, []);
+  }, [pathname, searchParams, router]);
 
-  if (!isAuthenticated) return <Loader className="animate-spin"/>;
-
+  if (!isAuthenticated) return <Loader className="animate-spin" />;
 
   return <>{children}</>;
 }

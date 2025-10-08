@@ -15,7 +15,7 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 
 function getZoomLevel(distanceKm: number) {
   if (distanceKm < 1) return 15;
-  if (distanceKm < 5) return 13;
+  if (distanceKm < 5) return 14;
   if (distanceKm < 20) return 11;
   if (distanceKm < 100) return 8;
   if (distanceKm < 500) return 6;
@@ -23,15 +23,15 @@ function getZoomLevel(distanceKm: number) {
   return 4;
 }
 
-export const EmbedMap = ({ start, destination }: { start: GeoLocation; destination: GeoLocation }) => {
+export const EmbedMap = ({ start, destination, startName, destinationName }: { start: GeoLocation; destination: GeoLocation, startName: string, destinationName: string }) => {
   const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const distanceKm = haversineDistance(start.lat, start.lng, destination.lat, destination.lng);
   const zoom = getZoomLevel(distanceKm);
 
   const url = `https://www.google.com/maps/embed/v1/directions?key=${key}
-    &origin=${start.lat},${start.lng}
-    &destination=${destination.lat},${destination.lng}
+    &origin=${encodeURIComponent(startName)}
+    &destination=${encodeURIComponent(destinationName)}
     &zoom=${zoom}`;
 
   return (

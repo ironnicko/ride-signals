@@ -14,7 +14,7 @@ export default function HeroMap({
 }) {
   return (
     <div className="relative w-full h-[40vh] rounded-b-2xl overflow-hidden">
-      <EmbedMap start={ride.start!} destination={ride.destination!} />
+      <EmbedMap start={ride.start!} destination={ride.destination!} startName={ride.startName} destinationName={ride.destinationName} />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent flex flex-col justify-end p-8 text-white">
         <h2 className="text-3xl font-bold">
           {formState.tripName || `${ride.startName} → ${ride.destinationName}`}

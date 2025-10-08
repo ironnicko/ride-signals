@@ -4,7 +4,7 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import GoogleSignInButton from "@/app/signin/signInWithGoogle";
 import { useAuth } from "@/stores/useAuth";
@@ -15,7 +15,10 @@ export default function SignUp() {
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
 
+  const searchParams = useSearchParams();
   const router = useRouter();
+
+  const redirectUrl = searchParams.get("redirect") || "/dashboard";
 
   const {signup} = useAuth()
 
@@ -24,7 +27,7 @@ export default function SignUp() {
     try {
       const isLoggedIn = await signup(name, email, password)
       if (isLoggedIn == true){
-        router.replace("/dashboard")
+        router.replace(redirectUrl)
       }
     } catch(err){
       console.error(err)

@@ -3,12 +3,15 @@ import { useEffect } from "react";
 import { useAuth } from "@/stores/useAuth";
 import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 
 export default function GoogleSignInButton() {
   const {loginWithGoogle} = useAuth();
+  const searchParams = useSearchParams();
   const router = useRouter();
+
+  const redirectUrl = searchParams.get("redirect") || "/dashboard";
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://accounts.google.com/gsi/client";
@@ -25,7 +28,7 @@ export default function GoogleSignInButton() {
         const idToken = response.credential;
         try {
           await loginWithGoogle(idToken)
-          router.replace("/dashboard")
+          router.replace(redirectUrl)
         } catch (err) {
           console.error(err);
           toast.error("Failed to Login In")

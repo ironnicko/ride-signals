@@ -5,7 +5,7 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import GoogleSignInButton from "./signInWithGoogle";
 import { useAuth } from "@/stores/useAuth";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 
 export default function SignIn() {
@@ -14,7 +14,10 @@ export default function SignIn() {
   const [password, setPassword] = useState<string>("")
   const [buttonBoolean, setButtonBoolean] = useState<boolean>(false);
 
-  const router = useRouter()
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const redirectUrl = searchParams.get("redirect") || "/dashboard";
 
   const {login} = useAuth()
 
@@ -24,7 +27,7 @@ export default function SignIn() {
     try {
       const isLoggedIn = await login(email, password)
       if (isLoggedIn == true){
-        router.replace("/dashboard")
+        router.replace(redirectUrl)
       }
     } catch(err){
       console.error(err)
@@ -87,7 +90,7 @@ export default function SignIn() {
 
         <p className="text-center text-sm text-gray-500 mt-4">
           Don’t have an account?{" "}
-          <a href="/signup" className="text-blue-600 hover:underline">
+          <a href={`/signup?redirect=${redirectUrl}`} className="text-blue-600 hover:underline">
             Sign up
           </a>
         </p>
