@@ -21,7 +21,7 @@ export default function RidesList({ rides, onRideClick }: RidesListProps) {
         <div
           key={ride.rideCode}
           className={`flex cursor-pointer justify-center bg-white rounded-2xl shadow-md p-4 hover:shadow-lg transition-all ${
-                    (user.currentRide == ride.rideCode) ? "outline outline-2 outline-red-500" : ""
+                    (user.currentRide == ride.rideCode) ? "outline-2 outline-red-500" : ""
                   }`}
 
           onClick={() => onRideClick(ride)}

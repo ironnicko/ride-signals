@@ -1,9 +1,10 @@
+import { RideState, UserState } from "@/stores/types";
 import { Bike, OctagonX, PenSquareIcon, Save, Share2 } from "lucide-react";
 import { useState } from "react";
 
 interface RideControlsCardProps {
-  ride: any;
-  user: any;
+  ride: RideState;
+  user: UserState;
   isRideOwner: (userId?: string) => boolean;
   isEditing: boolean;
   setIsEditing: (v: boolean) => void;
@@ -42,7 +43,7 @@ export default function RideControlsCard({
 
   const OwnerControls = () => (
     <>
-      {(ride.status === "not started" && !isEditing) && (
+      {ride.status === "not started" && !isEditing && (
         <ControlButton
           onClick={handleStartRide}
           busy={buttonBusy}
@@ -51,7 +52,7 @@ export default function RideControlsCard({
           label="Start Ride"
         />
       )}
-      {(ride.status === "started"  && !isEditing)&& (
+      {ride.status === "started" && !isEditing && (
         <ControlButton
           onClick={handleEndRide}
           busy={buttonBusy}
@@ -113,13 +114,20 @@ export default function RideControlsCard({
     label: string;
   }
 
-  const ControlButton = ({ onClick, busy, color, Icon, label }: ControlButtonProps) => {
+  const ControlButton = ({
+    onClick,
+    busy,
+    color,
+    Icon,
+    label,
+  }: ControlButtonProps) => {
     const colors: Record<string, string> = {
       green: "text-green-600 hover:text-green-800",
       red: "text-red-600 hover:text-red-800",
       blue: "text-blue-600 hover:text-blue-800",
       purple: "text-purple-600 hover:text-purple-800",
     };
+
     return (
       <button
         onClick={onClick}

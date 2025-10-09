@@ -1,31 +1,29 @@
-version: '3.8'
-
 services:
-  frontend:
-    image: ironnicko1413/ride-signals-frontend:latest
-    build:
-      context: ./Frontend
-      dockerfile: Dockerfile
-    restart: always
-    expose:
-      - "3000"
-    env_file:
-      - ./.env
-    networks:
-      - webnet
+  # frontend:
+  #   image: ironnicko1413/ride-signals-frontend:latest
+  #   build:
+  #     context: ./Frontend
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   expose:
+  #     - "3000"
+  #   env_file:
+  #     - ./.env
+  #   networks:
+  #     - webnet
 
-  backend:
-    image: ironnicko1413/ride-signals-backend:latest
-    build:
-      context: ./Backend
-      dockerfile: Dockerfile
-    restart: always
-    expose:
-      - "8000"
-    env_file:
-      - ./.env
-    networks:
-      - webnet
+  # backend:
+  #   image: ironnicko1413/ride-signals-backend:latest
+  #   build:
+  #     context: ./Backend
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   expose:
+  #     - "8000"
+  #   env_file:
+  #     - ./.env
+  #   networks:
+  #     - webnet
 
   nginx:
     image: nginx:latest
@@ -43,6 +41,33 @@ services:
     # networks:
     #   - webnet
 
+  dragonfly:
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    ulimits:
+      memlock: -1
+    ports:
+      - "6379:6379"
+    # For better performance, consider `host` mode instead `port` to avoid docker NAT.
+    # `host` mode is NOT currently supported in Swarm Mode.
+    # https://docs.docker.com/compose/compose-file/compose-file-v3/#network_mode
+    # network_mode: "host"
+    volumes:
+      - ./dragonfly_data:/data
+    networks:
+      - webnet
+
+  # Optional Dragonfly UI (if you want a web dashboard)
+  redisinsight:
+    image: redis/redisinsight
+    ports:
+      - "5540:5540"
+    volumes:
+      - ./redisinsight_data:/db
+    depends_on:
+      - dragonfly
+    networks:
+      - webnet
+
   # mongo:
   #   image: mongo
   #   restart: always
@@ -54,11 +79,11 @@ services:
   #   volumes:
   #     - ./mongo_data:/data/db
   #   healthcheck:
-      # test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
-      # interval: 2s
-      # timeout: 5s
-      # retries: 3
-      # start_period: 5s
+  # test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+  # interval: 2s
+  # timeout: 5s
+  # retries: 3
+  # start_period: 5s
 
   # kafka:
   #   image: apache/kafka:latest
@@ -97,8 +122,6 @@ services:
   #     ME_CONFIG_BASICAUTH_ENABLED: true
   #     ME_CONFIG_BASICAUTH_USERNAME: admin
   #     ME_CONFIG_BASICAUTH_PASSWORD: admin
-
-
 
   # kafka-ui:
   #   image: provectuslabs/kafka-ui:latest

@@ -11,8 +11,12 @@
 node_modules
 /mongo_data
 /kafka_data
+/redisinsight_data
+/dragonfly_data
 /secrets
 tmux.sh
+
+.zed
 
 
 # Local .terraform directories

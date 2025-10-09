@@ -1,13 +1,15 @@
 import { Server, Socket } from "socket.io";
+import { createAdapter } from "socket.io-redis";
 import http from "http";
 import type { JoinRidePayload } from "./types";
-import { runKafka } from "./consumer";
+import Redis from "ioredis";
 
-
-const rideParticipants: Record<string, string[]> = {
-  ride123: ["user1", "user2"],
-  ride456: ["user3", "user4"],
-};
+// Redis clients for the adapter
+// const pubClient = new Redis({
+//   host: process.env.REDIS_HOST || "127.0.0.1",
+//   port: Number(process.env.REDIS_PORT) || 6379,
+// });
+// const subClient = pubClient.duplicate();
 
 const server = http.createServer();
 const io = new Server(server, {
@@ -17,16 +19,30 @@ const io = new Server(server, {
   },
 });
 
+// Attach the Redis adapter
+// io.adapter(createAdapter({ pubClient, subClient }));
+
+// Socket.IO events
 io.on("connection", (socket: Socket) => {
   console.log("User connected:", socket.id);
-  socket.on("joinRide", ({ rideCode, fromUser }: JoinRidePayload) => {
-    const participants = rideParticipants[rideCode] || [];
-    if (participants.includes(fromUser)) {
-      socket.join(rideCode);
-      console.log(`${fromUser} joined ride ${rideCode}`);
-      socket.emit("ride-joined", { rideCode });
-    } else {
-      socket.emit("error", { message: "Not authorized for this ride" });
+
+  socket.on("joinRide", async ({ rideCode, fromUser }: JoinRidePayload) => {
+    console.log(`${fromUser} attempting to join ride ${rideCode}...`);
+
+    try {
+        socket.join(rideCode);
+        console.log(`${fromUser} joined ride ${rideCode}`);
+
+        socket.emit("response", {
+          eventType: "joinRide",
+          data: { rideCode },
+        });
+
+        // Broadcast to all participants (across servers)
+        socket.to(rideCode).emit("userJoined", { user: fromUser });
+    } catch (err) {
+      console.error("Redis error:", err);
+      socket.emit("error", { message: "Internal server error" });
     }
   });
 
@@ -35,9 +51,6 @@ io.on("connection", (socket: Socket) => {
   });
 });
 
-
-runKafka(io).catch(console.error);
-
 server.listen(3001, () => {
-  console.log("🚀 Socket.io + Kafka bridge running on port 3001");
+  console.log("Socket.io running on port 3001");
 });

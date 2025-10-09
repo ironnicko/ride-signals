@@ -11,6 +11,7 @@ import RideInfoCard from "./RideInfoCard";
 import RideControlsCard from "./RideControlsCard";
 import HeroMap from "./HeroMap";
 import ParticipantsList from "./ParticipantsList";
+import { useSocket } from "@/stores/useSocket";
 
 export interface UpdateRideParams {
   endedAt: string;
@@ -29,6 +30,7 @@ interface RideModalProps {
 
 export default function RideModal({ ride, onClose }: RideModalProps) {
   const { user, setUser } = useAuth();
+  const { joinRide, socket } = useSocket();
   const { replaceRide } = useRides();
   const [currentRide, setCurrentRide] = useState(ride);
   const [formState, setFormState] = useState<Partial<UpdateRideParams>>({
@@ -42,14 +44,16 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [buttonBusy, setButtonBusy] = useState(false);
   const router = useRouter();
-  const [updateRide] = useMutation<{updateRide : RideState}>(UPDATE_RIDE);
+  const [updateRide] = useMutation<{ updateRide: RideState }>(UPDATE_RIDE);
 
   const isRideOwner = (id: string) =>
-    currentRide.participants?.some((p) => p.userId === id && p.role === "leader");
+    currentRide.participants?.some(
+      (p) => p.userId === id && p.role === "leader",
+    );
 
   async function handleRideChange(
     newStatus: "started" | "ended" | null,
-    requestType?: "start" | "end" | "remove"
+    requestType?: "start" | "end" | "remove",
   ) {
     setButtonBusy(true);
     try {
@@ -71,6 +75,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
 
       if (newStatus === "started") {
         setUser({ ...user!, currentRide: ride.rideCode });
+        joinRide({ rideCode: ride.rideCode, fromUser: user.id });
         router.push("/dashboard");
         toast.success("Ride started!");
       } else if (newStatus === "ended") {
@@ -92,6 +97,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
   const handleSetCurrentRide = async () => {
     setUser({ ...user!, currentRide: currentRide.rideCode });
     await handleRideChange(null, "start");
+    joinRide({ rideCode: ride.rideCode, fromUser: user.id });
     router.push("/dashboard");
   };
   const handleRemoveCurrentRide = async () => {
@@ -101,11 +107,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex flex-col overflow-y-auto">
-      <HeroMap
-        ride={currentRide}
-        onClose={onClose}
-        formState={formState}
-      />
+      <HeroMap ride={currentRide} onClose={onClose} formState={formState} />
       <div className="flex flex-col items-center gap-6 px-6 mt-6 pb-10">
         <RideInfoCard
           ride={currentRide}
@@ -126,9 +128,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
           handleRemoveCurrentRide={handleRemoveCurrentRide}
           handleSave={() => handleRideChange(null)}
         />
-        <ParticipantsList
-          ride={currentRide}
-        ></ParticipantsList>
+        <ParticipantsList ride={currentRide}></ParticipantsList>
       </div>
     </div>
   );

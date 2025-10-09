@@ -1,5 +1,7 @@
 // import { Preferences } from "@capacitor/preferences";
 
+import { Socket } from "socket.io-client";
+
 // Utility to detect if we are in Capacitor
 // const isCapacitor = typeof window !== "undefined" && window?.Capacitor;
 
@@ -69,6 +71,20 @@ export interface UserState {
     lastLoginAt: string | null
     isActive: boolean | null
     currentRide: string | null
+}
+
+export interface JoinRidePayload {
+  rideCode: string;
+  fromUser: string
+}
+
+export interface SocketState {
+  socket: Socket | null;
+  isConnected: boolean;
+  error: string | null;
+  connect: () => void;
+  disconnect: () => void;
+  joinRide: (payload: JoinRidePayload) => void;
 }
 
 export const storage = {

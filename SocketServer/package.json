@@ -10,7 +10,9 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "ioredis": "^5.8.1",
     "kafkajs": "^2.2.4",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "socket.io-redis": "^6.1.1"
   }
 }

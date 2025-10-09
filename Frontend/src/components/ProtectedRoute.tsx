@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import api from "@/lib/axios";
 import { Loader } from "lucide-react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useSocket } from "@/stores/useSocket";
 
 interface ProtectedProps {
   children: React.ReactNode;
@@ -14,6 +15,7 @@ export default function ProtectedRoute({ children }: ProtectedProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const { connect, isConnected } = useSocket.getState();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -21,7 +23,7 @@ export default function ProtectedRoute({ children }: ProtectedProps) {
         const res = await api.post("/authenticated");
         if (res.status === 200) {
           setIsAuthenticated(true);
-        } 
+        }
       } catch (err) {
         setIsAuthenticated(false);
 
@@ -34,6 +36,7 @@ export default function ProtectedRoute({ children }: ProtectedProps) {
   }, [pathname, searchParams, router]);
 
   if (!isAuthenticated) return <Loader className="animate-spin" />;
+  if (!isConnected) connect();
 
   return <>{children}</>;
 }
