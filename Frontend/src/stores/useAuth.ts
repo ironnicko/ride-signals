@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { AuthStore, storage } from "./types"
 import { toast } from "react-toastify";
-import { useRides } from "./useRides";
 
 export const useAuth = create<AuthStore>()(
     persist(

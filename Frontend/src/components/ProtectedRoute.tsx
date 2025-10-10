@@ -10,6 +10,15 @@ interface ProtectedProps {
   children: React.ReactNode;
 }
 
+const socketRoute = (pathname: string): boolean => {
+  switch (pathname) {
+    case "/joinRide":
+      return false;
+    default:
+      return true;
+  }
+};
+
 export default function ProtectedRoute({ children }: ProtectedProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -36,7 +45,10 @@ export default function ProtectedRoute({ children }: ProtectedProps) {
   }, [pathname, searchParams, router]);
 
   if (!isAuthenticated) return <Loader className="animate-spin" />;
-  if (!isConnected) connect();
+
+  if (!isConnected && socketRoute(pathname)) {
+    connect();
+  }
 
   return <>{children}</>;
 }

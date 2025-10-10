@@ -8,3 +8,7 @@ export interface KafkaRideEvent {
   type: string;
 }
 
+export interface JwtPayload {
+  userId: string;
+  exp?: number;
+}

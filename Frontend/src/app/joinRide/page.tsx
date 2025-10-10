@@ -9,11 +9,14 @@ import { RideState, UserState } from "@/stores/types";
 import { useAuth } from "@/stores/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { gql } from "@apollo/client";
+import { useOtherUsers } from "@/stores/useOtherUsers";
 
 export default function JoinRidePage() {
   const params = useSearchParams();
   const rideCode = params.get("rideCode");
-  const [invitedBy, setInvitiedBy] = useState<string | null>(params.get("invitedBy"));
+  const [invitedBy, setInvitiedBy] = useState<string | null>(
+    params.get("invitedBy"),
+  );
   const { user } = useAuth();
   const router = useRouter();
   const { data, loading, error } = useQuery<{ ride: RideState }>(RIDE, {
@@ -21,29 +24,27 @@ export default function JoinRidePage() {
     skip: !rideCode,
   });
 
-  const { data: inviterData } = useQuery<{ user: UserState }>(gql`
-    query User($userId: String!) {
-    user(userId: $userId) {
-      name
-    }
-  }
-    `, {
-    variables: { userId: invitedBy || "" },
-    skip: !invitedBy,
-  });
+  const { getUserById, fetchUsersByIds } = useOtherUsers();
 
-  const [joinRide, { loading: joining }] =
-    useMutation<{ joinRide: RideState }>(JOIN_RIDE);
+  const [joinRide, { loading: joining }] = useMutation<{ joinRide: RideState }>(
+    JOIN_RIDE,
+  );
   const [joined, setJoined] = useState(false);
+
+  fetchUsersByIds([invitedBy]);
 
   useEffect(() => {
     if (!data?.ride || !user) return;
     const alreadyJoined = data.ride.participants.some(
-      (participant) => participant.userId === user.id
+      (participant) => participant.userId === user.id,
     );
 
-    if (!(data.ride.participants.some((participant) => participant.userId == invitedBy)))
-        setInvitiedBy(null);
+    if (
+      !data.ride.participants.some(
+        (participant) => participant.userId == invitedBy,
+      )
+    )
+      setInvitiedBy(null);
 
     setJoined(alreadyJoined);
   }, [data, user]);
@@ -60,19 +61,35 @@ export default function JoinRidePage() {
   };
 
   if (!rideCode)
-    return <ProtectedRoute><p className="text-center mt-10">No ride code provided.</p></ProtectedRoute>;
+    return (
+      <ProtectedRoute>
+        <p className="text-center mt-10">No ride code provided.</p>
+      </ProtectedRoute>
+    );
   if (!invitedBy)
-    return <ProtectedRoute><p className="text-center mt-10">You must be invited by someone to join.</p></ProtectedRoute>;
+    return (
+      <ProtectedRoute>
+        <p className="text-center mt-10">
+          You must be invited by someone to join.
+        </p>
+      </ProtectedRoute>
+    );
   if (loading)
-    return <ProtectedRoute><p className="text-center mt-10">Loading ride details...</p></ProtectedRoute>;
+    return (
+      <ProtectedRoute>
+        <p className="text-center mt-10">Loading ride details...</p>
+      </ProtectedRoute>
+    );
   if (error)
     return (
-      <ProtectedRoute><p className="text-center mt-10 text-red-500">Error: {error.message}</p></ProtectedRoute>
+      <ProtectedRoute>
+        <p className="text-center mt-10 text-red-500">Error: {error.message}</p>
+      </ProtectedRoute>
     );
 
   const ride = data?.ride;
   const participantCount = ride?.participants?.length ?? 0;
-  const inviterName = inviterData?.user?.name || "Someone";
+  const inviterName = getUserById(invitedBy)?.name || "Someone";
 
   return (
     <ProtectedRoute>
@@ -107,8 +124,8 @@ export default function JoinRidePage() {
               joined
                 ? "bg-gray-500 cursor-default"
                 : joining
-                ? "bg-gray-400 cursor-wait"
-                : "bg-black hover:bg-gray-800"
+                  ? "bg-gray-400 cursor-wait"
+                  : "bg-black hover:bg-gray-800"
             }`}
           >
             {joined ? "Joined" : joining ? "Joining..." : "Join Ride"}

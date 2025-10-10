@@ -3,40 +3,99 @@ import Timer from "@/components/Timer";
 import { RIDE } from "@/lib/graphql/query";
 import { DashboardState, RideState } from "@/stores/types";
 import { useAuth } from "@/stores/useAuth";
+import { useSocket } from "@/stores/useSocket";
 import { useQuery } from "@apollo/client/react";
-import { Fuel, Square, ArrowLeft, ArrowRight, RefreshCcw, PlusCircle } from "lucide-react";
+import {
+  Fuel,
+  Square,
+  ArrowLeft,
+  ArrowRight,
+  RefreshCcw,
+  PlusCircle,
+} from "lucide-react";
 import { useEffect } from "react";
 
-
-interface OnGoingTripProps{
-  updateDashboard: (updates: Partial<DashboardState>) => void
+interface OnGoingTripProps {
+  updateDashboard: (updates: Partial<DashboardState>) => void;
 }
 
-export const OnGoingTrip = ({updateDashboard} : OnGoingTripProps) => {
+export const OnGoingTrip = ({ updateDashboard }: OnGoingTripProps) => {
   const { user } = useAuth();
+  const { joinRide, sendLocation } = useSocket();
   const { data, loading, error } = useQuery<{ ride: RideState }>(RIDE, {
     variables: { rideCode: user.currentRide },
     fetchPolicy: "cache-and-network",
   });
 
+  // useEffect(() => {
+  //   const watchId = navigator.geolocation.watchPosition(
+  //     (pos) => {
+  //       const location = {
+  //         lat: pos.coords.latitude,
+  //         lng: pos.coords.longitude,
+  //       };
+  //       updateDashboard({
+  //         userLocation: location,
+  //       });
+  //       if (data?.ride?.rideCode) { 
+  //         sendLocation({rideCode : data.ride.rideCode, location})
+  //       }
+  //       console.log("Fetching Location...");
+  //     },
+  //     (err) => console.error(err),
+  //     { enableHighAccuracy: true, maximumAge: 0 },
+  //   );
+  //   return () => navigator.geolocation.clearWatch(watchId);
+  // }, []);
+  
   useEffect(() => {
-    const watchId = navigator.geolocation.watchPosition(
-      (pos) => {
-        updateDashboard({userLocation : {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-        }});
-        console.log("Fetching Location...")
-      },
-      (err) => console.error(err),
-      { enableHighAccuracy: true, maximumAge: 0 }
-    );
-    return () => navigator.geolocation.clearWatch(watchId);
-  }, []);
+    if (!data?.ride?.rideCode) return;
+  
+    const { rideCode } = data.ride;
+  
+    // Fetch and send location every 5 seconds
+    const fetchLocation = () => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const location = {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          };
+  
+          updateDashboard({ userLocation: location });
+          sendLocation({ rideCode, location });
+  
+          console.log("📍 Location sent:", location);
+        },
+        (err) => console.error("❌ Geolocation error:", err),
+        { enableHighAccuracy: true }
+      );
+    };
+  
+    // Immediately fetch once
+    fetchLocation();
+  
+    // Start interval for every 5 seconds
+    const intervalId = setInterval(fetchLocation, 5000);
+  
+    return () => clearInterval(intervalId);
+  }, [data?.ride?.rideCode]);
+
+  
+  useEffect(() => {
+    if (data?.ride?.rideCode) {
+      joinRide({ rideCode: data.ride.rideCode });
+    }
+  }, [data?.ride?.rideCode, joinRide]);
+
 
   if (loading) return <p className="p-4">Loading Current Trip...</p>;
-  if (error) return <p className="p-4 text-red-600">Error loading Current Trip: {error.message}</p>;
-
+  if (error)
+    return (
+      <p className="p-4 text-red-600">
+        Error loading Current Trip: {error.message}
+      </p>
+    );
 
   return (
     <>
@@ -45,7 +104,6 @@ export const OnGoingTrip = ({updateDashboard} : OnGoingTripProps) => {
         <Timer ride={data.ride}></Timer>
         <div className="p-6 bg-white shadow-lg rounded-2xl border border-gray-200 w-80">
           <div className="grid grid-cols-3 gap-4 justify-items-center">
-
             {/* Left Arrow */}
             <button className="flex flex-col items-center text-green-600 hover:text-green-800">
               <ArrowLeft className="w-7 h-7" />
@@ -63,7 +121,6 @@ export const OnGoingTrip = ({updateDashboard} : OnGoingTripProps) => {
               <ArrowRight className="w-7 h-7" />
               <span className="text-xs mt-1">Right</span>
             </button>
-
 
             {/* Refuel */}
             <button className="flex flex-col items-center text-blue-600 hover:text-blue-800">

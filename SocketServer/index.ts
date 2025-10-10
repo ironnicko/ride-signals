@@ -1,15 +1,30 @@
 import { Server, Socket } from "socket.io";
 import { createAdapter } from "socket.io-redis";
 import http from "http";
-import type { JoinRidePayload } from "./types";
+import type { JoinRidePayload, JwtPayload } from "./types";
 import Redis from "ioredis";
+import jwt from "jsonwebtoken";
 
-// Redis clients for the adapter
-// const pubClient = new Redis({
-//   host: process.env.REDIS_HOST || "127.0.0.1",
-//   port: Number(process.env.REDIS_PORT) || 6379,
-// });
-// const subClient = pubClient.duplicate();
+
+const isValid = async (authToken: string): Promise<{ ok: boolean; id?: string }> => {
+  try {
+    const token = authToken.startsWith("Bearer ") ? authToken.slice(7) : authToken;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET) as  JwtPayload ;
+    if (!decoded || !decoded.userId) {
+      return { ok: false };
+    }
+    return { ok: true, id: decoded.userId };
+  } catch (err) {
+    console.error("JWT verification failed:", err);
+    return { ok: false };
+  }
+};
+
+const pubClient = new Redis({
+  host: process.env.REDIS_HOST || "localhost",
+  port: Number(process.env.REDIS_PORT) || 6379,
+});
+const subClient = pubClient.duplicate();
 
 const server = http.createServer();
 const io = new Server(server, {
@@ -19,38 +34,122 @@ const io = new Server(server, {
   },
 });
 
-// Attach the Redis adapter
-// io.adapter(createAdapter({ pubClient, subClient }));
+io.adapter(createAdapter({ pubClient, subClient }));
 
-// Socket.IO events
+const addParticipant = async (rideCode: string, userId: string) => {
+  const key = `ride:${rideCode}`;
+  await pubClient.sadd(key, userId);
+  await pubClient.expire(key, 30);
+};
+
+const removeParticipant = async (rideCode: string, userId: string) => {
+  await pubClient.srem(`ride:${rideCode}`, userId);
+};
+
+io.use(async (socket, next) => {
+  try {
+    const authToken = socket.handshake.auth.token;
+    const valid = await isValid(authToken);
+
+    if (valid.ok) {
+      const userId = valid.id;
+
+      await pubClient.set(`socket:${socket.id}:user`, userId);
+      await pubClient.sadd(`user:${userId}`, socket.id);
+
+      (socket as any).userId = userId;
+      next();
+    } else {
+      next(new Error("Unauthorized"));
+    }
+  } catch (err) {
+    next(new Error("Authentication failed"));
+  }
+});
+
 io.on("connection", (socket: Socket) => {
-  console.log("User connected:", socket.id);
+  const userId = (socket as any).userId;
+  console.log(`User connected: ${userId} (${socket.id})`);
 
-  socket.on("joinRide", async ({ rideCode, fromUser }: JoinRidePayload) => {
-    console.log(`${fromUser} attempting to join ride ${rideCode}...`);
+  socket.on("joinRide", async ({ rideCode }: JoinRidePayload) => {
+    console.log(`${userId} joining ride ${rideCode}`);
 
     try {
-        socket.join(rideCode);
-        console.log(`${fromUser} joined ride ${rideCode}`);
+      socket.join(rideCode);
+      await addParticipant(rideCode, userId);
 
-        socket.emit("response", {
-          eventType: "joinRide",
-          data: { rideCode },
-        });
+      const allLocations = await pubClient.hgetall(
+        `ride:${rideCode}:locations`,
+      );
 
-        // Broadcast to all participants (across servers)
-        socket.to(rideCode).emit("userJoined", { user: fromUser });
+      socket.emit("response", {
+        eventType: "joinRide",
+        data: { rideCode, locations: allLocations },
+      });
+
+      socket.to(rideCode).emit("userJoined", { user: userId });
     } catch (err) {
       console.error("Redis error:", err);
       socket.emit("error", { message: "Internal server error" });
     }
   });
 
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
+  socket.on("leaveRide", async ({ rideCode }: JoinRidePayload) => {
+    console.log(`${userId} leaving ride ${rideCode}`);
+
+    try {
+      await removeParticipant(rideCode, userId);
+      socket.leave(rideCode);
+
+      socket.to(rideCode).emit("userLeft", { user: userId });
+
+      socket.emit("response", {
+        eventType: "leaveRide",
+        data: { rideCode },
+      });
+    } catch (err) {
+      console.error("Redis error:", err);
+      socket.emit("error", { message: "Internal server error" });
+    }
+  });
+
+  socket.on("sendLocation", async ({ rideCode, location }) => {
+    try {
+      await pubClient.hset(
+        `ride:${rideCode}:locations`,
+        userId,
+        JSON.stringify(location),
+      );
+      await addParticipant(rideCode, userId)
+
+      socket.to(rideCode).emit("response", {
+        eventType: "locationUpdate",
+        data: {
+          user: userId,
+          location,
+        },
+      });
+    } catch (err) {
+      console.error("Redis error:", err);
+      socket.emit("error", { message: "Failed to update location" });
+    }
+  });
+
+  socket.on("disconnect", async () => {
+    console.log(`❌ User disconnected: ${userId} (${socket.id})`);
+
+    try {
+      const storedUserId = await pubClient.get(`socket:${socket.id}:user`);
+      if (storedUserId) {
+        await pubClient.srem(`user:${storedUserId}`, socket.id);
+        await pubClient.del(`socket:${socket.id}:user`);
+      }
+    } catch (err) {
+      console.error("Error cleaning up on disconnect:", err);
+    }
   });
 });
 
 server.listen(3001, () => {
-  console.log("Socket.io running on port 3001");
+  console.log("Socket.IO server running on port 3001");
 });

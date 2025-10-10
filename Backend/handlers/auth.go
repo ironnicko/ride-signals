@@ -114,6 +114,14 @@ func Login(c *gin.Context) {
 	})
 }
 
+func Authenticated(c *gin.Context){
+	userIDHex := c.Value("userId").(string)
+	c.JSON(http.StatusOK, gin.H{
+		"id" : userIDHex,
+	})
+
+}
+
 func RefreshAccessToken(c *gin.Context) {
 	var request struct {
 		RefreshToken string `json:"refreshToken"`

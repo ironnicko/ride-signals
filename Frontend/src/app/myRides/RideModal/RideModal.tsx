@@ -30,7 +30,7 @@ interface RideModalProps {
 
 export default function RideModal({ ride, onClose }: RideModalProps) {
   const { user, setUser } = useAuth();
-  const { joinRide, socket } = useSocket();
+  const { joinRide, leaveRide } = useSocket();
   const { replaceRide } = useRides();
   const [currentRide, setCurrentRide] = useState(ride);
   const [formState, setFormState] = useState<Partial<UpdateRideParams>>({
@@ -75,11 +75,12 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
 
       if (newStatus === "started") {
         setUser({ ...user!, currentRide: ride.rideCode });
-        joinRide({ rideCode: ride.rideCode, fromUser: user.id });
+        joinRide({ rideCode: ride.rideCode });
         router.push("/dashboard");
         toast.success("Ride started!");
       } else if (newStatus === "ended") {
         setUser({ ...user!, currentRide: null });
+        leaveRide({ rideCode: ride.rideCode });
         toast.success("Ride ended!");
       } else {
         toast.success("Ride updated!");
@@ -97,12 +98,13 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
   const handleSetCurrentRide = async () => {
     setUser({ ...user!, currentRide: currentRide.rideCode });
     await handleRideChange(null, "start");
-    joinRide({ rideCode: ride.rideCode, fromUser: user.id });
+    joinRide({ rideCode: ride.rideCode });
     router.push("/dashboard");
   };
   const handleRemoveCurrentRide = async () => {
     setUser({ ...user!, currentRide: null });
     await handleRideChange(null, "remove");
+    leaveRide({ rideCode: ride.rideCode });
   };
 
   return (
