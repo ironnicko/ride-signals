@@ -31,6 +31,7 @@ const io = new Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
@@ -150,6 +151,6 @@ io.on("connection", (socket: Socket) => {
   });
 });
 
-server.listen(3001, () => {
+server.listen(3001,"0.0.0.0", () => {
   console.log("Socket.IO server running on port 3001");
 });

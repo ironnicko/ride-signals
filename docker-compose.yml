@@ -25,6 +25,21 @@ services:
   #   networks:
   #     - webnet
 
+  # socket:
+  #   image: ironnicko1413/ride-signals-socket:latest
+  #   build:
+  #     context: ./SocketServer
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   expose:
+  #     - "3001"
+  #   env_file:
+  #     - ./.env
+  #   depends_on:
+  #     - dragonfly
+  #   networks:
+  #     - webnet
+
   nginx:
     image: nginx:latest
     container_name: nginx-proxy
@@ -38,25 +53,21 @@ services:
     # depends_on:
     #   - frontend
     #   - backend
-    # networks:
-    #   - webnet
+    #   - socket
+    networks:
+      - webnet
 
   dragonfly:
-    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    image: "docker.dragonflydb.io/dragonflydb/dragonfly"
     ulimits:
       memlock: -1
     ports:
       - "6379:6379"
-    # For better performance, consider `host` mode instead `port` to avoid docker NAT.
-    # `host` mode is NOT currently supported in Swarm Mode.
-    # https://docs.docker.com/compose/compose-file/compose-file-v3/#network_mode
-    # network_mode: "host"
     volumes:
       - ./dragonfly_data:/data
     networks:
       - webnet
 
-  # Optional Dragonfly UI (if you want a web dashboard)
   redisinsight:
     image: redis/redisinsight
     ports:

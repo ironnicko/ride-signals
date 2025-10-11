@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Socket.io Test</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    input, button { margin: 5px 0; padding: 5px; }
+    #log { margin-top: 20px; white-space: pre-wrap; background: #f0f0f0; padding: 10px; height: 300px; overflow-y: scroll; }
+  </style>
+</head>
+<body>
+  <h2>Socket.io Test Client</h2>
+  
+  <label>Auth Token:</label><br>
+  <input type="text" id="tokenInput" placeholder="Bearer TOKEN_HERE" size="50"/><br>
+  
+  <button id="connectBtn">Connect</button>
+  <button id="disconnectBtn">Disconnect</button><br>
+
+  <label>Ride Code:</label><br>
+  <input type="text" id="rideCode" placeholder="Ride123"/><br>
+
+  <button id="joinBtn">Join Ride</button>
+  <button id="leaveBtn">Leave Ride</button><br>
+
+  <label>Location:</label><br>
+  Lat: <input type="number" id="lat" step="0.000001" placeholder="0"/>,
+  Lng: <input type="number" id="lng" step="0.000001" placeholder="0"/><br>
+  <button id="sendLocBtn">Send Location</button>
+
+  <div id="log"></div>
+
+  <script>
+    let socket = null;
+
+    const log = (msg) => {
+      const logDiv = document.getElementById("log");
+      logDiv.textContent += msg + "\n";
+      logDiv.scrollTop = logDiv.scrollHeight;
+    };
+
+    document.getElementById("connectBtn").addEventListener("click", () => {
+      const token = document.getElementById("tokenInput").value.trim();
+      if (!token) return alert("Enter auth token!");
+
+      // Connect to socket
+      socket = io("http://localhost:8080", {
+        transports: ["websocket"],
+        auth: { token }
+      });
+
+      socket.on("connect", () => log(`[Socket] Connected: ${socket.id}`));
+      socket.on("disconnect", () => log("[Socket] Disconnected"));
+      socket.on("connect_error", (err) => log(`[Socket] Error: ${err.message}`));
+
+      socket.on("response", (data) => log(`[Socket] Response: ${JSON.stringify(data)}`));
+    });
+
+    document.getElementById("disconnectBtn").addEventListener("click", () => {
+      if (socket) {
+        socket.disconnect();
+        log("[Socket] Disconnected manually");
+      }
+    });
+
+    document.getElementById("joinBtn").addEventListener("click", () => {
+      if (!socket || !socket.connected) return alert("Socket not connected!");
+      const rideCode = document.getElementById("rideCode").value.trim();
+      socket.emit("joinRide", { rideCode });
+      log(`[Socket] joinRide emitted: ${rideCode}`);
+    });
+
+    document.getElementById("leaveBtn").addEventListener("click", () => {
+      if (!socket || !socket.connected) return alert("Socket not connected!");
+      const rideCode = document.getElementById("rideCode").value.trim();
+      socket.emit("leaveRide", { rideCode });
+      log(`[Socket] leaveRide emitted: ${rideCode}`);
+    });
+
+    document.getElementById("sendLocBtn").addEventListener("click", () => {
+      if (!socket || !socket.connected) return alert("Socket not connected!");
+      const rideCode = document.getElementById("rideCode").value.trim();
+      const lat = parseFloat(document.getElementById("lat").value);
+      const lng = parseFloat(document.getElementById("lng").value);
+      socket.emit("sendLocation", { rideCode, location: { lat, lng } });
+      log(`[Socket] sendLocation emitted: ${lat}, ${lng}`);
+    });
+  </script>
+</body>
+</html>
