@@ -24,6 +24,13 @@ import { Socket } from "socket.io-client";
 //         localStorage.setItem(name, JSON.stringify(value)),
 //       removeItem: (name: string) => localStorage.removeItem(name),
 //     };
+//
+
+export type Announcement = {
+  id: string;
+  type?: "info" | "success" | "join";
+  message: string;
+};
 
 export interface GeoLocation {
   lat: number;
@@ -78,6 +85,7 @@ export interface UserState {
   lastLoginAt: string | null;
   isActive: boolean | null;
   currentRide: string | null;
+  location?: GeoLocation | null;
 }
 
 export interface SocketState {
@@ -89,6 +97,7 @@ export interface SocketState {
   joinRide: (payload: { rideCode: string }) => void;
   sendLocation: (payload: { rideCode: string; location: GeoLocation }) => void;
   leaveRide: (payload: { rideCode: string }) => void;
+  onUserJoin: (cb: (name: string) => void) => void;
 }
 
 export const storage = {
@@ -126,6 +135,8 @@ export interface OtherUsersStore {
   users: Record<string, UserState>; // key = userId
   addUser: (user: UserState) => void;
   addUsers: (users: UserState[]) => void;
+  setUserLocation: (userId: string, location: GeoLocation | null) => void;
+  setUsersLocation: (userLocations: Record<string, string>) => void;
   getUserById: (id: string) => UserState | undefined;
   fetchUsersByIds: (ids: string[]) => Promise<void>;
   clearUsers: () => void;

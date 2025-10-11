@@ -13,6 +13,8 @@ import {
   RefreshCcw,
   PlusCircle,
 } from "lucide-react";
+import Announcer from "@/components/Announcer";
+import useAnnouncer from "@/hooks/useAnnouncer";
 import { useEffect } from "react";
 
 interface OnGoingTripProps {
@@ -21,38 +23,24 @@ interface OnGoingTripProps {
 
 export const OnGoingTrip = ({ updateDashboard }: OnGoingTripProps) => {
   const { user } = useAuth();
-  const { joinRide, sendLocation } = useSocket();
+  const { joinRide, sendLocation, onUserJoin } = useSocket.getState();
   const { data, loading, error } = useQuery<{ ride: RideState }>(RIDE, {
     variables: { rideCode: user.currentRide },
     fetchPolicy: "cache-and-network",
   });
+  const { announcements, addAnnouncement, removeAnnouncement } = useAnnouncer();
 
-  // useEffect(() => {
-  //   const watchId = navigator.geolocation.watchPosition(
-  //     (pos) => {
-  //       const location = {
-  //         lat: pos.coords.latitude,
-  //         lng: pos.coords.longitude,
-  //       };
-  //       updateDashboard({
-  //         userLocation: location,
-  //       });
-  //       if (data?.ride?.rideCode) { 
-  //         sendLocation({rideCode : data.ride.rideCode, location})
-  //       }
-  //       console.log("Fetching Location...");
-  //     },
-  //     (err) => console.error(err),
-  //     { enableHighAccuracy: true, maximumAge: 0 },
-  //   );
-  //   return () => navigator.geolocation.clearWatch(watchId);
-  // }, []);
-  
+  useEffect(() => {
+    onUserJoin((name: string) => {
+      addAnnouncement(`${name} joined your ride`, "join");
+    });
+  }, [onUserJoin, addAnnouncement]);
+
   useEffect(() => {
     if (!data?.ride?.rideCode) return;
-  
+
     const { rideCode } = data.ride;
-  
+
     // Fetch and send location every 5 seconds
     const fetchLocation = () => {
       navigator.geolocation.getCurrentPosition(
@@ -61,33 +49,31 @@ export const OnGoingTrip = ({ updateDashboard }: OnGoingTripProps) => {
             lat: pos.coords.latitude,
             lng: pos.coords.longitude,
           };
-  
+
           updateDashboard({ userLocation: location });
           sendLocation({ rideCode, location });
-  
+
           console.log("📍 Location sent:", location);
         },
         (err) => console.error("❌ Geolocation error:", err),
-        { enableHighAccuracy: true }
+        { enableHighAccuracy: true },
       );
     };
-  
+
     // Immediately fetch once
     fetchLocation();
-  
+
     // Start interval for every 5 seconds
     const intervalId = setInterval(fetchLocation, 5000);
-  
+
     return () => clearInterval(intervalId);
   }, [data?.ride?.rideCode]);
 
-  
   useEffect(() => {
     if (data?.ride?.rideCode) {
       joinRide({ rideCode: data.ride.rideCode });
     }
   }, [data?.ride?.rideCode, joinRide]);
-
 
   if (loading) return <p className="p-4">Loading Current Trip...</p>;
   if (error)
@@ -99,6 +85,10 @@ export const OnGoingTrip = ({ updateDashboard }: OnGoingTripProps) => {
 
   return (
     <>
+      <Announcer
+        announcements={announcements}
+        removeAnnouncement={removeAnnouncement}
+      />
       <Profile className="absolute top-4 left-[12vw] flex flex-col items-center" />
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
         <Timer ride={data.ride}></Timer>

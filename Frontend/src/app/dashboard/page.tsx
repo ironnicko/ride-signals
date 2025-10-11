@@ -8,11 +8,12 @@ import BottomSection from "./CreateTrip/BottomSection";
 import { useAuth } from "@/stores/useAuth";
 import { OnGoingTrip } from "./OnGoingTrip/OnGoingTrip";
 import { CircleDot } from "lucide-react";
-
+import { useOtherUsers } from "@/stores/useOtherUsers";
 
 export default function DashboardPage() {
-  
   const { user } = useAuth();
+  const { users: otherUsers } = useOtherUsers();
+  
 
   const [dashboardState, setDashboardState] = useState<DashboardState>({
     formIndex: 0,
@@ -23,35 +24,35 @@ export default function DashboardPage() {
     fromLocationName: null,
     maxRiders: 5,
     visibility: "private",
-    tripName : null
+    tripName: null,
   });
 
-  const {
-    toLocation,
-    fromLocation,
-    userLocation,
-  } = dashboardState;
+  const { toLocation, fromLocation, userLocation } = dashboardState;
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
-    (pos) =>
-      setDashboardState((prev) => ({
-        ...prev,
-        userLocation: {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-        },
-      })),
-    (err) => console.error(err),
-    { enableHighAccuracy: true }
-  );
+      (pos) =>
+        setDashboardState((prev) => ({
+          ...prev,
+          userLocation: {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          },
+        })),
+      (err) => console.error(err),
+      { enableHighAccuracy: true },
+    );
   }, []);
 
   const updateDashboard = (updates: Partial<DashboardState>) =>
     setDashboardState((prev) => ({ ...prev, ...updates }));
 
-
-  if (!userLocation) return <ProtectedRoute><p className="p-4">Fetching user location...</p></ProtectedRoute>;
+  if (!userLocation)
+    return (
+      <ProtectedRoute>
+        <p className="p-4">Fetching user location...</p>
+      </ProtectedRoute>
+    );
 
   return (
     <ProtectedRoute>
@@ -71,13 +72,31 @@ export default function DashboardPage() {
             </AdvancedMarker>
           )}
 
-          <FitBoundsHandler fromLocation={fromLocation} toLocation={toLocation} />
+          {Object.entries(otherUsers).map(([id, u]) => {
+            if (id === user?.id) return null;
+            if (!u.location) return null;
+
+            const { lat, lng } = u.location;
+            return (
+              <AdvancedMarker key={id} position={{ lat, lng }}>
+                <CircleDot className="text-green-800 w-6 h-6" />
+              </AdvancedMarker>
+            );
+          })}
+
+          <FitBoundsHandler
+            fromLocation={fromLocation}
+            toLocation={toLocation}
+          />
         </Map>
 
         {!!user?.currentRide ? (
-          <OnGoingTrip  updateDashboard={updateDashboard}/>
+          <OnGoingTrip updateDashboard={updateDashboard} />
         ) : (
-          <BottomSection updateDashboard={updateDashboard} dashboardState={dashboardState} />
+          <BottomSection
+            updateDashboard={updateDashboard}
+            dashboardState={dashboardState}
+          />
         )}
       </div>
     </ProtectedRoute>

@@ -5,11 +5,14 @@ import type { JoinRidePayload, JwtPayload } from "./types";
 import Redis from "ioredis";
 import jwt from "jsonwebtoken";
 
-
-const isValid = async (authToken: string): Promise<{ ok: boolean; id?: string }> => {
+const isValid = async (
+  authToken: string,
+): Promise<{ ok: boolean; id?: string }> => {
   try {
-    const token = authToken.startsWith("Bearer ") ? authToken.slice(7) : authToken;
-    const decoded = jwt.verify(token, process.env.JWT_SECRET) as  JwtPayload ;
+    const token = authToken.startsWith("Bearer ")
+      ? authToken.slice(7)
+      : authToken;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET) as JwtPayload;
     if (!decoded || !decoded.userId) {
       return { ok: false };
     }
@@ -39,12 +42,15 @@ io.adapter(createAdapter({ pubClient, subClient }));
 
 const addParticipant = async (rideCode: string, userId: string) => {
   const key = `ride:${rideCode}`;
-  await pubClient.sadd(key, userId);
-  await pubClient.expire(key, 30);
+  await pubClient.multi().sadd(key, userId).expire(key, 30).exec();
 };
 
 const removeParticipant = async (rideCode: string, userId: string) => {
-  await pubClient.srem(`ride:${rideCode}`, userId);
+  await pubClient
+    .multi()
+    .srem(`ride:${rideCode}`, userId)
+    .hdel(`ride:${rideCode}:locations`, userId)
+    .exec();
 };
 
 io.use(async (socket, next) => {
@@ -84,11 +90,13 @@ io.on("connection", (socket: Socket) => {
       );
 
       socket.emit("response", {
-        eventType: "joinRide",
+        eventType: "updateLocations",
         data: { rideCode, locations: allLocations },
       });
 
-      socket.to(rideCode).emit("userJoined", { user: userId });
+      socket
+        .to(rideCode)
+        .emit("response", { eventType: "userJoined", data: { userId } });
     } catch (err) {
       console.error("Redis error:", err);
       socket.emit("error", { message: "Internal server error" });
@@ -100,14 +108,10 @@ io.on("connection", (socket: Socket) => {
 
     try {
       await removeParticipant(rideCode, userId);
+
+      socket.to(rideCode).emit("userLeft", { userId });
+
       socket.leave(rideCode);
-
-      socket.to(rideCode).emit("userLeft", { user: userId });
-
-      socket.emit("response", {
-        eventType: "leaveRide",
-        data: { rideCode },
-      });
     } catch (err) {
       console.error("Redis error:", err);
       socket.emit("error", { message: "Internal server error" });
@@ -116,19 +120,21 @@ io.on("connection", (socket: Socket) => {
 
   socket.on("sendLocation", async ({ rideCode, location }) => {
     try {
-      await pubClient.hset(
-        `ride:${rideCode}:locations`,
-        userId,
-        JSON.stringify(location),
-      );
-      await addParticipant(rideCode, userId)
+      const key = `ride:${rideCode}`;
+      const hashkey = `${key}:locations`;
+      await pubClient
+        .multi()
+        .hset(hashkey, userId, JSON.stringify(location))
+        .hexpire(hashkey, 10, "FIELDS", 1, userId)
+        .sadd(key, userId).expire(key, 30).exec();
 
-      socket.to(rideCode).emit("response", {
-        eventType: "locationUpdate",
-        data: {
-          user: userId,
-          location,
-        },
+      const allLocations = await pubClient.hgetall(
+        hashkey,
+      );
+
+      socket.emit("response", {
+        eventType: "updateLocations",
+        data: { rideCode, locations: allLocations },
       });
     } catch (err) {
       console.error("Redis error:", err);
@@ -142,8 +148,11 @@ io.on("connection", (socket: Socket) => {
     try {
       const storedUserId = await pubClient.get(`socket:${socket.id}:user`);
       if (storedUserId) {
-        await pubClient.srem(`user:${storedUserId}`, socket.id);
-        await pubClient.del(`socket:${socket.id}:user`);
+        await pubClient
+          .multi()
+          .srem(`user:${storedUserId}`, socket.id)
+          .del(`socket:${socket.id}:user`)
+          .exec();
       }
     } catch (err) {
       console.error("Error cleaning up on disconnect:", err);
@@ -151,6 +160,6 @@ io.on("connection", (socket: Socket) => {
   });
 });
 
-server.listen(3001,"0.0.0.0", () => {
+server.listen(3001, "0.0.0.0", () => {
   console.log("Socket.IO server running on port 3001");
 });

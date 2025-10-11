@@ -30,7 +30,7 @@ interface RideModalProps {
 
 export default function RideModal({ ride, onClose }: RideModalProps) {
   const { user, setUser } = useAuth();
-  const { joinRide, leaveRide } = useSocket();
+  const { joinRide, leaveRide } = useSocket.getState();
   const { replaceRide } = useRides();
   const [currentRide, setCurrentRide] = useState(ride);
   const [formState, setFormState] = useState<Partial<UpdateRideParams>>({
