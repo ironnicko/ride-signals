@@ -3,6 +3,7 @@ import { io, Socket } from "socket.io-client";
 import type { SocketState, GeoLocation } from "./types";
 import { useAuth } from "./useAuth";
 import { useOtherUsers } from "./useOtherUsers";
+import api from "@/lib/axios";
 
 export const useSocket = create<SocketState>((set, get) => {
   const { accessToken } = useAuth.getState();
@@ -11,7 +12,7 @@ export const useSocket = create<SocketState>((set, get) => {
     autoConnect: false,
     reconnection: true,
     reconnectionAttempts: Infinity,
-    reconnectionDelay: 500,
+    reconnectionDelay: 5000,
     withCredentials: true,
     auth: {
       token: `Bearer ${accessToken}`,
@@ -26,12 +27,8 @@ export const useSocket = create<SocketState>((set, get) => {
   });
 
   socket.on("response", async (response: { eventType: string; data: any }) => {
-    const {
-      setUsersLocation,
-      setUserLocation,
-      fetchUsersByIds,
-      getUserById,
-    } = useOtherUsers.getState();
+    const { setUsersLocation, setUserLocation, fetchUsersByIds, getUserById } =
+      useOtherUsers.getState();
     switch (response.eventType) {
       case "updateLocations": {
         const locations = response.data.locations;
@@ -62,8 +59,11 @@ export const useSocket = create<SocketState>((set, get) => {
     set({ isConnected: false });
   });
 
-  socket.on("connect_error", (err) => {
+  socket.on("connect_error", async (err) => {
     console.error("[Socket] Connection error:", err.message);
+    if (err.message === "Unauthorized") {
+      await api.post("/authenticated");
+    }
     set({ error: err.message });
   });
 

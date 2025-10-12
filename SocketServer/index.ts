@@ -1,5 +1,4 @@
 import { Server, Socket } from "socket.io";
-import { createAdapter } from "socket.io-redis";
 import http from "http";
 import type { JoinRidePayload, JwtPayload } from "./types";
 import Redis from "ioredis";
@@ -23,11 +22,10 @@ const isValid = async (
   }
 };
 
-const pubClient = new Redis({
+const dragonflyClient = new Redis({
   host: process.env.REDIS_HOST || "localhost",
   port: Number(process.env.REDIS_PORT) || 6379,
 });
-const subClient = pubClient.duplicate();
 
 const server = http.createServer();
 const io = new Server(server, {
@@ -38,15 +36,13 @@ const io = new Server(server, {
   },
 });
 
-io.adapter(createAdapter({ pubClient, subClient }));
-
 const addParticipant = async (rideCode: string, userId: string) => {
   const key = `ride:${rideCode}`;
-  await pubClient.multi().sadd(key, userId).expire(key, 30).exec();
+  await dragonflyClient.multi().sadd(key, userId).expire(key, 60).exec();
 };
 
 const removeParticipant = async (rideCode: string, userId: string) => {
-  await pubClient
+  await dragonflyClient
     .multi()
     .srem(`ride:${rideCode}`, userId)
     .hdel(`ride:${rideCode}:locations`, userId)
@@ -60,10 +56,6 @@ io.use(async (socket, next) => {
 
     if (valid.ok) {
       const userId = valid.id;
-
-      await pubClient.set(`socket:${socket.id}:user`, userId);
-      await pubClient.sadd(`user:${userId}`, socket.id);
-
       (socket as any).userId = userId;
       next();
     } else {
@@ -78,6 +70,23 @@ io.on("connection", (socket: Socket) => {
   const userId = (socket as any).userId;
   console.log(`User connected: ${userId} (${socket.id})`);
 
+  socket.use(async (_, next) => {
+    try {
+      const socketMapKey = `socket:${socket.id}:user`;
+      const userMapKey = `user:${userId}`;
+      await dragonflyClient
+        .multi()
+        .set(socketMapKey, userId)
+        .sadd(userMapKey, socket.id)
+        .expire(socketMapKey, 60)
+        .expire(userMapKey, 60)
+        .exec();
+      next();
+    } catch (err) {
+      next(new Error("Failed to write to Cache!"));
+    }
+  });
+
   socket.on("joinRide", async ({ rideCode }: JoinRidePayload) => {
     console.log(`${userId} joining ride ${rideCode}`);
 
@@ -85,7 +94,7 @@ io.on("connection", (socket: Socket) => {
       socket.join(rideCode);
       await addParticipant(rideCode, userId);
 
-      const allLocations = await pubClient.hgetall(
+      const allLocations = await dragonflyClient.hgetall(
         `ride:${rideCode}:locations`,
       );
 
@@ -122,15 +131,15 @@ io.on("connection", (socket: Socket) => {
     try {
       const key = `ride:${rideCode}`;
       const hashkey = `${key}:locations`;
-      await pubClient
+      await dragonflyClient
         .multi()
         .hset(hashkey, userId, JSON.stringify(location))
-        .hexpire(hashkey, 10, "FIELDS", 1, userId)
-        .sadd(key, userId).expire(key, 30).exec();
+        .hexpire(hashkey, 15, "FIELDS", 1, userId)
+        .sadd(key, userId)
+        .expire(key, 30)
+        .exec();
 
-      const allLocations = await pubClient.hgetall(
-        hashkey,
-      );
+      const allLocations = await dragonflyClient.hgetall(hashkey);
 
       socket.emit("response", {
         eventType: "updateLocations",
@@ -146,9 +155,11 @@ io.on("connection", (socket: Socket) => {
     console.log(`❌ User disconnected: ${userId} (${socket.id})`);
 
     try {
-      const storedUserId = await pubClient.get(`socket:${socket.id}:user`);
+      const storedUserId = await dragonflyClient.get(
+        `socket:${socket.id}:user`,
+      );
       if (storedUserId) {
-        await pubClient
+        await dragonflyClient
           .multi()
           .srem(`user:${storedUserId}`, socket.id)
           .del(`socket:${socket.id}:user`)
