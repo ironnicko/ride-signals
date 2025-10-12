@@ -1,179 +1,147 @@
+# 🚲 Ride Signals
 
-# 🚲 Ride Signals Backend
-
-A backend service for real-time ride coordination, built with:
-
-- **Go (Gin + gqlgen GraphQL)**
-- **MongoDB** for persistence
-- **Kafka** for publishing/consuming ride signals
-- **Docker Compose** for local development
+A **real-time ride coordination platform** enabling users to create, join, and share rides — powered by a scalable backend built with **Go**, **Socket.IO**, **Dragonfly**, and **MongoDB**, and a modern frontend using **Next.js (React)**.
 
 ---
 
-## 📦 Features
+## 🧠 Overview
 
-- 🔑 **JWT Authentication** with signup & login
-- 👤 User management with unique email indexing
-- 🚲 **Rides API**: create/join rides with participants
-- 📡 **Signals API**: send real-time ride signals via Kafka
-- ⚡ GraphQL endpoint with mutations & queries
-- 🗄️ MongoDB collections with proper indexing (`users.email` unique)
+Ride Signals is designed for **live location updates**, **real-time ride tracking**, and **instant user coordination**.
+
+Built for performance and scalability — the backend leverages **Dragonfly** for ultra-fast pub/sub communication and caching, and **Socket.IO** for persistent WebSocket connections with clients.
+
+---
+
+## ⚙️ Tech Stack
+
+### 🧩 Backend
+
+* **Go (Gin)** — REST + GraphQL API
+* **GraphQL (gqlgen)** — Flexible data querying
+* **MongoDB** — Persistent storage for users, rides, and signals
+* **Dragonfly DB** — Redis-compatible in-memory store for:
+
+  * Socket presence and state tracking
+  * Pub/Sub ride updates
+  * Session caching
+* **Socket.IO (Go + Node)** — Real-time ride signaling and coordination
+* **JWT Authentication** — Secure access to protected APIs
+
+### 🌐 Frontend
+
+* **React + Next.js** — Interactive client app with SSR
+* **Zustand** — Global state management
+* **Socket.IO Client** — Real-time updates in the browser
+* **TypeScript + Tailwind CSS** — Scalable and clean UI
+
+### ☁️ Infrastructure
+
+* **AWS EC2 / ECS** — Hosting backend and socket services
+* **Docker & Docker Compose** — Local development and containerized deployments
+* **NGINX** — Reverse proxy and static asset serving
+
+---
+
+## 🚀 Features
+
+* 🔐 **JWT Authentication** — Secure login & signup
+* 🧍 **User Management** — Unique email-based accounts
+* 🚴 **Rides API** — Create, join, and manage rides
+* 🛰️ **Real-time Ride Updates** — Via Socket.IO + Dragonfly pub/sub
+* 🗺️ **Live Location Sharing** — Seamless location broadcasting
+* 💬 **Signal Broadcasting** — Real-time communication between ride participants
+* 🧩 **GraphQL + REST APIs** — For flexible client integration
+* 🧾 **MongoDB Indexing** — Optimized for user and ride lookups
 
 ---
 
 ## 🛠️ Setup
 
-### 1. Clone the repo
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/yourusername/ride-signals.git
 cd ride-signals
 ```
 
-### 2. Run services with Docker Compose
+### 2. Create Environment File
+
+```ini
+MONGO_URI=
+KAFKA_BROKERS=localhost
+JWT_SECRET=
+REFRESH_SECRET=
+SERVER_PORT=8000
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=
+NEXT_PUBLIC_GOOGLE_MAP_ID=
+NEXT_PUBLIC_API_URL=https://localhost:8000/api/v1
+GOOGLE_REDIRECT_URL=https://localhost:8000/api/v1/auth/google/callback
+FRONTEND_URL=https://localhost:3000
+REDIS_HOST=dragonfly
+REDIS_PORT=6379
+NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
+```
+
+### 3. Start Services with Docker Compose
 
 ```bash
 docker-compose up -d
 ```
 
-This will start:
+This will spin up:
 
-- **MongoDB** (`localhost:27017`)
-- **Kafka** (with both host and container listeners)
-- **Backend API** (`localhost:8080`)
-
-### 3. Kafka networking
-
-- From **host apps (like Go backend)** → use:
-
-  ```
-  localhost:9092
-  ```
-
-- From **other containers** → use:
-
-  ```
-  kafka:9094
-  ```
+* 🧩 **MongoDB** → persistent data
+* ⚡ **Dragonfly DB** → caching and pub/sub
+* 🧠 **Go Backend (Gin + GraphQL)**
+* 🔌 **Socket.IO Server (Bun/Node)**
 
 ---
 
-## ⚙️ Configuration
 
-Environment variables are managed via `.env`:
+## 🧰 Development
 
-```ini
-MONGO_URI=mongodb://root:example@localhost:27017/
-KAFKA_BROKERS=localhost:9092
-JWT_SECRET=supersecretjwt
-DB_NAME=rideapp
-PORT=8080
+### Start Backend Locally
+
+```bash
+go run main.go
 ```
 
----
+### Start Socket Server
 
-## 🚀 API
-
-### REST Endpoints
-
-- `POST /api/v1/signup` → Register new user
-- `POST /api/v1/login` → Login & get JWT
-
-### GraphQL Endpoint
-
-- `POST /api/v1/graphql`
-- Playground → `GET /api/v1/playground`
-
-#### Sample Schema
-
-```graphql
-type Mutation {
-  createRide(maxRiders: Int!, visibility: String!): Ride!
-  joinRide(rideCode: String!, role: String!): Ride!
-  sendSignal(
-    rideCode: String!
-    signalType: String!
-    lat: Float
-    lng: Float
-  ): Boolean!
-}
-
-type Query {
-  me: User!
-  ride(rideCode: String!): Ride!
-}
+```bash
+bun index.js
 ```
 
----
+### Start Frontend
 
-## 🗄️ MongoDB
-
-Collections:
-
-- **users** → stores users (with unique `email`)
-- **rides** → ride details & participants
-- **signals** → signal history
-
-Indexes:
-
-```go
-collection := db.Collection("users")
-collection.Indexes().CreateOne(context.TODO(), mongo.IndexModel{
-    Keys:    bson.M{"email": 1},
-    Options: options.Index().SetUnique(true).SetName("email_unique_index"),
-})
+```bash
+bun dev
 ```
 
----
+Open: [http://localhost:3000](http://localhost:3000)
 
-## 📡 Kafka
-
-- Topic: **ride-signals** (auto-created if not exists)
-- Producer example:
-
-```go
-PublishSignal("rideCode123", []byte(`{"type":"location","lat":12.9,"lng":80.2}`))
-```
-
----
-
-## 🏃 Running Locally
-
-1. Start Docker Compose
-
-   ```bash
-   docker-compose up -d
-   ```
-
-2. Run the Go server
-
-   ```bash
-   go run main.go
-   ```
-
-3. Open [http://localhost:8080/api/v1/playground](http://localhost:8080/api/v1/playground) for GraphQL playground.
+Although I recommend using a reverse-proxy like NGINX to make life easier for yourself.
 
 ---
 
 ## 🔒 Security Notes
 
-- JWT middleware protects GraphQL routes
-- Sensitive fields (`passwordHash`) excluded from schema
-- Recommended to **switch to GIN release mode** in production:
-
-  ```go
-  gin.SetMode(gin.ReleaseMode)
-  ```
+* All protected routes require JWT bearer tokens
+* Sensitive user data (e.g., passwords) are excluded from GraphQL schema
+* Recommended to use **HTTPS** + **secure cookies** in production
 
 ---
 
-## 📌 Roadmap
+## 🌍 Deployment (AWS)
 
-- [ ] Add Kafka consumer service for signals
-- [ ] Consumer service to make updates using Sockets.IO
-- [ ] Create a frontend using either React(and down-the-line use Cordova to make an app) or React Native
-- [ ] Add metrics and monitoring
-- [ ] Deploy with Kubernetes
+Typical setup:
+
+* **AWS ECS / Fargate**: Socket.IO + Dragonfly + Go backend + Frontend
+* **AWS DocumentDB**: Mongo-compatible database
+* **Route 53 + NGINX / AWS ACM + AWS ALB**: Domain routing and load balancing
 
 ---
 
