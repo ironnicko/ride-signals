@@ -42,6 +42,25 @@ resource "aws_lb_target_group" "backend" {
 }
 
 
+resource "aws_lb_target_group" "socket" {
+  name     = "socket-tg"
+  port     = 3001
+  protocol = "HTTP"
+  vpc_id   = module.vpc.vpc_id
+
+  target_type = "ip"
+
+  health_check {
+    path                = "/"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    matcher             = ""
+  }
+}
+
+
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.app.arn
   port              = 80
@@ -57,6 +76,38 @@ resource "aws_lb_listener" "http" {
   }
 }
 
+
+resource "aws_lb_listener_rule" "socket_rule_https" {
+  listener_arn = aws_lb_listener.https.arn
+  priority     = 20
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.socket.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/socket.io/*"]
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "socket_rule_http" {
+  listener_arn = aws_lb_listener.http.arn
+  priority     = 20
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.socket.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/socket.io/*"]
+    }
+  }
+}
 
 
 resource "aws_lb_listener" "https" {

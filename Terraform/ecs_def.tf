@@ -51,15 +51,46 @@ resource "aws_ecs_task_definition" "frontend" {
       portMappings = [
         { containerPort = 3000, protocol = "tcp" }
       ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.backend.name
+          "awslogs-region"        = "ap-south-2"
+          "awslogs-stream-prefix" = "frontend"
+        }
+      }
+    }
+  ])
+}
+
+resource "aws_ecs_task_definition" "socket" {
+  family                   = "socket-task"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "256"
+  memory                   = "512"
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  runtime_platform {
+    cpu_architecture = "ARM64"
+
+  }
+  container_definitions = jsonencode([
+    {
+      name      = "socket"
+      image     = "ironnicko1413/ride-signals-socket:latest"
+      essential = true
+      portMappings = [
+        { containerPort = 3001, protocol = "tcp" }
+      ]
       environment = [
-        for key, value in local.frontend_env : { name = key, value = value }
+        for key, value in local.socket_env : { name = key, value = value }
       ]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          "awslogs-group"         = aws_cloudwatch_log_group.frontend.name
+          "awslogs-group"         = aws_cloudwatch_log_group.backend.name
           "awslogs-region"        = "ap-south-2"
-          "awslogs-stream-prefix" = "frontend"
+          "awslogs-stream-prefix" = "socket"
         }
       }
     }

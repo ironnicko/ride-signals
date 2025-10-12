@@ -47,6 +47,31 @@ resource "aws_ecs_service" "frontend" {
   ]
 }
 
+resource "aws_ecs_service" "socket" {
+  name            = "socket-service"
+  cluster         = aws_ecs_cluster.this.id
+  task_definition = aws_ecs_task_definition.socket.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+
+  network_configuration {
+    subnets = module.vpc.public_subnets
+    security_groups = [aws_security_group.ecs_tasks.id]
+    assign_public_ip = true
+  }
+
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.socket.arn
+    container_name   = "socket"
+    container_port   = 3001
+  }
+  depends_on = [
+    aws_lb_target_group.socket
+  ]
+}
+
 output "alb_dns" {
   value = aws_lb.app.dns_name
 }

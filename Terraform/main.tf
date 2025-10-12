@@ -50,29 +50,16 @@ resource "aws_cloudwatch_log_group" "backend" {
   retention_in_days = 7
 }
 
-resource "aws_cloudwatch_log_group" "frontend" {
-  name              = "/ecs/frontend"
-  retention_in_days = 7
-}
-
 
 locals {
   backend_env = tomap({
     for tuple in regexall("(\\w+)=(.*)", file("${path.module}/backend.env")) :
     tuple[0] => tuple[1]
   })
-
-  frontend_env_file = tomap({
-    for tuple in regexall("(\\w+)=(.*)", file("${path.module}/frontend.env")) :
+  socket_env = tomap({
+    for tuple in regexall("(\\w+)=(.*)", file("${path.module}/socket.env")) :
     tuple[0] => tuple[1]
   })
-
-  backend_url = "http://${aws_lb.app.dns_name}/api/v1"
-
-  frontend_env = merge(
-    local.frontend_env_file,
-    { NEXT_PUBLIC_API_URL = local.backend_url }
-  )
 
 }
 

@@ -24,7 +24,9 @@ const isValid = async (
 
 const dragonflyClient = new Redis({
   host: process.env.REDIS_HOST || "localhost",
-  port: Number(process.env.REDIS_PORT) || 6379,
+  port: Number(process.env.REDIS_PORT) || 0,
+  username: process.env.REDIS_USERNAME || null,
+  password: process.env.REDIS_PASSWORD || null,
 });
 
 const server = http.createServer();
@@ -169,6 +171,13 @@ io.on("connection", (socket: Socket) => {
       console.error("Error cleaning up on disconnect:", err);
     }
   });
+});
+
+server.on("request", (req, res) => {
+  if (req.method === "GET" && req.url === "/") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ status: "ok" }));
+  }
 });
 
 server.listen(3001, "0.0.0.0", () => {

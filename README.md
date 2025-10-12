@@ -82,6 +82,8 @@ GOOGLE_REDIRECT_URL=https://localhost:8000/api/v1/auth/google/callback
 FRONTEND_URL=https://localhost:3000
 REDIS_HOST=dragonfly
 REDIS_PORT=6379
+REDIS_USERNAME=
+REDIS_PASSWORD=
 NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
 ```
 
