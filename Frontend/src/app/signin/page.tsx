@@ -72,7 +72,7 @@ export default function SignIn() {
             </div>
           </div>
 
-          <Button disabled={buttonBoolean} className="w-full mt-4" >
+          <Button disabled={buttonBoolean} className="w-full cursor-pointer mt-4" >
             Sign In
           </Button>
         </form>

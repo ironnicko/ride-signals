@@ -22,7 +22,7 @@ interface OnGoingTripProps {
 }
 
 export const OnGoingTrip = ({ updateDashboard }: OnGoingTripProps) => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const { joinRide, sendLocation, onUserJoin } = useSocket.getState();
   const { data, loading, error } = useQuery<{ ride: RideState }>(RIDE, {
     variables: { rideCode: user.currentRide },
@@ -40,6 +40,14 @@ export const OnGoingTrip = ({ updateDashboard }: OnGoingTripProps) => {
     if (!data?.ride?.rideCode) return;
 
     const { rideCode } = data.ride;
+    
+    if (data.ride.endedAt) {
+      setUser({
+        ...user,
+        currentRide: null,
+      });
+    }
+
 
     // Fetch and send location every 5 seconds
     const fetchLocation = () => {
