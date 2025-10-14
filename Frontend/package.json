@@ -22,7 +22,9 @@
     "framer-motion": "^12.23.24",
     "graphql": "^16.11.0",
     "lucide-react": "^0.544.0",
+    "minimatch": "^10.0.3",
     "next": "15.5.3",
+    "next-pwa": "^5.6.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-icons": "^5.5.0",
@@ -30,6 +32,7 @@
     "rxjs": "^7.8.2",
     "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.3.1",
+    "web-push": "^3.6.7",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

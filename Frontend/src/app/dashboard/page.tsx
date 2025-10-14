@@ -13,7 +13,6 @@ import { useOtherUsers } from "@/stores/useOtherUsers";
 export default function DashboardPage() {
   const { user } = useAuth();
   const { users: otherUsers } = useOtherUsers();
-  
 
   const [dashboardState, setDashboardState] = useState<DashboardState>({
     formIndex: 0,
@@ -56,7 +55,7 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="relative w-screen h-screen">
+      <div className="relative w-screen h-screen overflow-hidden">
         <Map
           defaultCenter={userLocation}
           disableDefaultUI={true}

@@ -110,6 +110,7 @@ func Login(c *gin.Context) {
 			"name":        user.Name,
 			"email":       user.Email,
 			"currentRide": user.CurrentRide,
+			"picture": user.Picture,
 		},
 	})
 }

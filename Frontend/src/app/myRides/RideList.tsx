@@ -1,4 +1,3 @@
-"use client";
 import { RideState } from "@/stores/types";
 import { useAuth } from "@/stores/useAuth";
 

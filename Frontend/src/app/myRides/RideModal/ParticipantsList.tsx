@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { UserRound } from "lucide-react";
 import { useOtherUsers } from "@/stores/useOtherUsers";
 import { RideState } from "@/stores/types";
+import Image from "next/image";
 
 export default function ParticipantsList({ ride }: { ride: RideState }) {
   const { fetchUsersByIds, getUserById } = useOtherUsers();
@@ -14,17 +15,17 @@ export default function ParticipantsList({ ride }: { ride: RideState }) {
   }, [ride.participants]);
 
   return (
-    <div className="w-full max-w-2xl bg-white/80 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/20">
-      <div className="flex flex-wrap justify-center gap-6">
+    <div className="w-full max-w-2xl bg-white/80 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/20 overflow-x-auto scroll-smooth">
+      <div className="flex gap-12 min-w-max justify-center mx-auto snap-x snap-mandatory">
         {ride.participants?.map((p) => {
           const user = getUserById(p.userId);
           return (
             <div
               key={p.userId}
-              className="flex flex-col items-center text-center space-y-2"
+              className="flex flex-col items-center text-center space-y-2 flex-shrink-0 snap-center"
             >
               {user?.picture ? (
-                <img
+                <Image
                   src={user.picture}
                   alt={user.name ?? "User"}
                   className="w-16 h-16 rounded-full border border-gray-300 object-cover"
@@ -41,5 +42,7 @@ export default function ParticipantsList({ ride }: { ride: RideState }) {
         })}
       </div>
     </div>
+
+
   );
 }
