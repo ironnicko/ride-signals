@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -46,10 +46,6 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
   const router = useRouter();
   const [updateRide] = useMutation<{ updateRide: RideState }>(UPDATE_RIDE);
 
-  const isRideOwner = (id: string) =>
-    currentRide.participants?.some(
-      (p) => p.userId === id && p.role === "leader",
-    );
 
   async function handleRideChange(
     newStatus: "started" | "ended" | null,
@@ -120,7 +116,6 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
         <RideControlsCard
           ride={currentRide}
           user={user}
-          isRideOwner={isRideOwner}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
           buttonBusy={buttonBusy}

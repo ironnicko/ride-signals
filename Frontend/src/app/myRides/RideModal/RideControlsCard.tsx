@@ -5,7 +5,6 @@ import { useState } from "react";
 interface RideControlsCardProps {
   ride: RideState;
   user: UserState;
-  isRideOwner: (userId?: string) => boolean;
   isEditing: boolean;
   setIsEditing: (v: boolean) => void;
   buttonBusy: boolean;
@@ -19,7 +18,6 @@ interface RideControlsCardProps {
 export default function RideControlsCard({
   ride,
   user,
-  isRideOwner,
   isEditing,
   setIsEditing,
   buttonBusy,
@@ -30,10 +28,14 @@ export default function RideControlsCard({
   handleSave,
 }: RideControlsCardProps) {
   const [copied, setCopied] = useState(false);
-  const owner = isRideOwner(user?.id);
+  const leader = ride.participants?.some(
+    (p) => p.userId === user.id && p.role === "leader",
+  );
   const isCurrentRide = user?.currentRide === ride.rideCode;
   const rideHasEnded = !!ride.endedAt;
 
+
+  
   const handleShareRide = () => {
     const link = `${window.location.origin}/joinRide?rideCode=${ride.rideCode}&invitedBy=${user.id}`;
     navigator.clipboard.writeText(link).then(() => {
@@ -42,11 +44,11 @@ export default function RideControlsCard({
     });
   };
 
-  if (!owner && rideHasEnded) return null;
+  if (!leader && rideHasEnded) return null;
 
   return (
     <div className="w-full max-w-2xl bg-white/80 backdrop-blur-md rounded-xl p-6 flex flex-wrap justify-center gap-24 shadow-lg border border-white/20">
-      {owner ? (
+      {leader ? (
         <OwnerControls
           ride={ride}
           isEditing={isEditing}
