@@ -60,6 +60,7 @@ export default function RideControlsCard({
         />
       ) : (
         <NonOwnerControls
+          ride={ride}
           isEditing={isEditing}
           isCurrentRide={isCurrentRide}
           copied={copied}
@@ -160,7 +161,7 @@ const OwnerControls = ({
       Icon={isEditing ? Save : PenSquareIcon}
       label={isEditing ? "Save" : "Edit"}
     />
-    {!isEditing && (
+    {!isEditing && (ride.settings.maxRiders > ride.participants.length) && (
       <ControlButton
         onClick={handleShareRide}
         color="purple"
@@ -178,6 +179,7 @@ interface NonOwnerControlsProps {
   handleSetCurrentRide: () => void;
   handleRemoveCurrentRide: () => void;
   handleShareRide: () => void;
+  ride: RideState;
 }
 
 const NonOwnerControls = ({
@@ -187,6 +189,7 @@ const NonOwnerControls = ({
   handleSetCurrentRide,
   handleRemoveCurrentRide,
   handleShareRide,
+  ride,
 }: NonOwnerControlsProps) => (
   <>
     {!isCurrentRide ? (
@@ -204,7 +207,7 @@ const NonOwnerControls = ({
         label="Remove Current Ride"
       />
     )}
-    {!isEditing && (
+    {!isEditing && (ride.settings.maxRiders > ride.participants.length) && (
       <ControlButton
         onClick={handleShareRide}
         color="purple"

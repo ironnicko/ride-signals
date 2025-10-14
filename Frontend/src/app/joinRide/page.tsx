@@ -51,6 +51,7 @@ export default function JoinRidePage() {
 
   const handleJoin = async () => {
     if (!rideCode) return;
+    if (joined) router.push("/myRides");
     try {
       await joinRide({ variables: { rideCode, role: "member" } });
       setJoined(true);
@@ -91,6 +92,13 @@ export default function JoinRidePage() {
   const participantCount = ride?.participants?.length ?? 0;
   const inviterName = getUserById(invitedBy)?.name || "Someone";
 
+  if (participantCount == ride.settings.maxRiders && !joined)
+    return (
+      <ProtectedRoute>
+        <p className="text-center mt-10">Sorry This Trip is Full!</p>
+      </ProtectedRoute>
+    );
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-6">
@@ -119,12 +127,12 @@ export default function JoinRidePage() {
           {/* Join Button */}
           <button
             onClick={handleJoin}
-            disabled={joining || joined}
-            className={`mt-6 w-full px-6 py-3 rounded-lg text-white font-medium transition-colors ${
+            disabled={joining}
+            className={`mt-6 w-full cursor-pointer px-6 py-3 rounded-lg text-white font-medium transition-colors ${
               joined
-                ? "bg-gray-500 cursor-default"
+                ? "bg-black cursor-pointer"
                 : joining
-                  ? "bg-gray-400 cursor-wait"
+                  ? "bg-gray-500 cursor-wait"
                   : "bg-black hover:bg-gray-800"
             }`}
           >

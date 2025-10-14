@@ -50,6 +50,7 @@ export default function RideInfoCard({
             {isEditing && !ride.endedAt ? (
               <input
                 type="number"
+                min={ ride.participants.length}
                 className="w-14 border rounded-md px-2 py-1 text-sm focus:ring focus:ring-blue-200 focus:outline-none"
                 value={formState.maxRiders}
                 onChange={(e) =>

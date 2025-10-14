@@ -56,7 +56,7 @@ export const useSocket = create<SocketState>((set, get) => {
 
   socket.on("disconnect", () => {
     console.log("[Socket] Disconnected");
-    set({ isConnected: false });
+    set({ isConnected: false, inRoom: false });
   });
 
   socket.on("connect_error", async (err) => {
@@ -78,6 +78,7 @@ export const useSocket = create<SocketState>((set, get) => {
     socket,
     isConnected: false,
     error: null,
+    inRoom: false,
     connect: () => {
       if (!socket.connected) socket.connect();
     },
@@ -85,13 +86,19 @@ export const useSocket = create<SocketState>((set, get) => {
       if (socket.connected) socket.disconnect();
     },
     joinRide: (payload: { rideCode: string }) => {
-      socket.emit("joinRide", payload);
+      if (!get().inRoom) {
+        socket.emit("joinRide", payload);
+        set({ inRoom: true });
+      }
     },
     sendLocation: (payload: { rideCode: string; location: GeoLocation }) => {
       socket.emit("sendLocation", payload);
     },
     leaveRide: (payload: { rideCode: string }) => {
-      socket.emit("leaveRide", payload);
+      if (get().inRoom) {
+        socket.emit("leaveRide", payload);
+        set({ inRoom: false });
+      }
     },
 
     onUserJoin: (cb: (name: string) => void) => {
