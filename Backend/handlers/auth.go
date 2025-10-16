@@ -106,19 +106,20 @@ func Login(c *gin.Context) {
 		"accessToken":  tokenPair.AccessToken,
 		"refreshToken": tokenPair.RefreshToken,
 		"user": gin.H{
-			"id":          user.ID.Hex(),
-			"name":        user.Name,
-			"email":       user.Email,
-			"currentRide": user.CurrentRide,
-			"picture": user.Picture,
+			"id":               user.ID.Hex(),
+			"name":             user.Name,
+			"email":            user.Email,
+			"currentRide":      user.CurrentRide,
+			"picture":          user.Picture,
+			"pushSubscription": user.PushSubscription,
 		},
 	})
 }
 
-func Authenticated(c *gin.Context){
+func Authenticated(c *gin.Context) {
 	userIDHex := c.Value("userId").(string)
 	c.JSON(http.StatusOK, gin.H{
-		"id" : userIDHex,
+		"id": userIDHex,
 	})
 
 }

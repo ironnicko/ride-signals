@@ -17,7 +17,7 @@ export default function ClientWrappers({
       libraries={["places"]}
     >
       <ApolloProvider client={gqlClient}>
-        {/*<PushNotificationManager/>*/}
+        <PushNotificationManager/>
         <InstallPrompt />
         {children}
       </ApolloProvider>

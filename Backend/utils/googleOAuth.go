@@ -66,6 +66,7 @@ func handleGoogleUser(c *gin.Context, googleUser GoogleUser) (map[string]interfa
 				PasswordHash: GenerateRandomHash(),
 				CreatedAt:    time.Now().UTC().Format(time.RFC3339),
 				LastLoginAt:  time.Now().UTC().Format(time.RFC3339),
+				Picture:      &googleUser.Picture,
 				IsActive:     true,
 			}
 
@@ -94,11 +95,13 @@ func handleGoogleUser(c *gin.Context, googleUser GoogleUser) (map[string]interfa
 
 	return map[string]interface{}{
 		"user": map[string]interface{}{
-			"id":          userId,
-			"name":        googleUser.Name,
-			"email":       googleUser.Email,
-			"picture":     googleUser.Picture,
-			"currentRide": dbUser.CurrentRide,
+			"id":               userId,
+			"name":             googleUser.Name,
+			"email":            googleUser.Email,
+			"picture":          googleUser.Picture,
+			"currentRide":      dbUser.CurrentRide,
+			"isActive":         dbUser.IsActive,
+			"pushSubscription": dbUser.PushSubscription,
 		},
 		"accessToken":  tokens.AccessToken,
 		"refreshToken": tokens.RefreshToken,

@@ -27,13 +27,8 @@ export const OnGoingTrip = ({
   dashboardState,
 }: OnGoingTripProps) => {
   const { user, setUser } = useAuth();
-  const {
-    joinRide,
-    inRoom,
-    sendSignal,
-    sendLocation,
-    onAnnounce,
-  } = useSocket.getState();
+  const { joinRide, inRoom, sendSignal, sendLocation, onAnnounce } =
+    useSocket.getState();
   const { data, loading, error } = useQuery<{ ride: RideState }>(RIDE, {
     variables: { rideCode: user.currentRide },
     fetchPolicy: "cache-and-network",
@@ -98,12 +93,16 @@ export const OnGoingTrip = ({
   }, [data?.ride?.rideCode, joinRide, inRoom]);
 
   const handleSendSignal = (type: string) => {
-    if (data?.ride)
-      sendSignal({
-        rideCode: data.ride.rideCode,
-        location: userLocation,
-        signalType: type,
-      });
+    try {
+      if (data?.ride) {
+        sendSignal({
+          rideCode: data.ride.rideCode,
+          location: userLocation,
+          signalType: type,
+        });
+        addAnnouncement(type, "info");
+      }
+    } catch (err) {}
   };
 
   if (loading) return <p className="p-4">Loading Current Trip...</p>;

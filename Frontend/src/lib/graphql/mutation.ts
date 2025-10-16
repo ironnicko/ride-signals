@@ -127,3 +127,24 @@ export const JOIN_RIDE = gql`
     }
   }
 `;
+
+export const UPDATE_USER = gql`
+  mutation UpdateUser($input: UpdateUserInput!) {
+    updateUser(input: $input) {
+      id
+      name
+      email
+      isActive
+      currentRide
+      picture
+      pushSubscription {
+        endpoint
+        keys {
+          p256dh
+          auth
+        }
+      }
+    }
+  }
+
+  `

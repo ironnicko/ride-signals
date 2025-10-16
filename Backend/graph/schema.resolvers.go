@@ -124,6 +124,66 @@ func (r *mutationResolver) UpdateRide(ctx context.Context, rideCode string, requ
 	return &ride, nil
 }
 
+// UpdateUser is the resolver for the updateUser field.
+func (r *mutationResolver) UpdateUser(ctx context.Context, input models.UpdateUserInput) (*models.User, error) {
+	usersColl := db.GetCollection("bikeapp", "users")
+
+	userIDHex := ctx.Value("userId").(string)
+	userID, err := primitive.ObjectIDFromHex(userIDHex)
+	if err != nil {
+		return nil, fmt.Errorf("invalid userId: %w", err)
+	}
+
+	update := bson.M{}
+
+	if input.Name != nil {
+		update["name"] = *input.Name
+	}
+	if input.Email != nil {
+		update["email"] = *input.Email
+	}
+	if input.IsActive != nil {
+		update["isActive"] = *input.IsActive
+	}
+	if input.CurrentRide != nil {
+		update["currentRide"] = *input.CurrentRide
+	}
+	if input.Picture != nil {
+		update["picture"] = *input.Picture
+	}
+	if input.PushSubscription != nil {
+		ps := input.PushSubscription
+		psUpdate := bson.M{
+			"endpoint": ps.Endpoint,
+			"keys": bson.M{
+				"p256dh": ps.Keys.P256dh,
+				"auth":   ps.Keys.Auth,
+			},
+		}
+		update["pushSubscription"] = psUpdate
+	}
+	if input.ClearSubscription != nil {
+		update["pushSubscription"] = nil
+	}
+
+	if len(update) == 0 {
+		return nil, fmt.Errorf("no fields to update")
+	}
+
+	_, err = usersColl.UpdateOne(ctx, bson.M{"_id": userID}, bson.M{"$set": update})
+	if err != nil {
+		return nil, fmt.Errorf("failed to update user: %w", err)
+	}
+
+	var user models.User
+	err = usersColl.FindOne(ctx, bson.M{"_id": userID}).Decode(&user)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch updated user: %w", err)
+	}
+
+	return &user, nil
+}
+
 // --- JoinRide ---
 func (r *mutationResolver) JoinRide(ctx context.Context, rideCode string, role string) (*models.Ride, error) {
 	userIDHex := ctx.Value("userId").(string)
@@ -295,7 +355,6 @@ func (r *queryResolver) UsersByIds(ctx context.Context, ids []string) ([]*models
 		objectIDs = append(objectIDs, objID)
 	}
 
-
 	cursor, err := coll.Find(ctx, bson.M{"_id": bson.M{"$in": objectIDs}})
 	if err != nil {
 		return nil, err
@@ -317,7 +376,6 @@ func (r *queryResolver) UsersByIds(ctx context.Context, ids []string) ([]*models
 
 	return users, nil
 }
-
 
 // --- Ride Field Resolvers ---
 func (r *rideResolver) ID(ctx context.Context, obj *models.Ride) (string, error) {

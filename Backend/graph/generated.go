@@ -60,12 +60,23 @@ type ComplexityRoot struct {
 		JoinRide   func(childComplexity int, rideCode string, role string) int
 		SendSignal func(childComplexity int, rideCode string, signalType string, lat *float64, lng *float64) int
 		UpdateRide func(childComplexity int, rideCode string, requestType *string, maxRiders *int, visibility *string, endedAt *string, startedAt *string, status *string, tripName *string) int
+		UpdateUser func(childComplexity int, input models.UpdateUserInput) int
 	}
 
 	Participant struct {
 		JoinedAt func(childComplexity int) int
 		Role     func(childComplexity int) int
 		UserID   func(childComplexity int) int
+	}
+
+	PushSubscription struct {
+		Endpoint func(childComplexity int) int
+		Keys     func(childComplexity int) int
+	}
+
+	PushSubscriptionKeys struct {
+		Auth   func(childComplexity int) int
+		P256dh func(childComplexity int) int
 	}
 
 	Query struct {
@@ -108,20 +119,22 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		CreatedAt   func(childComplexity int) int
-		CurrentRide func(childComplexity int) int
-		Email       func(childComplexity int) int
-		ID          func(childComplexity int) int
-		IsActive    func(childComplexity int) int
-		LastLoginAt func(childComplexity int) int
-		Name        func(childComplexity int) int
-		Picture     func(childComplexity int) int
+		CreatedAt        func(childComplexity int) int
+		CurrentRide      func(childComplexity int) int
+		Email            func(childComplexity int) int
+		ID               func(childComplexity int) int
+		IsActive         func(childComplexity int) int
+		LastLoginAt      func(childComplexity int) int
+		Name             func(childComplexity int) int
+		Picture          func(childComplexity int) int
+		PushSubscription func(childComplexity int) int
 	}
 }
 
 type MutationResolver interface {
 	CreateRide(ctx context.Context, maxRiders int, visibility string, startLat float64, startLng float64, destinationLat float64, destinationLng float64, startName string, destinationName string, tripName string) (*models.Ride, error)
 	UpdateRide(ctx context.Context, rideCode string, requestType *string, maxRiders *int, visibility *string, endedAt *string, startedAt *string, status *string, tripName *string) (*models.Ride, error)
+	UpdateUser(ctx context.Context, input models.UpdateUserInput) (*models.User, error)
 	JoinRide(ctx context.Context, rideCode string, role string) (*models.Ride, error)
 	SendSignal(ctx context.Context, rideCode string, signalType string, lat *float64, lng *float64) (bool, error)
 }
@@ -225,6 +238,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.UpdateRide(childComplexity, args["rideCode"].(string), args["requestType"].(*string), args["maxRiders"].(*int), args["visibility"].(*string), args["endedAt"].(*string), args["startedAt"].(*string), args["status"].(*string), args["tripName"].(*string)), true
+	case "Mutation.updateUser":
+		if e.complexity.Mutation.UpdateUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateUser_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateUser(childComplexity, args["input"].(models.UpdateUserInput)), true
 
 	case "Participant.joinedAt":
 		if e.complexity.Participant.JoinedAt == nil {
@@ -244,6 +268,32 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Participant.UserID(childComplexity), true
+
+	case "PushSubscription.endpoint":
+		if e.complexity.PushSubscription.Endpoint == nil {
+			break
+		}
+
+		return e.complexity.PushSubscription.Endpoint(childComplexity), true
+	case "PushSubscription.keys":
+		if e.complexity.PushSubscription.Keys == nil {
+			break
+		}
+
+		return e.complexity.PushSubscription.Keys(childComplexity), true
+
+	case "PushSubscriptionKeys.auth":
+		if e.complexity.PushSubscriptionKeys.Auth == nil {
+			break
+		}
+
+		return e.complexity.PushSubscriptionKeys.Auth(childComplexity), true
+	case "PushSubscriptionKeys.p256dh":
+		if e.complexity.PushSubscriptionKeys.P256dh == nil {
+			break
+		}
+
+		return e.complexity.PushSubscriptionKeys.P256dh(childComplexity), true
 
 	case "Query.me":
 		if e.complexity.Query.Me == nil {
@@ -474,6 +524,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.User.Picture(childComplexity), true
+	case "User.pushSubscription":
+		if e.complexity.User.PushSubscription == nil {
+			break
+		}
+
+		return e.complexity.User.PushSubscription(childComplexity), true
 
 	}
 	return 0, false
@@ -482,7 +538,11 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputPushSubscriptionInput,
+		ec.unmarshalInputPushSubscriptionKeysInput,
+		ec.unmarshalInputUpdateUserInput,
+	)
 	first := true
 
 	switch opCtx.Operation.Operation {
@@ -579,7 +639,38 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema.graphqls", Input: `type User {
+	{Name: "../schema.graphqls", Input: `type PushSubscriptionKeys {
+  p256dh: String!
+  auth: String!
+}
+
+type PushSubscription {
+  endpoint: String!
+  keys: PushSubscriptionKeys!
+}
+
+input PushSubscriptionKeysInput {
+  p256dh: String!
+  auth: String!
+}
+
+input PushSubscriptionInput {
+  endpoint: String!
+  keys: PushSubscriptionKeysInput!
+  expirationTime: String
+}
+
+input UpdateUserInput {
+  name: String
+  email: String
+  isActive: Boolean
+  currentRide: String
+  picture: String
+  pushSubscription: PushSubscriptionInput
+  clearSubscription: Boolean
+}
+
+type User {
   id: ID!
   name: String!
   email: String!
@@ -588,6 +679,7 @@ var sources = []*ast.Source{
   isActive: Boolean!
   currentRide: String
   picture: String
+  pushSubscription: PushSubscription
 }
 
 type Ride {
@@ -664,6 +756,8 @@ type Mutation {
     status: String
     tripName: String
   ): Ride!
+
+  updateUser(input: UpdateUserInput!): User!
 
   joinRide(rideCode: String!, role: String!): Ride!
 
@@ -818,6 +912,17 @@ func (ec *executionContext) field_Mutation_updateRide_args(ctx context.Context, 
 		return nil, err
 	}
 	args["tripName"] = arg7
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateUserInput2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐUpdateUserInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -1113,6 +1218,67 @@ func (ec *executionContext) fieldContext_Mutation_updateRide(ctx context.Context
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_updateUser,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().UpdateUser(ctx, fc.Args["input"].(models.UpdateUserInput))
+		},
+		nil,
+		ec.marshalNUser2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐUser,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "name":
+				return ec.fieldContext_User_name(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "lastLoginAt":
+				return ec.fieldContext_User_lastLoginAt(ctx, field)
+			case "isActive":
+				return ec.fieldContext_User_isActive(ctx, field)
+			case "currentRide":
+				return ec.fieldContext_User_currentRide(ctx, field)
+			case "picture":
+				return ec.fieldContext_User_picture(ctx, field)
+			case "pushSubscription":
+				return ec.fieldContext_User_pushSubscription(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_joinRide(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1308,6 +1474,120 @@ func (ec *executionContext) fieldContext_Participant_joinedAt(_ context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _PushSubscription_endpoint(ctx context.Context, field graphql.CollectedField, obj *models.PushSubscription) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PushSubscription_endpoint,
+		func(ctx context.Context) (any, error) { return obj.Endpoint, nil },
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PushSubscription_endpoint(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PushSubscription",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PushSubscription_keys(ctx context.Context, field graphql.CollectedField, obj *models.PushSubscription) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PushSubscription_keys,
+		func(ctx context.Context) (any, error) { return obj.Keys, nil },
+		nil,
+		ec.marshalNPushSubscriptionKeys2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐPushSubscriptionKeys,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PushSubscription_keys(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PushSubscription",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "p256dh":
+				return ec.fieldContext_PushSubscriptionKeys_p256dh(ctx, field)
+			case "auth":
+				return ec.fieldContext_PushSubscriptionKeys_auth(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PushSubscriptionKeys", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PushSubscriptionKeys_p256dh(ctx context.Context, field graphql.CollectedField, obj *models.PushSubscriptionKeys) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PushSubscriptionKeys_p256dh,
+		func(ctx context.Context) (any, error) { return obj.P256dh, nil },
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PushSubscriptionKeys_p256dh(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PushSubscriptionKeys",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PushSubscriptionKeys_auth(ctx context.Context, field graphql.CollectedField, obj *models.PushSubscriptionKeys) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PushSubscriptionKeys_auth,
+		func(ctx context.Context) (any, error) { return obj.Auth, nil },
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PushSubscriptionKeys_auth(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PushSubscriptionKeys",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_me(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1348,6 +1628,8 @@ func (ec *executionContext) fieldContext_Query_me(_ context.Context, field graph
 				return ec.fieldContext_User_currentRide(ctx, field)
 			case "picture":
 				return ec.fieldContext_User_picture(ctx, field)
+			case "pushSubscription":
+				return ec.fieldContext_User_pushSubscription(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1526,6 +1808,8 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_currentRide(ctx, field)
 			case "picture":
 				return ec.fieldContext_User_picture(ctx, field)
+			case "pushSubscription":
+				return ec.fieldContext_User_pushSubscription(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1585,6 +1869,8 @@ func (ec *executionContext) fieldContext_Query_usersByIds(ctx context.Context, f
 				return ec.fieldContext_User_currentRide(ctx, field)
 			case "picture":
 				return ec.fieldContext_User_picture(ctx, field)
+			case "pushSubscription":
+				return ec.fieldContext_User_pushSubscription(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -2558,6 +2844,39 @@ func (ec *executionContext) fieldContext_User_picture(_ context.Context, field g
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_pushSubscription(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_pushSubscription,
+		func(ctx context.Context) (any, error) { return obj.PushSubscription, nil },
+		nil,
+		ec.marshalOPushSubscription2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐPushSubscription,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_pushSubscription(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "endpoint":
+				return ec.fieldContext_PushSubscription_endpoint(ctx, field)
+			case "keys":
+				return ec.fieldContext_PushSubscription_keys(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PushSubscription", field.Name)
 		},
 	}
 	return fc, nil
@@ -3987,6 +4306,150 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputPushSubscriptionInput(ctx context.Context, obj any) (models.PushSubscriptionInput, error) {
+	var it models.PushSubscriptionInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"endpoint", "keys", "expirationTime"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "endpoint":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endpoint"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Endpoint = data
+		case "keys":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keys"))
+			data, err := ec.unmarshalNPushSubscriptionKeysInput2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐPushSubscriptionKeysInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Keys = data
+		case "expirationTime":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("expirationTime"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ExpirationTime = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputPushSubscriptionKeysInput(ctx context.Context, obj any) (models.PushSubscriptionKeysInput, error) {
+	var it models.PushSubscriptionKeysInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"p256dh", "auth"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "p256dh":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("p256dh"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.P256dh = data
+		case "auth":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("auth"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Auth = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, obj any) (models.UpdateUserInput, error) {
+	var it models.UpdateUserInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "email", "isActive", "currentRide", "picture", "pushSubscription", "clearSubscription"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "email":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
+		case "isActive":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isActive"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IsActive = data
+		case "currentRide":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currentRide"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CurrentRide = data
+		case "picture":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("picture"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Picture = data
+		case "pushSubscription":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pushSubscription"))
+			data, err := ec.unmarshalOPushSubscriptionInput2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐPushSubscriptionInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PushSubscription = data
+		case "clearSubscription":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clearSubscription"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClearSubscription = data
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -4068,6 +4531,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "updateRide":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateRide(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updateUser":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateUser(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -4165,6 +4635,94 @@ func (ec *executionContext) _Participant(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = ec._Participant_joinedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var pushSubscriptionImplementors = []string{"PushSubscription"}
+
+func (ec *executionContext) _PushSubscription(ctx context.Context, sel ast.SelectionSet, obj *models.PushSubscription) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, pushSubscriptionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PushSubscription")
+		case "endpoint":
+			out.Values[i] = ec._PushSubscription_endpoint(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "keys":
+			out.Values[i] = ec._PushSubscription_keys(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var pushSubscriptionKeysImplementors = []string{"PushSubscriptionKeys"}
+
+func (ec *executionContext) _PushSubscriptionKeys(ctx context.Context, sel ast.SelectionSet, obj *models.PushSubscriptionKeys) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, pushSubscriptionKeysImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PushSubscriptionKeys")
+		case "p256dh":
+			out.Values[i] = ec._PushSubscriptionKeys_p256dh(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "auth":
+			out.Values[i] = ec._PushSubscriptionKeys_auth(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -4752,6 +5310,8 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._User_currentRide(ctx, field, obj)
 		case "picture":
 			out.Values[i] = ec._User_picture(ctx, field, obj)
+		case "pushSubscription":
+			out.Values[i] = ec._User_pushSubscription(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5256,6 +5816,15 @@ func (ec *executionContext) marshalNParticipant2ᚕgithubᚗcomᚋironnickoᚋri
 	return ret
 }
 
+func (ec *executionContext) marshalNPushSubscriptionKeys2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐPushSubscriptionKeys(ctx context.Context, sel ast.SelectionSet, v models.PushSubscriptionKeys) graphql.Marshaler {
+	return ec._PushSubscriptionKeys(ctx, sel, &v)
+}
+
+func (ec *executionContext) unmarshalNPushSubscriptionKeysInput2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐPushSubscriptionKeysInput(ctx context.Context, v any) (*models.PushSubscriptionKeysInput, error) {
+	res, err := ec.unmarshalInputPushSubscriptionKeysInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNRide2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐRide(ctx context.Context, sel ast.SelectionSet, v models.Ride) graphql.Marshaler {
 	return ec._Ride(ctx, sel, &v)
 }
@@ -5332,6 +5901,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNUpdateUserInput2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐUpdateUserInput(ctx context.Context, v any) (models.UpdateUserInput, error) {
+	res, err := ec.unmarshalInputUpdateUserInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNUser2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v models.User) graphql.Marshaler {
@@ -5715,6 +6289,21 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	_ = ctx
 	res := graphql.MarshalInt(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOPushSubscription2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐPushSubscription(ctx context.Context, sel ast.SelectionSet, v *models.PushSubscription) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PushSubscription(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOPushSubscriptionInput2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐPushSubscriptionInput(ctx context.Context, v any) (*models.PushSubscriptionInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputPushSubscriptionInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {

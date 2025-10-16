@@ -86,6 +86,7 @@ export interface UserState {
   isActive: boolean | null;
   currentRide: string | null;
   location?: GeoLocation | null;
+  pushSubscription?: PushSubscription | null;
 }
 
 export interface SocketState {

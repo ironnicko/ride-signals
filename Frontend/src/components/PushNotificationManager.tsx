@@ -1,11 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  subscribeUser,
-  unsubscribeUser,
-  sendNotification,
-} from "@/app/actions";
+import { sendNotification } from "@/app/actions";
+import { useUserSubscription } from "@/hooks/useUserSubscription";
+import { useAuth } from "@/stores/useAuth";
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -21,11 +19,12 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export default function PushNotificationManager() {
-  const [isSupported, setIsSupported] = useState(false);
-  const [subscription, setSubscription] = useState<PushSubscription | null>(
-    null,
-  );
+  const { user } = useAuth();
   const [message, setMessage] = useState("");
+  const [isSupported, setIsSupported] = useState(false);
+  const { subscribeUser, unsubscribeUser } = useUserSubscription();
+
+  const subscription = user?.pushSubscription ?? null;
 
   useEffect(() => {
     if ("serviceWorker" in navigator && "PushManager" in window) {
@@ -35,12 +34,10 @@ export default function PushNotificationManager() {
   }, []);
 
   async function registerServiceWorker() {
-    const registration = await navigator.serviceWorker.register("/sw.js", {
+    await navigator.serviceWorker.register("/sw.js", {
       scope: "/",
       updateViaCache: "none",
     });
-    const sub = await registration.pushManager.getSubscription();
-    setSubscription(sub);
   }
 
   async function subscribeToPush() {
@@ -48,26 +45,25 @@ export default function PushNotificationManager() {
     const sub = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(
-        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
       ),
     });
-    setSubscription(sub);
+
     const serializedSub = JSON.parse(JSON.stringify(sub));
-    console.log(serializedSub);
     await subscribeUser(serializedSub);
   }
 
   async function unsubscribeFromPush() {
-    await subscription?.unsubscribe();
-    setSubscription(null);
+    const registration = await navigator.serviceWorker.ready;
+    const sub = await registration.pushManager.getSubscription();
+    await sub?.unsubscribe();
     await unsubscribeUser();
   }
 
   async function sendTestNotification() {
-    if (subscription) {
-      await sendNotification(message);
-      setMessage("");
-    }
+    if (!subscription) return;
+    await sendNotification(subscription, message);
+    setMessage("");
   }
 
   if (!isSupported) {

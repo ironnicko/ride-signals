@@ -13,6 +13,11 @@ resolver:
   package: graph
   filename_template: "{name}.resolvers.go"
 
+model:
+  filename: models/generated_models.go
+  package: models
+
+
 # Map GraphQL types to your custom Go structs in the `models` package
 models:
   Ride:
@@ -27,3 +32,7 @@ models:
     model: github.com/ironnicko/ride-signals/Backend/models.Participant
   Signal:
     model: github.com/ironnicko/ride-signals/Backend/models.Signal
+  PushSubscription:
+    model: github.com/ironnicko/ride-signals/Backend/models.PushSubscription
+  PushSubscriptionKeys:
+    model: github.com/ironnicko/ride-signals/Backend/models.PushSubscriptionKeys
