@@ -120,12 +120,26 @@ io.on("connection", (socket: Socket) => {
     try {
       await removeParticipant(rideCode, userId);
 
-      socket.to(rideCode).emit("userLeft", { userId });
+      socket
+        .to(rideCode)
+        .emit("response", { eventType: "userLeft", data: { userId } });
 
       socket.leave(rideCode);
     } catch (err) {
       console.error("Redis error:", err);
       socket.emit("error", { message: "Internal server error" });
+    }
+  });
+
+  socket.on("sendSignal", ({ rideCode, signalType, location }) => {
+    try {
+      console.log("Sending signal");
+      socket.to(rideCode).emit("response", {
+        eventType: "sentSignal",
+        data: { signalType, location },
+      });
+    } catch (err) {
+      console.error("Error sending Signal");
     }
   });
 

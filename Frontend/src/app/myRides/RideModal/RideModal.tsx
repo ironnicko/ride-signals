@@ -46,7 +46,6 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
   const router = useRouter();
   const [updateRide] = useMutation<{ updateRide: RideState }>(UPDATE_RIDE);
 
-
   async function handleRideChange(
     newStatus: "started" | "ended" | null,
     requestType?: "start" | "end" | "remove",
@@ -74,10 +73,12 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
         joinRide({ rideCode: ride.rideCode });
         router.push("/dashboard");
         toast.success("Ride started!");
+        // Send Out Notifications
       } else if (newStatus === "ended") {
         setUser({ ...user!, currentRide: null });
         leaveRide({ rideCode: ride.rideCode });
         toast.success("Ride ended!");
+        // Send Out Notifications
       } else {
         toast.success("Ride updated!");
         setIsEditing(false);

@@ -90,7 +90,10 @@ export default function DashboardPage() {
         </Map>
 
         {!!user?.currentRide ? (
-          <OnGoingTrip updateDashboard={updateDashboard} />
+          <OnGoingTrip
+            updateDashboard={updateDashboard}
+            dashboardState={dashboardState}
+          />
         ) : (
           <BottomSection
             updateDashboard={updateDashboard}

@@ -19,12 +19,6 @@ resource "aws_acm_certificate" "app_cert" {
   }
 }
 
-# resource "aws_acm_certificate_validation" "app_cert_validation" {
-#   certificate_arn         = aws_acm_certificate.app_cert.arn
-#   validation_record_fqdns = [for record in aws_route53_record.app_cert_validation : record.fqdn]
-# }
-
-
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "ecsTaskExecutionRole"
 

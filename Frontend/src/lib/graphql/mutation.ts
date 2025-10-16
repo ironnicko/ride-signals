@@ -1,6 +1,5 @@
 import { gql } from "@apollo/client";
 
-
 export const CREATE_RIDE = gql`
   mutation CreateRide(
     $maxRiders: Int!
@@ -51,28 +50,27 @@ export const CREATE_RIDE = gql`
   }
 `;
 
-
 export const UPDATE_RIDE = gql`
-mutation UpdateRide(
-  $rideCode: String!,
-  $requestType: String,
-  $maxRiders: Int,
-  $visibility: String,
-  $startedAt: String,
-  $endedAt: String,
-  $status: String,
-  $tripName: String,
-) {
-  updateRide(
-    rideCode: $rideCode,
-    requestType: $requestType,
-    maxRiders: $maxRiders,
-    visibility: $visibility,
-    startedAt: $startedAt,
-    endedAt: $endedAt,
-    tripName : $tripName,
-    status: $status
-  )  {
+  mutation UpdateRide(
+    $rideCode: String!
+    $requestType: String
+    $maxRiders: Int
+    $visibility: String
+    $startedAt: String
+    $endedAt: String
+    $status: String
+    $tripName: String
+  ) {
+    updateRide(
+      rideCode: $rideCode
+      requestType: $requestType
+      maxRiders: $maxRiders
+      visibility: $visibility
+      startedAt: $startedAt
+      endedAt: $endedAt
+      tripName: $tripName
+      status: $status
+    ) {
       rideCode
       status
       startedAt
@@ -100,6 +98,22 @@ mutation UpdateRide(
       createdAt
       createdBy
     }
+  }
+`;
+
+export const SEND_SIGNAL = gql`
+  mutation SendSignal(
+    $rideCode: String!
+    $signalType: String!
+    $lat: Float
+    $lng: Float
+  ) {
+    sendSignal(
+      rideCode: $rideCode
+      signalType: $signalType
+      lat: $lat
+      lng: $lng
+    )
   }
 `;
 

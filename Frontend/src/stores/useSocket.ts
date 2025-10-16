@@ -7,6 +7,10 @@ import api from "@/lib/axios";
 
 export const useSocket = create<SocketState>((set, get) => {
   const { accessToken } = useAuth.getState();
+  let onAnnounceCallback:
+    | ((name: string, info: "join" | "info" | "success") => void)
+    | null = null;
+
   const socket: Socket = io(process.env.NEXT_PUBLIC_SOCKET_URL as string, {
     transports: ["websocket"],
     autoConnect: false,
@@ -19,7 +23,12 @@ export const useSocket = create<SocketState>((set, get) => {
     },
   });
 
-  let onUserJoinCallback: ((name: string) => void) | null = null;
+  useAuth.subscribe((state) => {
+    if (get().socket && state.accessToken) {
+      get().socket.auth = { token: `Bearer ${state.accessToken}` };
+      if (!get().socket.connected) get().socket.connect();
+    }
+  });
 
   socket.on("connect", () => {
     console.log("[Socket] Connected:", socket.id);
@@ -35,19 +44,26 @@ export const useSocket = create<SocketState>((set, get) => {
         setUsersLocation(locations);
         break;
       }
+      case "sentSignal": {
+        if (onAnnounceCallback) console.log(response.data);
+        onAnnounceCallback(response.data.signalType, "info");
+        break;
+      }
       case "userJoined": {
         const userId = response.data.userId;
         await fetchUsersByIds([userId]);
         const joinedUser = getUserById(userId);
         const name = joinedUser?.name || "Someone";
-        if (onUserJoinCallback) onUserJoinCallback(name);
+        if (onAnnounceCallback)
+          onAnnounceCallback(`${name} Joined the Ride`, "join");
         break;
       }
       case "userLeft": {
         const userId = response.data.userId;
         const leftUser = getUserById(userId);
         const name = leftUser?.name || "Someone";
-        if (onUserJoinCallback) onUserJoinCallback(name);
+        if (onAnnounceCallback)
+          onAnnounceCallback(`${name} Left the Ride`, "info");
         setUserLocation(userId, null);
         break;
       }
@@ -67,13 +83,6 @@ export const useSocket = create<SocketState>((set, get) => {
     set({ error: err.message });
   });
 
-  useAuth.subscribe((state) => {
-    if (get().socket && state.accessToken) {
-      get().socket.auth = { token: `Bearer ${state.accessToken}` };
-      if (!get().socket.connected) get().socket.connect();
-    }
-  });
-
   return {
     socket,
     isConnected: false,
@@ -91,7 +100,7 @@ export const useSocket = create<SocketState>((set, get) => {
         set({ inRoom: true });
       }
     },
-    sendLocation: (payload: { rideCode: string; location: GeoLocation }) => {
+    sendLocation: (payload) => {
       socket.emit("sendLocation", payload);
     },
     leaveRide: (payload: { rideCode: string }) => {
@@ -100,9 +109,13 @@ export const useSocket = create<SocketState>((set, get) => {
         set({ inRoom: false });
       }
     },
-
-    onUserJoin: (cb: (name: string) => void) => {
-      onUserJoinCallback = cb;
+    sendSignal: (payload) => {
+      socket.emit("sendSignal", payload);
+    },
+    onAnnounce: (
+      cb: (name: string, info: "info" | "join" | "success") => void,
+    ) => {
+      onAnnounceCallback = cb;
     },
   };
 });

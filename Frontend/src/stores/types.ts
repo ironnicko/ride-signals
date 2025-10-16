@@ -97,8 +97,15 @@ export interface SocketState {
   disconnect: () => void;
   joinRide: (payload: { rideCode: string }) => void;
   sendLocation: (payload: { rideCode: string; location: GeoLocation }) => void;
+  sendSignal: (payload: {
+    rideCode: string;
+    signalType: string;
+    location: GeoLocation;
+  }) => void;
   leaveRide: (payload: { rideCode: string }) => void;
-  onUserJoin: (cb: (name: string) => void) => void;
+  onAnnounce: (
+    cb: (name: string, info: "join" | "info" | "success") => void,
+  ) => void;
 }
 
 export const storage = {

@@ -37,7 +37,7 @@ export const useOtherUsers = create<OtherUsersStore>((set, get) => ({
 
   setUsersLocation: (userLocations: Record<string, string>) =>
     set(() => {
-      const updatedUsers = {  };
+      const updatedUsers = {};
 
       if (Object.keys(userLocations).length === 0) {
         for (const userId in updatedUsers) {
@@ -74,7 +74,13 @@ export const useOtherUsers = create<OtherUsersStore>((set, get) => ({
       });
 
       if (data?.usersByIds) {
-        get().addUsers(data.usersByIds);
+        set((state) => {
+          const newUsers = { ...state.users };
+          data.usersByIds.forEach((u) => {
+            if (u.id) newUsers[u.id] = u;
+          });
+          return { users: newUsers };
+        });
       }
     } catch (error) {
       console.error("Error fetching users:", error);
