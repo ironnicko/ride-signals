@@ -8,11 +8,11 @@ const kafka = new Kafka({
   brokers: ["localhost:9094"],
 });
 
-const consumer = kafka.consumer({ groupId: "ride-signals-consumer" });
+const consumer = kafka.consumer({ groupId: "tandem-sync-consumer" });
 
 export async function runKafka(io : Server) {
   await consumer.connect();
-  await consumer.subscribe({ topic: "ride-signals", fromBeginning: false });
+  await consumer.subscribe({ topic: "tandem-sync", fromBeginning: false });
 
   await consumer.run({
     eachMessage: async ({ message }) => {

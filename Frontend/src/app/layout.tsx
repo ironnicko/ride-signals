@@ -7,7 +7,7 @@ import ClientWrappers from "@/components/ClientWrappers";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "RideSignals",
+  title: "TandemSync",
   description: "Sync your rides and communicate effortlessly.",
 };
 

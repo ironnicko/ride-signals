@@ -1,5 +1,5 @@
 resource "aws_lb" "app" {
-  name               = "Ride-Signals-alb"
+  name               = "tandem-sync-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]

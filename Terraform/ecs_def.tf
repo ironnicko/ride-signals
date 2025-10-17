@@ -12,7 +12,7 @@ resource "aws_ecs_task_definition" "backend" {
   container_definitions = jsonencode([
     {
       name      = "backend"
-      image     = "ironnicko1413/ride-signals-backend:latest"
+      image     = "ironnicko1413/tandem-sync-backend:latest"
       essential = true
       portMappings = [
         { containerPort = 8000, protocol = "tcp" }
@@ -46,7 +46,7 @@ resource "aws_ecs_task_definition" "frontend" {
   container_definitions = jsonencode([
     {
       name      = "frontend"
-      image     = "ironnicko1413/ride-signals-frontend:latest"
+      image     = "ironnicko1413/tandem-sync-frontend:latest"
       essential = true
       portMappings = [
         { containerPort = 3000, protocol = "tcp" }
@@ -77,7 +77,7 @@ resource "aws_ecs_task_definition" "socket" {
   container_definitions = jsonencode([
     {
       name      = "socket"
-      image     = "ironnicko1413/ride-signals-socket:latest"
+      image     = "ironnicko1413/tandem-sync-socket:latest"
       essential = true
       portMappings = [
         { containerPort = 3001, protocol = "tcp" }

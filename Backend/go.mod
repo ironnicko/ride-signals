@@ -1,4 +1,4 @@
-module github.com/ironnicko/ride-signals/Backend
+module github.com/ironnicko/tandem-sync/Backend
 
 go 1.25.1
 

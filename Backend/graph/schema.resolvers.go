@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ironnicko/ride-signals/Backend/db"
-	"github.com/ironnicko/ride-signals/Backend/models"
-	"github.com/ironnicko/ride-signals/Backend/utils"
+	"github.com/ironnicko/tandem-sync/Backend/db"
+	"github.com/ironnicko/tandem-sync/Backend/models"
+	"github.com/ironnicko/tandem-sync/Backend/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

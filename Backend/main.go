@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	config "github.com/ironnicko/ride-signals/Backend/config"
-	"github.com/ironnicko/ride-signals/Backend/db"
-	"github.com/ironnicko/ride-signals/Backend/routes"
-	"github.com/ironnicko/ride-signals/Backend/utils"
+	config "github.com/ironnicko/tandem-sync/Backend/config"
+	"github.com/ironnicko/tandem-sync/Backend/db"
+	"github.com/ironnicko/tandem-sync/Backend/routes"
+	"github.com/ironnicko/tandem-sync/Backend/utils"
 	"github.com/joho/godotenv"
 )
 

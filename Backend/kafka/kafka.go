@@ -10,7 +10,7 @@ import (
 )
 
 var Writer *kafka.Writer
-var topic = "ride-signals"
+var topic = "tandem-sync"
 
 func InitProducer(brokers string) error {
 	Writer = kafka.NewWriter(kafka.WriterConfig{

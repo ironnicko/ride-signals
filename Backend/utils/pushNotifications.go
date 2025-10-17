@@ -7,8 +7,8 @@ import (
 	"log"
 
 	"github.com/SherClockHolmes/webpush-go"
-	"github.com/ironnicko/ride-signals/Backend/config"
-	"github.com/ironnicko/ride-signals/Backend/models"
+	"github.com/ironnicko/tandem-sync/Backend/config"
+	"github.com/ironnicko/tandem-sync/Backend/models"
 )
 
 type NotificationPayload struct {

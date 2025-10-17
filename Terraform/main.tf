@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_ecs_cluster" "this" {
-  name = "Ride-Signals-cluster"
+  name = "tandem-sync-cluster"
 }
 
 resource "aws_acm_certificate" "app_cert" {

@@ -11,9 +11,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/ironnicko/ride-signals/Backend/config"
-	"github.com/ironnicko/ride-signals/Backend/db"
-	"github.com/ironnicko/ride-signals/Backend/models"
+	"github.com/ironnicko/tandem-sync/Backend/config"
+	"github.com/ironnicko/tandem-sync/Backend/db"
+	"github.com/ironnicko/tandem-sync/Backend/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

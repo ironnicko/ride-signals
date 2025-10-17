@@ -21,18 +21,18 @@ model:
 # Map GraphQL types to your custom Go structs in the `models` package
 models:
   Ride:
-    model: github.com/ironnicko/ride-signals/Backend/models.Ride
+    model: github.com/ironnicko/tandem-sync/Backend/models.Ride
   User:
-    model: github.com/ironnicko/ride-signals/Backend/models.User
+    model: github.com/ironnicko/tandem-sync/Backend/models.User
   RideSettings:
-    model: github.com/ironnicko/ride-signals/Backend/models.RideSettings
+    model: github.com/ironnicko/tandem-sync/Backend/models.RideSettings
   GeoLocation:
-    model: github.com/ironnicko/ride-signals/Backend/models.GeoLocation
+    model: github.com/ironnicko/tandem-sync/Backend/models.GeoLocation
   Participant:
-    model: github.com/ironnicko/ride-signals/Backend/models.Participant
+    model: github.com/ironnicko/tandem-sync/Backend/models.Participant
   Signal:
-    model: github.com/ironnicko/ride-signals/Backend/models.Signal
+    model: github.com/ironnicko/tandem-sync/Backend/models.Signal
   PushSubscription:
-    model: github.com/ironnicko/ride-signals/Backend/models.PushSubscription
+    model: github.com/ironnicko/tandem-sync/Backend/models.PushSubscription
   PushSubscriptionKeys:
-    model: github.com/ironnicko/ride-signals/Backend/models.PushSubscriptionKeys
+    model: github.com/ironnicko/tandem-sync/Backend/models.PushSubscriptionKeys

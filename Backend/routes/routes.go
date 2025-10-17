@@ -6,9 +6,9 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
-	"github.com/ironnicko/ride-signals/Backend/graph"
-	"github.com/ironnicko/ride-signals/Backend/handlers"
-	"github.com/ironnicko/ride-signals/Backend/utils"
+	"github.com/ironnicko/tandem-sync/Backend/graph"
+	"github.com/ironnicko/tandem-sync/Backend/handlers"
+	"github.com/ironnicko/tandem-sync/Backend/utils"
 )
 
 func InitializeRoutes(r *gin.Engine) {

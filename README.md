@@ -1,4 +1,4 @@
-# 🚲 Ride Signals
+# 🚲 TandemSync
 
 A **real-time ride coordination platform** enabling users to create, join, and share rides — powered by a scalable backend built with **Go**, **Socket.IO**, **Dragonfly**, and **MongoDB**, and a modern frontend using **Next.js (React)**.
 
@@ -6,7 +6,7 @@ A **real-time ride coordination platform** enabling users to create, join, and s
 
 ## 🧠 Overview
 
-Ride Signals is designed for **live location updates**, **real-time ride tracking**, and **instant user coordination**.
+TandemSync is designed for **live location updates**, **real-time ride tracking**, and **instant user coordination**.
 
 Built for performance and scalability — the backend leverages **Dragonfly** for ultra-fast pub/sub communication and caching, and **Socket.IO** for persistent WebSocket connections with clients.
 
@@ -60,8 +60,8 @@ Built for performance and scalability — the backend leverages **Dragonfly** fo
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/ride-signals.git
-cd ride-signals
+git clone https://github.com/yourusername/tandem-sync.git
+cd tandem-sync
 ```
 
 ### 2. Create Environment File

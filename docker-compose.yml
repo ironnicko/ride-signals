@@ -1,6 +1,6 @@
 services:
   # frontend:
-  #   image: ironnicko1413/ride-signals-frontend:latest
+  #   image: ironnicko1413/tandem-sync-frontend:latest
   #   build:
   #     context: ./Frontend
   #     dockerfile: Dockerfile
@@ -13,7 +13,7 @@ services:
   #     - webnet
 
   # backend:
-  #   image: ironnicko1413/ride-signals-backend:latest
+  #   image: ironnicko1413/tandem-sync-backend:latest
   #   build:
   #     context: ./Backend
   #     dockerfile: Dockerfile
@@ -26,7 +26,7 @@ services:
   #     - webnet
 
   # socket:
-  #   image: ironnicko1413/ride-signals-socket:latest
+  #   image: ironnicko1413/tandem-sync-socket:latest
   #   build:
   #     context: ./SocketServer
   #     dockerfile: Dockerfile

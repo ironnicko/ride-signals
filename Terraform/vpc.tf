@@ -2,7 +2,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.1.2"
 
-  name = "Ride-Signals-vpc"
+  name = "tandem-sync-vpc"
   cidr = "10.0.0.0/16"
 
   azs             = ["ap-south-2a", "ap-south-2b"]

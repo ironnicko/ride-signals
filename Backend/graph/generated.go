@@ -13,7 +13,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/ironnicko/ride-signals/Backend/models"
+	"github.com/ironnicko/tandem-sync/Backend/models"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -918,7 +918,7 @@ func (ec *executionContext) field_Mutation_updateRide_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateUserInput2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐUpdateUserInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateUserInput2githubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐUpdateUserInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1091,7 +1091,7 @@ func (ec *executionContext) _Mutation_createRide(ctx context.Context, field grap
 			return ec.resolvers.Mutation().CreateRide(ctx, fc.Args["maxRiders"].(int), fc.Args["visibility"].(string), fc.Args["startLat"].(float64), fc.Args["startLng"].(float64), fc.Args["destinationLat"].(float64), fc.Args["destinationLng"].(float64), fc.Args["startName"].(string), fc.Args["destinationName"].(string), fc.Args["tripName"].(string))
 		},
 		nil,
-		ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐRide,
+		ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐRide,
 		true,
 		true,
 	)
@@ -1162,7 +1162,7 @@ func (ec *executionContext) _Mutation_updateRide(ctx context.Context, field grap
 			return ec.resolvers.Mutation().UpdateRide(ctx, fc.Args["rideCode"].(string), fc.Args["requestType"].(*string), fc.Args["maxRiders"].(*int), fc.Args["visibility"].(*string), fc.Args["endedAt"].(*string), fc.Args["startedAt"].(*string), fc.Args["status"].(*string), fc.Args["tripName"].(*string))
 		},
 		nil,
-		ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐRide,
+		ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐRide,
 		true,
 		true,
 	)
@@ -1233,7 +1233,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 			return ec.resolvers.Mutation().UpdateUser(ctx, fc.Args["input"].(models.UpdateUserInput))
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐUser,
 		true,
 		true,
 	)
@@ -1294,7 +1294,7 @@ func (ec *executionContext) _Mutation_joinRide(ctx context.Context, field graphq
 			return ec.resolvers.Mutation().JoinRide(ctx, fc.Args["rideCode"].(string), fc.Args["role"].(string))
 		},
 		nil,
-		ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐRide,
+		ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐRide,
 		true,
 		true,
 	)
@@ -1521,7 +1521,7 @@ func (ec *executionContext) _PushSubscription_keys(ctx context.Context, field gr
 			return obj.Keys, nil
 		},
 		nil,
-		ec.marshalNPushSubscriptionKeys2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐPushSubscriptionKeys,
+		ec.marshalNPushSubscriptionKeys2githubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐPushSubscriptionKeys,
 		true,
 		true,
 	)
@@ -1614,7 +1614,7 @@ func (ec *executionContext) _Query_me(ctx context.Context, field graphql.Collect
 			return ec.resolvers.Query().Me(ctx)
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐUser,
 		true,
 		true,
 	)
@@ -1664,7 +1664,7 @@ func (ec *executionContext) _Query_ride(ctx context.Context, field graphql.Colle
 			return ec.resolvers.Query().Ride(ctx, fc.Args["rideCode"].(string))
 		},
 		nil,
-		ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐRide,
+		ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐRide,
 		true,
 		true,
 	)
@@ -1734,7 +1734,7 @@ func (ec *executionContext) _Query_myRides(ctx context.Context, field graphql.Co
 			return ec.resolvers.Query().MyRides(ctx)
 		},
 		nil,
-		ec.marshalNRide2ᚕᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐRideᚄ,
+		ec.marshalNRide2ᚕᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐRideᚄ,
 		true,
 		true,
 	)
@@ -1794,7 +1794,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 			return ec.resolvers.Query().User(ctx, fc.Args["userId"].(string))
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐUser,
 		true,
 		true,
 	)
@@ -1855,7 +1855,7 @@ func (ec *executionContext) _Query_usersByIds(ctx context.Context, field graphql
 			return ec.resolvers.Query().UsersByIds(ctx, fc.Args["ids"].([]string))
 		},
 		nil,
-		ec.marshalNUser2ᚕᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐUserᚄ,
+		ec.marshalNUser2ᚕᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐUserᚄ,
 		true,
 		true,
 	)
@@ -2226,7 +2226,7 @@ func (ec *executionContext) _Ride_participants(ctx context.Context, field graphq
 			return obj.Participants, nil
 		},
 		nil,
-		ec.marshalNParticipant2ᚕgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐParticipantᚄ,
+		ec.marshalNParticipant2ᚕgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐParticipantᚄ,
 		true,
 		true,
 	)
@@ -2263,7 +2263,7 @@ func (ec *executionContext) _Ride_settings(ctx context.Context, field graphql.Co
 			return obj.Settings, nil
 		},
 		nil,
-		ec.marshalNRideSettings2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐRideSettings,
+		ec.marshalNRideSettings2githubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐRideSettings,
 		true,
 		true,
 	)
@@ -2298,7 +2298,7 @@ func (ec *executionContext) _Ride_start(ctx context.Context, field graphql.Colle
 			return obj.Start, nil
 		},
 		nil,
-		ec.marshalNGeoLocation2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐGeoLocation,
+		ec.marshalNGeoLocation2githubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐGeoLocation,
 		true,
 		true,
 	)
@@ -2333,7 +2333,7 @@ func (ec *executionContext) _Ride_destination(ctx context.Context, field graphql
 			return obj.Destination, nil
 		},
 		nil,
-		ec.marshalNGeoLocation2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐGeoLocation,
+		ec.marshalNGeoLocation2githubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐGeoLocation,
 		true,
 		true,
 	)
@@ -2658,7 +2658,7 @@ func (ec *executionContext) _Signal_location(ctx context.Context, field graphql.
 			return obj.Location, nil
 		},
 		nil,
-		ec.marshalOGeoLocation2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐGeoLocation,
+		ec.marshalOGeoLocation2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐGeoLocation,
 		true,
 		false,
 	)
@@ -2925,7 +2925,7 @@ func (ec *executionContext) _User_pushSubscription(ctx context.Context, field gr
 			return obj.PushSubscription, nil
 		},
 		nil,
-		ec.marshalOPushSubscription2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐPushSubscription,
+		ec.marshalOPushSubscription2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐPushSubscription,
 		true,
 		false,
 	)
@@ -4419,7 +4419,7 @@ func (ec *executionContext) unmarshalInputPushSubscriptionInput(ctx context.Cont
 			it.Endpoint = data
 		case "keys":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keys"))
-			data, err := ec.unmarshalNPushSubscriptionKeysInput2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐPushSubscriptionKeysInput(ctx, v)
+			data, err := ec.unmarshalNPushSubscriptionKeysInput2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐPushSubscriptionKeysInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4522,7 +4522,7 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 			it.Picture = data
 		case "pushSubscription":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pushSubscription"))
-			data, err := ec.unmarshalOPushSubscriptionInput2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐPushSubscriptionInput(ctx, v)
+			data, err := ec.unmarshalOPushSubscriptionInput2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐPushSubscriptionInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5792,7 +5792,7 @@ func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.S
 	return graphql.WrapContextMarshaler(ctx, res)
 }
 
-func (ec *executionContext) marshalNGeoLocation2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐGeoLocation(ctx context.Context, sel ast.SelectionSet, v models.GeoLocation) graphql.Marshaler {
+func (ec *executionContext) marshalNGeoLocation2githubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐGeoLocation(ctx context.Context, sel ast.SelectionSet, v models.GeoLocation) graphql.Marshaler {
 	return ec._GeoLocation(ctx, sel, &v)
 }
 
@@ -5858,11 +5858,11 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNParticipant2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐParticipant(ctx context.Context, sel ast.SelectionSet, v models.Participant) graphql.Marshaler {
+func (ec *executionContext) marshalNParticipant2githubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐParticipant(ctx context.Context, sel ast.SelectionSet, v models.Participant) graphql.Marshaler {
 	return ec._Participant(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNParticipant2ᚕgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐParticipantᚄ(ctx context.Context, sel ast.SelectionSet, v []models.Participant) graphql.Marshaler {
+func (ec *executionContext) marshalNParticipant2ᚕgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐParticipantᚄ(ctx context.Context, sel ast.SelectionSet, v []models.Participant) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -5886,7 +5886,7 @@ func (ec *executionContext) marshalNParticipant2ᚕgithubᚗcomᚋironnickoᚋri
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNParticipant2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐParticipant(ctx, sel, v[i])
+			ret[i] = ec.marshalNParticipant2githubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐParticipant(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -5906,20 +5906,20 @@ func (ec *executionContext) marshalNParticipant2ᚕgithubᚗcomᚋironnickoᚋri
 	return ret
 }
 
-func (ec *executionContext) marshalNPushSubscriptionKeys2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐPushSubscriptionKeys(ctx context.Context, sel ast.SelectionSet, v models.PushSubscriptionKeys) graphql.Marshaler {
+func (ec *executionContext) marshalNPushSubscriptionKeys2githubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐPushSubscriptionKeys(ctx context.Context, sel ast.SelectionSet, v models.PushSubscriptionKeys) graphql.Marshaler {
 	return ec._PushSubscriptionKeys(ctx, sel, &v)
 }
 
-func (ec *executionContext) unmarshalNPushSubscriptionKeysInput2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐPushSubscriptionKeysInput(ctx context.Context, v any) (*models.PushSubscriptionKeysInput, error) {
+func (ec *executionContext) unmarshalNPushSubscriptionKeysInput2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐPushSubscriptionKeysInput(ctx context.Context, v any) (*models.PushSubscriptionKeysInput, error) {
 	res, err := ec.unmarshalInputPushSubscriptionKeysInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNRide2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐRide(ctx context.Context, sel ast.SelectionSet, v models.Ride) graphql.Marshaler {
+func (ec *executionContext) marshalNRide2githubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐRide(ctx context.Context, sel ast.SelectionSet, v models.Ride) graphql.Marshaler {
 	return ec._Ride(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNRide2ᚕᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐRideᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Ride) graphql.Marshaler {
+func (ec *executionContext) marshalNRide2ᚕᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐRideᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Ride) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -5943,7 +5943,7 @@ func (ec *executionContext) marshalNRide2ᚕᚖgithubᚗcomᚋironnickoᚋride�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐRide(ctx, sel, v[i])
+			ret[i] = ec.marshalNRide2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐRide(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -5963,7 +5963,7 @@ func (ec *executionContext) marshalNRide2ᚕᚖgithubᚗcomᚋironnickoᚋride�
 	return ret
 }
 
-func (ec *executionContext) marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐRide(ctx context.Context, sel ast.SelectionSet, v *models.Ride) graphql.Marshaler {
+func (ec *executionContext) marshalNRide2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐRide(ctx context.Context, sel ast.SelectionSet, v *models.Ride) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -5973,7 +5973,7 @@ func (ec *executionContext) marshalNRide2ᚖgithubᚗcomᚋironnickoᚋrideᚑsi
 	return ec._Ride(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNRideSettings2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐRideSettings(ctx context.Context, sel ast.SelectionSet, v models.RideSettings) graphql.Marshaler {
+func (ec *executionContext) marshalNRideSettings2githubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐRideSettings(ctx context.Context, sel ast.SelectionSet, v models.RideSettings) graphql.Marshaler {
 	return ec._RideSettings(ctx, sel, &v)
 }
 
@@ -5993,16 +5993,16 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNUpdateUserInput2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐUpdateUserInput(ctx context.Context, v any) (models.UpdateUserInput, error) {
+func (ec *executionContext) unmarshalNUpdateUserInput2githubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐUpdateUserInput(ctx context.Context, v any) (models.UpdateUserInput, error) {
 	res, err := ec.unmarshalInputUpdateUserInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v models.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2githubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v models.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.User) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6026,7 +6026,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋironnickoᚋride�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐUser(ctx, sel, v[i])
+			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6046,7 +6046,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋironnickoᚋride�
 	return ret
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v *models.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v *models.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -6356,7 +6356,7 @@ func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel as
 	return graphql.WrapContextMarshaler(ctx, res)
 }
 
-func (ec *executionContext) marshalOGeoLocation2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐGeoLocation(ctx context.Context, sel ast.SelectionSet, v *models.GeoLocation) graphql.Marshaler {
+func (ec *executionContext) marshalOGeoLocation2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐGeoLocation(ctx context.Context, sel ast.SelectionSet, v *models.GeoLocation) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -6381,14 +6381,14 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return res
 }
 
-func (ec *executionContext) marshalOPushSubscription2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐPushSubscription(ctx context.Context, sel ast.SelectionSet, v *models.PushSubscription) graphql.Marshaler {
+func (ec *executionContext) marshalOPushSubscription2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐPushSubscription(ctx context.Context, sel ast.SelectionSet, v *models.PushSubscription) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._PushSubscription(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOPushSubscriptionInput2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐPushSubscriptionInput(ctx context.Context, v any) (*models.PushSubscriptionInput, error) {
+func (ec *executionContext) unmarshalOPushSubscriptionInput2ᚖgithubᚗcomᚋironnickoᚋtandemᚑsyncᚋBackendᚋmodelsᚐPushSubscriptionInput(ctx context.Context, v any) (*models.PushSubscriptionInput, error) {
 	if v == nil {
 		return nil, nil
 	}
