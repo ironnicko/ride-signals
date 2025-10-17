@@ -70,58 +70,49 @@ export default function PushNotificationManager() {
     return <p>Push notifications are not supported in this browser.</p>;
   }
 
-  return (
-    <div className="w-full max-w-md bg-white/80 backdrop-blur-md border border-gray-200 rounded-xl shadow-lg p-6 space-y-4 text-center">
-      <h3 className="text-xl font-semibold text-gray-800">
-        Push Notifications
-      </h3>
+  if (!subscription)
+    return (
+      <>
+        <p className="text-gray-600">
+          You are not subscribed to push notifications.
+        </p>
 
-      {subscription ? (
-        <>
-          <p className="text-gray-600">
-            You are subscribed to push notifications.
-          </p>
+        <button
+          onClick={subscribeToPush}
+          className="bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg transition"
+        >
+          Subscribe
+        </button>
+      </>
+    );
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button
-              onClick={unsubscribeFromPush}
-              className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg transition"
-            >
-              Unsubscribe
-            </button>
+  // return (
+  //   <>
+  //     <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+  //       <button
+  //         onClick={unsubscribeFromPush}
+  //         className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg transition"
+  //       >
+  //         Unsubscribe
+  //       </button>
 
-            <button
-              onClick={sendTestNotification}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition"
-            >
-              Send Test
-            </button>
-          </div>
+  //       <button
+  //         onClick={sendTestNotification}
+  //         className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition"
+  //       >
+  //         Send Test
+  //       </button>
+  //     </div>
 
-          <div className="flex flex-col items-center gap-2 mt-4">
-            <input
-              type="text"
-              placeholder="Enter notification message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
-        </>
-      ) : (
-        <>
-          <p className="text-gray-600">
-            You are not subscribed to push notifications.
-          </p>
-
-          <button
-            onClick={subscribeToPush}
-            className="bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg transition"
-          >
-            Subscribe
-          </button>
-        </>
-      )}
-    </div>
-  );
+  //     <div className="flex flex-col items-center gap-2 mt-4">
+  //       <input
+  //         type="text"
+  //         placeholder="Enter notification message"
+  //         value={message}
+  //         onChange={(e) => setMessage(e.target.value)}
+  //         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+  //       />
+  //     </div>
+  //   </>
+  // );
 }

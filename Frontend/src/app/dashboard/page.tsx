@@ -9,6 +9,7 @@ import { useAuth } from "@/stores/useAuth";
 import { OnGoingTrip } from "./OnGoingTrip/OnGoingTrip";
 import { CircleDot } from "lucide-react";
 import { useOtherUsers } from "@/stores/useOtherUsers";
+import PushNotificationManager from "@/components/PushNotificationManager";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -56,6 +57,7 @@ export default function DashboardPage() {
   return (
     <ProtectedRoute>
       <div className="relative w-screen h-screen overflow-hidden">
+      <PushNotificationManager />
         <Map
           defaultCenter={userLocation}
           disableDefaultUI={true}

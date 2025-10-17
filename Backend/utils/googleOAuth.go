@@ -154,7 +154,7 @@ func GoogleLoginHandler(c *gin.Context) {
 func GoogleCallbackHandler(c *gin.Context) {
 	code := c.Query("code")
 	state := c.Query("state")
-	cfg := config.LoadConfig()
+	cfg := config.Envs
 
 	if code == "" {
 		c.Redirect(http.StatusTemporaryRedirect, "/signin")
@@ -194,7 +194,7 @@ func GoogleCallbackHandler(c *gin.Context) {
 
 	frontendRedirect := fmt.Sprintf(
 		"%s/google-redirect?response=%s&redirect=%s",
-		cfg.Frontend_URL,
+		cfg.FrontendURL,
 		url.QueryEscape(base64.StdEncoding.EncodeToString(mustJSON(userResponse))),
 		url.QueryEscape(state),
 	)

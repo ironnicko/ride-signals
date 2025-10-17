@@ -5,30 +5,38 @@ import (
 )
 
 type Config struct {
-	MongoURI             string
-	KafkaBrokers         string
-	JWTSecret            string
-	RefreshJWTSecret     string
-	Google_Client_ID     string
-	Google_Client_Secret string
-	Google_Redirect_URL  string
-	Mode                 string
-	ServerPort           string
-	Frontend_URL         string
+	MongoURI           string
+	KafkaBrokers       string
+	JWTSecret          string
+	RefreshJWTSecret   string
+	GoogleClientID     string
+	GoogleClientSecret string
+	GoogleRedirectURL  string
+	Mode               string
+	ServerPort         string
+	FrontendURL        string
+	VAPIDPublickey     string
+	VAPIDPrivatekey    string
+	MyEmail            string
 }
 
-func LoadConfig() *Config {
-	return &Config{
-		MongoURI:             getEnv("MONGO_URI", "mongodb://localhost:27017"),
-		KafkaBrokers:         getEnv("KAFKA_BROKERS", "localhost:9092"),
-		JWTSecret:            getEnv("JWT_SECRET", "supersecret"),
-		RefreshJWTSecret:     getEnv("REFRESH_SECRET", "refreshsupersecret"),
-		Google_Client_ID:     getEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", ""),
-		Google_Client_Secret: getEnv("GOOGLE_CLIENT_SECRET", ""),
-		Google_Redirect_URL:  getEnv("GOOGLE_REDIRECT_URL", ""),
-		ServerPort:           getEnv("SERVER_PORT", "8000"),
-		Frontend_URL:         getEnv("FRONTEND_URL", ""),
-		Mode:                 getEnv("MODE", "local"),
+var Envs *Config
+
+func LoadConfig() {
+	Envs = &Config{
+		MongoURI:           getEnv("MONGO_URI", "mongodb://localhost:27017"),
+		KafkaBrokers:       getEnv("KAFKA_BROKERS", "localhost:9092"),
+		JWTSecret:          getEnv("JWT_SECRET", "supersecret"),
+		RefreshJWTSecret:   getEnv("REFRESH_SECRET", "refreshsupersecret"),
+		GoogleClientID:     getEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", ""),
+		GoogleClientSecret: getEnv("GOOGLE_CLIENT_SECRET", ""),
+		GoogleRedirectURL:  getEnv("GOOGLE_REDIRECT_URL", ""),
+		ServerPort:         getEnv("SERVER_PORT", "8000"),
+		FrontendURL:        getEnv("FRONTEND_URL", ""),
+		Mode:               getEnv("MODE", "local"),
+		MyEmail:            getEnv("MY_EMAIL", ""),
+		VAPIDPublickey:     getEnv("NEXT_PUBLIC_VAPID_PUBLIC_KEY", ""),
+		VAPIDPrivatekey:    getEnv("VAPID_PRIVATE_KEY", ""),
 	}
 }
 

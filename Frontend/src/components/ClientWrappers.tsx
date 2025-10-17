@@ -3,7 +3,6 @@ import { gqlClient } from "@/lib/graphql/client";
 import { APIProvider } from "@vis.gl/react-google-maps";
 import { ApolloProvider } from "@apollo/client/react";
 import InstallPrompt from "./InstallPrompt";
-import PushNotificationManager from "./PushNotificationManager";
 
 export default function ClientWrappers({
   children,
@@ -17,7 +16,6 @@ export default function ClientWrappers({
       libraries={["places"]}
     >
       <ApolloProvider client={gqlClient}>
-        <PushNotificationManager/>
         <InstallPrompt />
         {children}
       </ApolloProvider>

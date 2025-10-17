@@ -19,7 +19,7 @@ export interface UpdateRideParams {
   status: "ended" | "started" | "not started" | null;
   visibility: "private" | "public";
   maxRiders: number;
-  requestType: "start" | "end" | "remove" | null;
+  requestType: "start" | "join" | "end" | "remove" | null;
   tripName: string;
 }
 
@@ -48,7 +48,7 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
 
   async function handleRideChange(
     newStatus: "started" | "ended" | null,
-    requestType?: "start" | "end" | "remove",
+    requestType?: "start" | "join" | "end" | "remove",
   ) {
     setButtonBusy(true);
     try {
@@ -90,11 +90,11 @@ export default function RideModal({ ride, onClose }: RideModalProps) {
     setButtonBusy(false);
   }
 
-  const handleStartRide = () => handleRideChange("started");
-  const handleEndRide = () => handleRideChange("ended");
+  const handleStartRide = () => handleRideChange("started", "start");
+  const handleEndRide = () => handleRideChange("ended", "end");
   const handleSetCurrentRide = async () => {
     setUser({ ...user!, currentRide: currentRide.rideCode });
-    await handleRideChange(null, "start");
+    await handleRideChange(null, "join");
     joinRide({ rideCode: ride.rideCode });
     router.push("/dashboard");
   };

@@ -2,12 +2,6 @@ package main
 
 import (
 	"fmt"
-
-	// "github.com/99designs/gqlgen"
-	// "github.com/99designs/gqlgen/api"
-	// "github.com/99designs/gqlgen/internal/imports"
-	// notConfig "github.com/99designs/gqlgen/codegen/config"
-
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	config "github.com/ironnicko/ride-signals/Backend/config"
@@ -18,11 +12,12 @@ import (
 )
 
 func main() {
-	cfg := config.LoadConfig()
-
+	config.LoadConfig()
+	cfg := config.Envs
 	if cfg.Mode != "Prod" {
 		godotenv.Load(".env.local")
-		cfg = config.LoadConfig()
+		config.LoadConfig()
+		cfg = config.Envs
 	}
 	fmt.Println(cfg)
 
@@ -30,9 +25,9 @@ func main() {
 	// kafka.InitProducer(cfg.KafkaBrokers)
 	utils.InitJWT(cfg.JWTSecret, cfg.RefreshJWTSecret)
 	utils.InitGoogleOAuth(
-		cfg.Google_Client_ID,
-		cfg.Google_Client_Secret,
-		cfg.Google_Redirect_URL,
+		cfg.GoogleClientID,
+		cfg.GoogleClientSecret,
+		cfg.GoogleRedirectURL,
 	)
 
 	r := gin.Default()

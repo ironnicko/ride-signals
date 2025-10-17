@@ -1028,7 +1028,9 @@ func (ec *executionContext) _GeoLocation_lat(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_GeoLocation_lat,
-		func(ctx context.Context) (any, error) { return obj.Lat, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Lat, nil
+		},
 		nil,
 		ec.marshalNFloat2float64,
 		true,
@@ -1055,7 +1057,9 @@ func (ec *executionContext) _GeoLocation_lng(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_GeoLocation_lng,
-		func(ctx context.Context) (any, error) { return obj.Lng, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Lng, nil
+		},
 		nil,
 		ec.marshalNFloat2float64,
 		true,
@@ -1426,7 +1430,9 @@ func (ec *executionContext) _Participant_role(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Participant_role,
-		func(ctx context.Context) (any, error) { return obj.Role, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Role, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1453,7 +1459,9 @@ func (ec *executionContext) _Participant_joinedAt(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Participant_joinedAt,
-		func(ctx context.Context) (any, error) { return obj.JoinedAt, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.JoinedAt, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1480,7 +1488,9 @@ func (ec *executionContext) _PushSubscription_endpoint(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PushSubscription_endpoint,
-		func(ctx context.Context) (any, error) { return obj.Endpoint, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Endpoint, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1507,7 +1517,9 @@ func (ec *executionContext) _PushSubscription_keys(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PushSubscription_keys,
-		func(ctx context.Context) (any, error) { return obj.Keys, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Keys, nil
+		},
 		nil,
 		ec.marshalNPushSubscriptionKeys2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐPushSubscriptionKeys,
 		true,
@@ -1540,7 +1552,9 @@ func (ec *executionContext) _PushSubscriptionKeys_p256dh(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PushSubscriptionKeys_p256dh,
-		func(ctx context.Context) (any, error) { return obj.P256dh, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.P256dh, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1567,7 +1581,9 @@ func (ec *executionContext) _PushSubscriptionKeys_auth(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PushSubscriptionKeys_auth,
-		func(ctx context.Context) (any, error) { return obj.Auth, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Auth, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2032,7 +2048,9 @@ func (ec *executionContext) _Ride_rideCode(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Ride_rideCode,
-		func(ctx context.Context) (any, error) { return obj.RideCode, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.RideCode, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2059,7 +2077,9 @@ func (ec *executionContext) _Ride_status(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Ride_status,
-		func(ctx context.Context) (any, error) { return obj.Status, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Status, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2086,7 +2106,9 @@ func (ec *executionContext) _Ride_createdAt(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Ride_createdAt,
-		func(ctx context.Context) (any, error) { return obj.CreatedAt, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2142,7 +2164,9 @@ func (ec *executionContext) _Ride_startedAt(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Ride_startedAt,
-		func(ctx context.Context) (any, error) { return obj.StartedAt, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.StartedAt, nil
+		},
 		nil,
 		ec.marshalOString2ᚖstring,
 		true,
@@ -2169,7 +2193,9 @@ func (ec *executionContext) _Ride_endedAt(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Ride_endedAt,
-		func(ctx context.Context) (any, error) { return obj.EndedAt, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.EndedAt, nil
+		},
 		nil,
 		ec.marshalOString2ᚖstring,
 		true,
@@ -2196,7 +2222,9 @@ func (ec *executionContext) _Ride_participants(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Ride_participants,
-		func(ctx context.Context) (any, error) { return obj.Participants, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Participants, nil
+		},
 		nil,
 		ec.marshalNParticipant2ᚕgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐParticipantᚄ,
 		true,
@@ -2231,7 +2259,9 @@ func (ec *executionContext) _Ride_settings(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Ride_settings,
-		func(ctx context.Context) (any, error) { return obj.Settings, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Settings, nil
+		},
 		nil,
 		ec.marshalNRideSettings2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐRideSettings,
 		true,
@@ -2264,7 +2294,9 @@ func (ec *executionContext) _Ride_start(ctx context.Context, field graphql.Colle
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Ride_start,
-		func(ctx context.Context) (any, error) { return obj.Start, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Start, nil
+		},
 		nil,
 		ec.marshalNGeoLocation2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐGeoLocation,
 		true,
@@ -2297,7 +2329,9 @@ func (ec *executionContext) _Ride_destination(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Ride_destination,
-		func(ctx context.Context) (any, error) { return obj.Destination, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Destination, nil
+		},
 		nil,
 		ec.marshalNGeoLocation2githubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐGeoLocation,
 		true,
@@ -2330,7 +2364,9 @@ func (ec *executionContext) _Ride_startName(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Ride_startName,
-		func(ctx context.Context) (any, error) { return obj.StartName, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.StartName, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2357,7 +2393,9 @@ func (ec *executionContext) _Ride_destinationName(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Ride_destinationName,
-		func(ctx context.Context) (any, error) { return obj.DestinationName, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DestinationName, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2384,7 +2422,9 @@ func (ec *executionContext) _Ride_tripName(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Ride_tripName,
-		func(ctx context.Context) (any, error) { return obj.TripName, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TripName, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2411,7 +2451,9 @@ func (ec *executionContext) _RideSettings_maxRiders(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_RideSettings_maxRiders,
-		func(ctx context.Context) (any, error) { return obj.MaxRiders, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.MaxRiders, nil
+		},
 		nil,
 		ec.marshalNInt2int,
 		true,
@@ -2438,7 +2480,9 @@ func (ec *executionContext) _RideSettings_visibility(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_RideSettings_visibility,
-		func(ctx context.Context) (any, error) { return obj.Visibility, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Visibility, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2494,7 +2538,9 @@ func (ec *executionContext) _Signal_rideCode(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Signal_rideCode,
-		func(ctx context.Context) (any, error) { return obj.RideCode, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.RideCode, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2550,7 +2596,9 @@ func (ec *executionContext) _Signal_type(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Signal_type,
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2577,7 +2625,9 @@ func (ec *executionContext) _Signal_timestamp(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Signal_timestamp,
-		func(ctx context.Context) (any, error) { return obj.Timestamp, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Timestamp, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2604,7 +2654,9 @@ func (ec *executionContext) _Signal_location(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Signal_location,
-		func(ctx context.Context) (any, error) { return obj.Location, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Location, nil
+		},
 		nil,
 		ec.marshalOGeoLocation2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐGeoLocation,
 		true,
@@ -2666,7 +2718,9 @@ func (ec *executionContext) _User_name(ctx context.Context, field graphql.Collec
 		ec.OperationContext,
 		field,
 		ec.fieldContext_User_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2693,7 +2747,9 @@ func (ec *executionContext) _User_email(ctx context.Context, field graphql.Colle
 		ec.OperationContext,
 		field,
 		ec.fieldContext_User_email,
-		func(ctx context.Context) (any, error) { return obj.Email, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Email, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2720,7 +2776,9 @@ func (ec *executionContext) _User_createdAt(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_User_createdAt,
-		func(ctx context.Context) (any, error) { return obj.CreatedAt, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2747,7 +2805,9 @@ func (ec *executionContext) _User_lastLoginAt(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_User_lastLoginAt,
-		func(ctx context.Context) (any, error) { return obj.LastLoginAt, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.LastLoginAt, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2774,7 +2834,9 @@ func (ec *executionContext) _User_isActive(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_User_isActive,
-		func(ctx context.Context) (any, error) { return obj.IsActive, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.IsActive, nil
+		},
 		nil,
 		ec.marshalNBoolean2bool,
 		true,
@@ -2801,7 +2863,9 @@ func (ec *executionContext) _User_currentRide(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_User_currentRide,
-		func(ctx context.Context) (any, error) { return obj.CurrentRide, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.CurrentRide, nil
+		},
 		nil,
 		ec.marshalOString2ᚖstring,
 		true,
@@ -2828,7 +2892,9 @@ func (ec *executionContext) _User_picture(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_User_picture,
-		func(ctx context.Context) (any, error) { return obj.Picture, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Picture, nil
+		},
 		nil,
 		ec.marshalOString2ᚖstring,
 		true,
@@ -2855,7 +2921,9 @@ func (ec *executionContext) _User_pushSubscription(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_User_pushSubscription,
-		func(ctx context.Context) (any, error) { return obj.PushSubscription, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PushSubscription, nil
+		},
 		nil,
 		ec.marshalOPushSubscription2ᚖgithubᚗcomᚋironnickoᚋrideᚑsignalsᚋBackendᚋmodelsᚐPushSubscription,
 		true,
@@ -2888,7 +2956,9 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2944,7 +3014,9 @@ func (ec *executionContext) ___Directive_isRepeatable(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_isRepeatable,
-		func(ctx context.Context) (any, error) { return obj.IsRepeatable, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.IsRepeatable, nil
+		},
 		nil,
 		ec.marshalNBoolean2bool,
 		true,
@@ -2971,7 +3043,9 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_locations,
-		func(ctx context.Context) (any, error) { return obj.Locations, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Locations, nil
+		},
 		nil,
 		ec.marshalN__DirectiveLocation2ᚕstringᚄ,
 		true,
@@ -2998,7 +3072,9 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_args,
-		func(ctx context.Context) (any, error) { return obj.Args, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Args, nil
+		},
 		nil,
 		ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ,
 		true,
@@ -3050,7 +3126,9 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext___EnumValue_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -3164,7 +3242,9 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Field_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -3220,7 +3300,9 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Field_args,
-		func(ctx context.Context) (any, error) { return obj.Args, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Args, nil
+		},
 		nil,
 		ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ,
 		true,
@@ -3272,7 +3354,9 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Field_type,
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		nil,
 		ec.marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType,
 		true,
@@ -3381,7 +3465,9 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext___InputValue_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -3437,7 +3523,9 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext___InputValue_type,
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		nil,
 		ec.marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType,
 		true,
@@ -3488,7 +3576,9 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext___InputValue_defaultValue,
-		func(ctx context.Context) (any, error) { return obj.DefaultValue, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DefaultValue, nil
+		},
 		nil,
 		ec.marshalOString2ᚖstring,
 		true,

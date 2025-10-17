@@ -28,6 +28,8 @@ export default function ParticipantsList({ ride }: { ride: RideState }) {
                 <Image
                   src={user.picture}
                   alt={user.name ?? "User"}
+                  width={16}
+                  height={16}
                   className="w-16 h-16 rounded-full border border-gray-300 object-cover"
                 />
               ) : (

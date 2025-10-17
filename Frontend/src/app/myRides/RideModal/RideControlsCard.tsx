@@ -146,7 +146,6 @@ const OwnerControls = memo(
 );
 OwnerControls.displayName = "OwnerControls";
 
-
 interface NonOwnerControlsProps {
   isEditing: boolean;
   isCurrentRide: boolean;
@@ -177,21 +176,23 @@ const NonOwnerControls = memo(
 
     return (
       <>
-        {!isCurrentRide ? (
-          <ControlButton
-            onClick={handleSetCurrentRide}
-            color="green"
-            Icon={Bike}
-            label="Set Current Ride"
-          />
-        ) : (
-          <ControlButton
-            onClick={handleRemoveCurrentRide}
-            color="yellow"
-            Icon={OctagonX}
-            label="Remove Current Ride"
-          />
-        )}
+        {!ride.endedAt &&
+          ride.startedAt &&
+          (!isCurrentRide ? (
+            <ControlButton
+              onClick={handleSetCurrentRide}
+              color="green"
+              Icon={Bike}
+              label="Set Current Ride"
+            />
+          ) : (
+            <ControlButton
+              onClick={handleRemoveCurrentRide}
+              color="yellow"
+              Icon={OctagonX}
+              label="Remove Current Ride"
+            />
+          ))}
 
         {!isEditing && ride.settings.maxRiders > ride.participants.length && (
           <ControlButton
