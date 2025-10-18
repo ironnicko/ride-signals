@@ -82,29 +82,38 @@ export default function DashboardPage() {
             </AdvancedMarker>
           )}
 
-          {Object.entries(otherUsers).map(([id, u]) => {
-            if (id === user?.id) return null;
-            if (!u.location) return null;
-          
-            const { lat, lng } = u.location;
-          
-            const userColor = hashStringToHsl(id);
-          
-            return (
-              <AdvancedMarker key={id} position={{ lat, lng }}>
-                <div
-                  className="relative flex items-center justify-center rounded-full w-8 h-8 font-semibold text-white text-xs"
-                  style={{ backgroundColor: userColor }}
-                >
-                  <CircleDot className="absolute inset-0 w-full h-full text-white opacity-25" />
-                  <span className="z-10 truncate max-w-[1.5rem] text-center">
-                    {u.name?.substring(0, 2) || "?"}
-                  </span>
-                </div>
-              </AdvancedMarker>
-            );
-          })}
+          {Object.entries(otherUsers)
+            .filter(
+              ([_, u]) =>
+                u.location &&
+                !isNaN(Number(u.location.lat)) &&
+                !isNaN(Number(u.location.lng)),
+            )
+            .map(([id, u]) => {
+              if (id === user?.id) return null;
+              if (!u.location) return null;
 
+              const userColor = hashStringToHsl(id);
+              const lat = Number(u.location.lat);
+              const lng = Number(u.location.lng);
+
+              if (isNaN(lat) || isNaN(lng)) return null;
+
+              return (
+                <AdvancedMarker key={id} position={{ lat, lng }}>
+                  <div
+                    className="relative flex items-center justify-center w-8 h-8 rounded-full border-2 font-semibold text-xs"
+                    style={{
+                      borderColor: userColor,
+                      backgroundColor: "transparent",
+                      // color: userColor,
+                    }}
+                  >
+                    {u.name}
+                  </div>
+                </AdvancedMarker>
+              );
+            })}
 
           <FitBoundsHandler
             fromLocation={userLocation}

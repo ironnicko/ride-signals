@@ -90,7 +90,6 @@ export interface UserState {
 }
 
 export interface SocketState {
-  socket: Socket | null;
   isConnected: boolean;
   inRoom: boolean;
   error: string | null;

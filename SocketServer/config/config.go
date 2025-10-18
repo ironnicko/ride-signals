@@ -18,7 +18,7 @@ var (
 	RedisClient *redis.Client
 
 	RideRooms   = make(map[string]map[*websocket.Conn]string)
-	RoomsMu     sync.Mutex
+	RoomsMu     sync.RWMutex
 	ActiveUsers = make(map[*websocket.Conn]string)
 	Envs        *Config
 )

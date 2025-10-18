@@ -29,9 +29,8 @@ export const OnGoingTrip = ({
   const { user, setUser } = useAuth();
   const {
     joinRide,
-    connect,
-    isConnected,
     sendSignal,
+    isConnected,
     inRoom,
     sendLocation,
     onAnnounce,
@@ -62,8 +61,9 @@ export const OnGoingTrip = ({
   }, [data?.ride?.rideCode, data?.ride?.endedAt]);
 
   useEffect(() => {
-    joinRide({ rideCode: user.currentRide });
-  }, [user.currentRide, inRoom]);
+    if (data?.ride?.rideCode && !inRoom)
+      joinRide({ rideCode: data?.ride?.rideCode });
+  }, [data?.ride?.rideCode, inRoom]);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -92,10 +92,10 @@ export const OnGoingTrip = ({
   }, []);
 
   const sendLocationSocketEvent = useCallback(() => {
-    if (userLocation && user.currentRide) {
-      sendLocation({ rideCode: user.currentRide, location: userLocation });
+    if (userLocation && data?.ride?.rideCode) {
+      sendLocation({ rideCode: data?.ride?.rideCode, location: userLocation });
     }
-  }, [userLocation, user.currentRide, sendLocation]);
+  }, [userLocation, data?.ride?.rideCode, sendLocation]);
 
   useEffect(() => {
     const intervalId = setInterval(sendLocationSocketEvent, 3000);

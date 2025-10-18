@@ -24,11 +24,22 @@ func IsValidToken(authHeader string) (string, bool) {
 	return claims.UserID, true
 }
 
-func BroadcastToRoom(rideCode string, message any) {
-	config.RoomsMu.Lock()
-	defer config.RoomsMu.Unlock()
+func BroadcastToRoom(skipConn *websocket.Conn, rideCode string, msg any) {
+	config.RoomsMu.RLock()
+	conns := make([]*websocket.Conn, 0, len(config.RideRooms[rideCode]))
 	for conn := range config.RideRooms[rideCode] {
-		conn.WriteJSON(message)
+
+		if conn == skipConn {
+			continue
+		}
+		conns = append(conns, conn)
+	}
+	config.RoomsMu.RUnlock()
+
+	for _, conn := range conns {
+		if err := conn.WriteJSON(msg); err != nil {
+			CleanupConnection(conn)
+		}
 	}
 }
 
@@ -36,16 +47,23 @@ func CleanupConnection(conn *websocket.Conn) {
 	userID := config.ActiveUsers[conn]
 	delete(config.ActiveUsers, conn)
 
+	var ridesToNotify []string
+
 	config.RoomsMu.Lock()
-	defer config.RoomsMu.Unlock()
 	for rideCode, members := range config.RideRooms {
 		if _, ok := members[conn]; ok {
 			delete(members, conn)
-			BroadcastToRoom(rideCode, map[string]any{
-				"eventType": "userLeft",
-				"data":      map[string]string{"userId": userID},
-			})
+			ridesToNotify = append(ridesToNotify, rideCode)
 		}
 	}
+	config.RoomsMu.Unlock()
+
+	for _, rideCode := range ridesToNotify {
+		BroadcastToRoom(conn, rideCode, map[string]any{
+			"eventType": "userLeft",
+			"data":      map[string]string{"userId": userID},
+		})
+	}
+
 	conn.Close()
 }
