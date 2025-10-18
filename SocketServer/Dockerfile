@@ -1,4 +1,4 @@
-eight Go image
+
 FROM golang:alpine
 WORKDIR /app
 
