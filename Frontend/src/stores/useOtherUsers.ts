@@ -35,25 +35,25 @@ export const useOtherUsers = create<OtherUsersStore>((set, get) => ({
       };
     }),
 
-  setUsersLocation: (userLocations: Record<string, string>) => {
+  setUsersLocation: (userLocations: Record<string, GeoLocation>) => {
     const userIds = Object.keys(userLocations);
     get().fetchUsersByIds(userIds);
     set((state) => {
       const updatedUsers = { ...state.users } as Record<string, UserState>;
 
-      for (const [userId, locationString] of Object.entries(userLocations)) {
-        const parsedLocation = JSON.parse(locationString) as GeoLocation;
+      for (const [userId, location] of Object.entries(userLocations)) {
         const existingUser = updatedUsers[userId];
+        console.log(location);
 
         if (
           !existingUser ||
-          existingUser.location?.lat !== parsedLocation.lat ||
-          existingUser.location?.lng !== parsedLocation.lng
+          existingUser.location?.lat !== location.lat ||
+          existingUser.location?.lng !== location.lng
         ) {
           updatedUsers[userId] = {
             ...existingUser,
             name: existingUser?.name ?? "Unknown",
-            location: parsedLocation,
+            location: location,
           };
         }
       }

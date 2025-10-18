@@ -27,8 +27,15 @@ export const OnGoingTrip = ({
   dashboardState,
 }: OnGoingTripProps) => {
   const { user, setUser } = useAuth();
-  const { joinRide, sendSignal, inRoom, sendLocation, onAnnounce } =
-    useSocket();
+  const {
+    joinRide,
+    connect,
+    isConnected,
+    sendSignal,
+    inRoom,
+    sendLocation,
+    onAnnounce,
+  } = useSocket();
   const { data, loading, error } = useQuery<{ ride: RideState }>(RIDE, {
     variables: { rideCode: user.currentRide },
     fetchPolicy: "cache-and-network",

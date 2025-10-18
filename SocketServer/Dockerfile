@@ -1,17 +1,16 @@
-# ---- Base image ----
-FROM oven/bun:latest
-
-# ---- Set working directory ----
+eight Go image
+FROM golang:alpine
 WORKDIR /app
 
-# ---- Copy package files ----
-COPY package.json bun.lock* ./
+# Install dependencies
+COPY go.mod go.sum ./
+RUN go mod download
 
-# ---- Install dependencies ----
-RUN bun install --frozen-lockfile
-
-# ---- Copy the rest of the app ----
+# Copy source
 COPY . .
 
-# ---- Run the server ----
-CMD ["bun", "run", "index.js"]
+# Build
+RUN go build -o SocketServer ./
+
+# Run
+CMD ["./SocketServer"]

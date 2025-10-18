@@ -145,7 +145,7 @@ export interface OtherUsersStore {
   addUser: (user: UserState) => void;
   addUsers: (users: UserState[]) => void;
   setUserLocation: (userId: string, location: GeoLocation | null) => void;
-  setUsersLocation: (userLocations: Record<string, string>) => void;
+  setUsersLocation: (userLocations: Record<string, GeoLocation>) => void;
   getUserById: (id: string) => UserState | undefined;
   fetchUsersByIds: (ids: string[]) => Promise<void>;
   clearUsers: () => void;
