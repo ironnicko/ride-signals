@@ -1,42 +1,64 @@
-import { UserState } from "@/stores/types";
-import { useMap } from "@vis.gl/react-google-maps";
+"use client";
+import { GeoLocation, UserState } from "@/stores/types";
 import { useEffect } from "react";
 
 interface FitBoundsHandlerProps {
-  fromLocation: google.maps.LatLngLiteral | null;
-  toLocation: google.maps.LatLngLiteral | null;
-  otherUsers: Record<string, UserState> | null;
+  fromLocation: GeoLocation | null;
+  toLocation: GeoLocation | null;
+  otherUsers: Record<string, UserState>;
 }
 
-export const FitBoundsHandler = ({
+export function FitBoundsHandler({
   fromLocation,
   toLocation,
   otherUsers,
-}: FitBoundsHandlerProps) => {
-  const map = useMap();
-
+}: FitBoundsHandlerProps) {
   useEffect(() => {
     const fitMapBounds = () => {
-      if (!map || !fromLocation || !toLocation) return;
-
       const bounds = new google.maps.LatLngBounds();
-      bounds.extend(fromLocation);
 
-      bounds.extend(toLocation);
+      const points: GeoLocation[] = [];
 
-      if (otherUsers)
-        Object.entries(otherUsers).map(([id, u]) => {
-          if (!u.location) return null;
-          bounds.extend(u.location);
-        });
+      if (
+        fromLocation &&
+        isFinite(fromLocation.lat) &&
+        isFinite(fromLocation.lng)
+      ) {
+        points.push(fromLocation);
+      }
 
-      map.fitBounds(bounds);
+      if (toLocation && isFinite(toLocation.lat) && isFinite(toLocation.lng)) {
+        points.push(toLocation);
+      }
+
+      Object.values(otherUsers).forEach((u) => {
+        const location = u.location;
+        if (location && isFinite(location.lat) && isFinite(location.lng)) {
+          points.push(location);
+        }
+      });
+
+      if (points.length === 0) return;
+
+      points.forEach((point) => {
+        bounds.extend(new google.maps.LatLng(point.lat, point.lng));
+      });
+
+      const mapElement = document.querySelector("canvas"); // or your map ref
+      if (!mapElement) return;
+
+      const mapInstance = (window as any).googleMap as google.maps.Map;
+      if (!mapInstance) return;
+
+      mapInstance.fitBounds(bounds);
     };
-    // const intervalID = setInterval(fitMapBounds, 10 * 1000);
+
     fitMapBounds();
 
+    // Optional: refit periodically if users move
+    // const intervalID = setInterval(fitMapBounds, 5000);
     // return () => clearInterval(intervalID);
-  }, [map, fromLocation, toLocation]);
+  }, [fromLocation, toLocation, otherUsers]);
 
   return null;
-};
+}

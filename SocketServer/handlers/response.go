@@ -47,7 +47,7 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 			handleSendLocation(conn, userID, payload)
 		case "sendSignal":
 			var payload types.Payload = msg.Data
-			handleSendSignal(userID, payload)
+			handleSendSignal(conn, userID, payload)
 		}
 	}
 }

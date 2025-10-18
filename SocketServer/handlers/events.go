@@ -21,12 +21,12 @@ func handleJoinRide(conn *websocket.Conn, userID string, payload types.Payload) 
 		return
 	}
 
-	config.RoomsMu.Lock()
+	config.RoomsMu.RLock()
 	if config.RideRooms[rideCode] == nil {
 		config.RideRooms[rideCode] = make(map[*websocket.Conn]string)
 	}
 	config.RideRooms[rideCode][conn] = userID
-	config.RoomsMu.Unlock()
+	config.RoomsMu.RUnlock()
 
 	allLocations, _ := config.RedisClient.HGetAll(config.CTX, fmt.Sprintf("ride:%s:locations", rideCode)).Result()
 	conn.WriteJSON(map[string]any{
@@ -37,7 +37,7 @@ func handleJoinRide(conn *websocket.Conn, userID string, payload types.Payload) 
 		},
 	})
 
-	utils.BroadcastToRoom(rideCode, map[string]any{
+	utils.BroadcastToRoom(conn, rideCode, map[string]any{
 		"eventType": "userJoined",
 		"data":      map[string]string{"userId": userID},
 	})
@@ -53,7 +53,7 @@ func handleLeaveRide(conn *websocket.Conn, userID string, payload types.Payload)
 	delete(config.RideRooms[rideCode], conn)
 	config.RoomsMu.Unlock()
 
-	utils.BroadcastToRoom(rideCode, map[string]any{
+	utils.BroadcastToRoom(conn, rideCode, map[string]any{
 		"eventType": "userLeft",
 		"data":      map[string]string{"userId": userID},
 	})
@@ -64,6 +64,7 @@ func handleSendLocation(conn *websocket.Conn, userID string, payload types.Paylo
 	location := payload.Location
 	key := fmt.Sprintf("ride:%s:locations", rideCode)
 	rideSetKey := fmt.Sprintf("ride:%s", rideCode)
+	// log.Printf("%s Sending Location to %s", userID, rideCode)
 
 	locBytes, err := json.Marshal(location)
 	if err != nil {
@@ -104,8 +105,9 @@ func handleSendLocation(conn *websocket.Conn, userID string, payload types.Paylo
 	})
 }
 
-func handleSendSignal(userID string, payload types.Payload) {
-	utils.BroadcastToRoom(payload.RideCode, map[string]any{
+func handleSendSignal(conn *websocket.Conn, userID string, payload types.Payload) {
+	log.Printf("%s Sending Signal to %s", userID, payload.RideCode)
+	utils.BroadcastToRoom(conn, payload.RideCode, map[string]any{
 		"eventType": "sentSignal",
 		"data": map[string]any{
 			"signalType": payload.SignalType,
