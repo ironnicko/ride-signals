@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { io, Socket } from "socket.io-client";
-import type { SocketState, GeoLocation } from "./types";
+import type { SocketState } from "./types";
 import { useAuth } from "./useAuth";
 import { useOtherUsers } from "./useOtherUsers";
 import api from "@/lib/axios";

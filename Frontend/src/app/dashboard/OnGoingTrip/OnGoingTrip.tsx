@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import Announcer from "@/components/Announcer";
 import useAnnouncer from "@/hooks/useAnnouncer";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 interface OnGoingTripProps {
   updateDashboard: (updates: Partial<DashboardState>) => void;
@@ -27,8 +27,8 @@ export const OnGoingTrip = ({
   dashboardState,
 }: OnGoingTripProps) => {
   const { user, setUser } = useAuth();
-  const { joinRide, inRoom, sendSignal, sendLocation, onAnnounce } =
-    useSocket.getState();
+  const { joinRide, sendSignal, inRoom, sendLocation, onAnnounce } =
+    useSocket();
   const { data, loading, error } = useQuery<{ ride: RideState }>(RIDE, {
     variables: { rideCode: user.currentRide },
     fetchPolicy: "cache-and-network",
@@ -45,52 +45,55 @@ export const OnGoingTrip = ({
   useEffect(() => {
     if (!data?.ride?.rideCode) return;
 
-    const { rideCode, destination, start } = data.ride;
-
+    const { destination, start, endedAt } = data.ride;
     updateDashboard({ fromLocation: start, toLocation: destination });
 
-    if (data.ride.endedAt) {
-      setUser({
-        ...user,
-        currentRide: null,
-      });
+    if (endedAt) {
+      setUser({ ...user, currentRide: null });
       updateDashboard({ fromLocation: null, toLocation: null });
-      // update the db
     }
-
-    // Fetch and send location every 5 seconds
-    const fetchLocation = () => {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const location = {
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-          };
-
-          updateDashboard({ userLocation: location });
-          sendLocation({ rideCode, location });
-
-          console.log("📍 Location sent:", location);
-        },
-        (err) => console.error("❌ Geolocation error:", err),
-        { enableHighAccuracy: true },
-      );
-    };
-
-    // Immediately fetch once
-    fetchLocation();
-
-    // Start interval for every 5 seconds
-    const intervalId = setInterval(fetchLocation, 5000);
-
-    return () => clearInterval(intervalId);
-  }, [data?.ride?.rideCode]);
+  }, [data?.ride?.rideCode, data?.ride?.endedAt]);
 
   useEffect(() => {
-    if (data?.ride?.rideCode) {
-      joinRide({ rideCode: data.ride.rideCode });
+    joinRide({ rideCode: user.currentRide });
+  }, [user.currentRide, inRoom]);
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      console.error("❌ Geolocation is not supported by this browser.");
+      return;
     }
-  }, [data?.ride?.rideCode, joinRide, inRoom]);
+
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        const location = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        };
+
+        updateDashboard({ userLocation: location });
+        console.log("📍 Location updated:", location);
+      },
+      (err) => console.error("❌ Geolocation error:", err),
+      { enableHighAccuracy: true },
+    );
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+      console.log("🧹 Geolocation watcher cleared");
+    };
+  }, []);
+
+  const sendLocationSocketEvent = useCallback(() => {
+    if (userLocation && user.currentRide) {
+      sendLocation({ rideCode: user.currentRide, location: userLocation });
+    }
+  }, [userLocation, user.currentRide, sendLocation]);
+
+  useEffect(() => {
+    const intervalId = setInterval(sendLocationSocketEvent, 3000);
+    return () => clearInterval(intervalId);
+  }, [sendLocationSocketEvent]);
 
   const handleSendSignal = (type: string) => {
     try {
@@ -102,7 +105,9 @@ export const OnGoingTrip = ({
         });
         addAnnouncement(type, "info");
       }
-    } catch (err) {}
+    } catch (err) {
+      console.error("Signal send error:", err);
+    }
   };
 
   if (loading) return <p className="p-4">Loading Current Trip...</p>;

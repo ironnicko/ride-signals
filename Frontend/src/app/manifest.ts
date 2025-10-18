@@ -3,9 +3,9 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "TandemSync",
-    short_name: "RideSig",
+    short_name: "TandemSync",
     description: "A Progressive Web App built with Next.js",
-    start_url: "/",
+    start_url: "/dashboard",
     display: "standalone",
     background_color: "#ffffff",
     theme_color: "#000000",

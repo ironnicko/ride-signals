@@ -35,26 +35,44 @@ export const useOtherUsers = create<OtherUsersStore>((set, get) => ({
       };
     }),
 
-  setUsersLocation: (userLocations: Record<string, string>) =>
-    set(() => {
-      const updatedUsers = {};
-
-      if (Object.keys(userLocations).length === 0) {
-        for (const userId in updatedUsers) {
-          updatedUsers[userId] = { ...updatedUsers[userId], location: null };
-        }
-        return { users: updatedUsers };
-      }
+  setUsersLocation: (userLocations: Record<string, string>) => {
+    const userIds = Object.keys(userLocations);
+    get().fetchUsersByIds(userIds);
+    set((state) => {
+      const updatedUsers = { ...state.users } as Record<string, UserState>;
 
       for (const [userId, locationString] of Object.entries(userLocations)) {
-        const existingUser = updatedUsers[userId];
         const parsedLocation = JSON.parse(locationString) as GeoLocation;
+        const existingUser = updatedUsers[userId];
 
-        updatedUsers[userId] = { ...existingUser, location: parsedLocation };
+        if (
+          !existingUser ||
+          existingUser.location?.lat !== parsedLocation.lat ||
+          existingUser.location?.lng !== parsedLocation.lng
+        ) {
+          updatedUsers[userId] = {
+            ...existingUser,
+            name: existingUser?.name ?? "Unknown",
+            location: parsedLocation,
+          };
+        }
+      }
+
+      for (const userId of Object.keys(updatedUsers)) {
+        if (!(userId in userLocations)) {
+          const existingUser = updatedUsers[userId];
+          if (existingUser?.location !== null) {
+            updatedUsers[userId] = {
+              ...existingUser,
+              location: null,
+            };
+          }
+        }
       }
 
       return { users: updatedUsers };
-    }),
+    });
+  },
 
   fetchUsersByIds: async (ids) => {
     const uniqueIds = ids.filter(
@@ -62,7 +80,7 @@ export const useOtherUsers = create<OtherUsersStore>((set, get) => ({
         id &&
         ids.indexOf(id) === i &&
         (get().users[id]?.name === "Unknown" || !get().users[id]?.name),
-    ); // fetch only if not already cached
+    );
 
     if (uniqueIds.length === 0) return;
 
@@ -73,7 +91,7 @@ export const useOtherUsers = create<OtherUsersStore>((set, get) => ({
         fetchPolicy: "network-only",
       });
 
-      if (data?.usersByIds) {
+      if (data?.usersByIds?.length) {
         set((state) => {
           const newUsers = { ...state.users };
           data.usersByIds.forEach((u) => {
